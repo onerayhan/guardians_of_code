@@ -1,15 +1,19 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
-import SignUp from './pages/SignUp';
-import SignIn from './pages/SignIn';
+import Friends from './pages/friends';
+import ProtectedRoute from './contexts/ProtectedRoute';
 
 const AppRouter = () => {
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route
+        path="/friends" 
+        element = {<ProtectedRoute> <Friends /> </ProtectedRoute>}
+        />
+        
       </Routes>
     </Router>
   );
