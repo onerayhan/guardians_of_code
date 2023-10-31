@@ -25,7 +25,7 @@
         <!-- MainActivity için olan intent-filter kaldırıldı -->
         <activity
             android:name=".MainActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Start2">
     </activity>
