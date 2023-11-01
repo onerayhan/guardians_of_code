@@ -1,50 +1,52 @@
-import { RiUserFill, RiUserAddFill } from 'react-icons/ri'
-import { BiUserCircle} from 'react-icons/bi'
-import { Link } from 'react-router-dom'
-import { useUser } from '../../contexts/UserContext'
+import React from 'react';
 import { useUserEntry } from '../../contexts/UserEntryContext'
+import { FiUser } from 'react-icons/fi'
+import {useIsAuthenticated} from 'react-auth-kit';
+import {useAuthUser} from 'react-auth-kit'
 
-function Header() {
 
-    const { user } = useUser();
-    const { showSignIn, showSignUp } = useUserEntry();
+const Header: React.FC = () => {
+  const buttonStyle = 
+    "border-[2px] rounded-[10px] border-[#232A4E] px-[25px] py-[7px]";
 
-    return (
-        <div className="bg-primary-color fixed top-0 w-full h-12 z-50">
-            <div className="container mx-auto h-11 flex items-center w-full justify-between p-3 pt-[1rem]">
-                
-                {/*     LOGO     */}
-                <Link to="/">
-                    <img src="/header_logo.svg" alt="Header Logo"/>
-                </Link>
+  const { showSignIn, showSignUp } = useUserEntry() as { showSignIn: () => void; showSignUp: () => void }; // Assuming useUserEntry returns an object with showSignIn and showSignUp methods
+  const isAuthenticated = useIsAuthenticated();
 
-                <nav className="flex gap-x-8 text-sm font-semibold">
-                {user ? 
-                    ( // User is logged in, show user ID
-                    <div className="flex items-center gap-x-2 text-white transition-all text-opacity-80 hover:text-opacity-100">
-                        <BiUserCircle size={20} />
-                        <span>{user.id}</span>
-                    </div>
-                    ) 
-                    : 
-                    ( // User is not logged in, show sign in and sign up links
-                    <>
-                    <button onClick={showSignIn} className="flex items-center gap-x-2 text-white transition-all text-opacity-80 hover:text-opacity-100">
-                        <RiUserFill size={20} />
-                        Sign In
-                    </button>
-                    <button onClick={showSignUp} className="flex items-center gap-x-2 text-white transition-all text-opacity-80 hover:text-opacity-100">
-                        <RiUserAddFill size={20} />
-                        Sign Up
-                    </button>
-                    </>
-                    )
-                }
-                </nav>
+  const auth = useAuthUser() // Assuming useAuthUser returns the user object  
 
+  return (
+    <div className="header bg-[#081730] flex items-center justify-between px-[5rem] pt-[2.4rem] text-[0.8rem]">
+      
+      {/*  */}
+      <img 
+          src={"header_logo.svg"}
+          alt="Logo"
+          className="logo w-[42px] h-[42px]"  
+      />
+
+      {/* BUTTONS */}
+      <div className="buttons flex">
+        {auth() ? 
+          ( // User is logged in, show user ID
+            <div className={`mr-[35px] hover:bg-[#232A4E] text-white ${buttonStyle}`}>
+              <FiUser size={20}/>
+              <span>{auth().id}</span>
             </div>
-        </div>
-    )
-}
+          ) : 
+          ( // User is not logged in, show sign in and sign up links
+            <div className='flex items-center justify-center'>
+              <button className={`mr-[35px] hover:bg-[#232A4E] text-white ${buttonStyle}`} onClick={showSignIn}>
+                Sign In
+              </button>
+              <button className={buttonStyle+` bg-[#232A4E] text-white hover:border-stone-400`} onClick={showSignUp}>
+                Sign Up
+              </button>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  );
+};
 
 export default Header;

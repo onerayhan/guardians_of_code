@@ -1,12 +1,18 @@
-import Body from "../components/Landing/Body";
 import Header from "../components/Landing/Header";
+import Hero from "../components/Landing/Body/Hero";
+import Download from "../components/Landing/Body/Download";
+import Experience from "../components/Landing/Body/Experience";
+import Search from "../components/Landing/Body/Search";
 
 const Landing = () => 
 {
     return (
       <div>
         <Header />
-        <Body />
+        <Hero />
+        <Experience />
+        <Search />
+        <Download />
       </div>
     );
 };

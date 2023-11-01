@@ -1,14 +1,16 @@
 module.exports = {
   mode: 'jit',
   purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
-  darkMode: false, // or 'media' or 'class'
+  darkMode: false,
   theme: {
     extend: {
       colors: {
-        'primary-color': '#662d2a',
-        'secondary-color': '#f0d0ce',
+        'primary-color': '#18194d',
+        'secondary-color': '#9797de',
+      },
+      transitionProperty: {
+      'opacity': 'opacity',
       }
-    },
 
   },
   variants: {
@@ -16,4 +18,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+}}

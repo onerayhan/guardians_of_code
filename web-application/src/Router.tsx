@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
-import Friends from './pages/friends';
 import ProtectedRoute from './contexts/ProtectedRoute';
+import Friends from './pages/Friends';
 
 const AppRouter = () => {
 
