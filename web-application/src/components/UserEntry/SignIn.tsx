@@ -148,7 +148,7 @@ const SignIn = () => {
           ) => {
             setTimeout(() => {
               alert(JSON.stringify(values, null, 2));
-              onSubmitRequest(values);
+              //onSubmitRequest(values);
               setSubmitting(false);
             }, 500);
           }}
@@ -172,9 +172,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-
-//<form className="flex flex-col items-center justify-center gap-y-4">
-//<EmailInput />
-//<PasswordInput />
-//<button type="submit" className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Sign In</button>
-//</form>

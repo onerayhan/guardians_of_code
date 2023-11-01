@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import { UserEntryProvider } from './contexts/UserEntryContext';
-import  AuthProvider  from "react-auth-kit"
+import { AuthProvider } from "react-auth-kit"
 import './tailwind.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

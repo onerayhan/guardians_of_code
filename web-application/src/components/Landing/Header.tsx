@@ -4,7 +4,6 @@ import { FiUser } from 'react-icons/fi'
 import {useIsAuthenticated} from 'react-auth-kit';
 import {useAuthUser} from 'react-auth-kit'
 
-
 const Header: React.FC = () => {
   const buttonStyle = 
     "border-[2px] rounded-[10px] border-[#232A4E] px-[25px] py-[7px]";
@@ -26,11 +25,11 @@ const Header: React.FC = () => {
 
       {/* BUTTONS */}
       <div className="buttons flex">
-        {auth() ? 
+        {isAuthenticated() ? 
           ( // User is logged in, show user ID
             <div className={`mr-[35px] hover:bg-[#232A4E] text-white ${buttonStyle}`}>
               <FiUser size={20}/>
-              <span>{auth().id}</span>
+              <span>{auth()?.username}</span>
             </div>
           ) : 
           ( // User is not logged in, show sign in and sign up links

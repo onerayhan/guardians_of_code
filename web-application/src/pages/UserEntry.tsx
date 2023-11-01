@@ -3,7 +3,6 @@ import SignIn from '../components/UserEntry/SignIn';
 import SignUp from '../components/UserEntry/SignUp';
 import RenewPass from '../components/UserEntry/RenewPass';
 import Modal from '../components/Modal';
-import { useUser } from '../contexts/UserContext';
 
 interface UserEntryProps {
   formType: 'signin' | 'signup' | 'renewpass';
@@ -11,12 +10,11 @@ interface UserEntryProps {
 }
 
 const UserEntry: FC<UserEntryProps> = ({ formType, closeUserEntry }) => {
-  const { user } = useUser();
   const [isVisible, setIsVisible] = useState(true);
 
   const handleClose = () => {
     setIsVisible(false);
-    closeUserEntry();
+    closeUserEntry(); // Ensure that when the modal closes, it also informs the parent context
   };
 
   const renderForm = () => {
@@ -33,9 +31,11 @@ const UserEntry: FC<UserEntryProps> = ({ formType, closeUserEntry }) => {
   };
 
   return (
-    <Modal onClose={handleClose} isVisible={isVisible}>
-      {renderForm()}
-    </Modal>
+    <div>
+      <Modal onClose={handleClose} isVisible={isVisible}>
+        {renderForm()}
+      </Modal>
+    </div>
   );
 }
 

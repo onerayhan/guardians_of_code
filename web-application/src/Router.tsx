@@ -1,19 +1,25 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
-import ProtectedRoute from './contexts/ProtectedRoute';
-import Friends from './pages/Friends';
+import UserEntry from './pages/UserEntry';
+import Friends from './pages/Friends'; // Assuming you have a SecureComponent
+import { RequireAuth } from 'react-auth-kit'
 
 const AppRouter = () => {
-
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route
-        path="/friends" 
-        element = {<ProtectedRoute> <Friends /> </ProtectedRoute>}
+        <Route path="/asd" element={<UserEntry formType={'signin'} closeUserEntry={function (): void {
+          throw new Error('Function not implemented.');
+        } } />} />
+        <Route 
+          path="/friends" 
+          element={
+            <RequireAuth loginPath="/asd">
+              <Friends />
+            </RequireAuth>
+          } 
         />
-        
       </Routes>
     </Router>
   );

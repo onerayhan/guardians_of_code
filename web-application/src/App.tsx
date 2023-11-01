@@ -1,22 +1,19 @@
+import React from 'react';
 import AppRouter from './Router';
 import { useUserEntry } from './contexts/UserEntryContext';
 import UserEntry from './pages/UserEntry';
-import "./tailwind.css"
+import "./tailwind.css";
 
-function App() 
-{
-
+const App: React.FC = () => {
   const { isUserEntryVisible, formType, hideUserEntry } = useUserEntry();
 
   return (
-    <>
-      <div className="app">
-        {isUserEntryVisible && formType && (
-          <UserEntry formType={formType} closeUserEntry={hideUserEntry} />
-        )}
+    <div className="app">
+      {isUserEntryVisible && formType && (
+        <UserEntry formType={formType} closeUserEntry={hideUserEntry} />
+      )}
       <AppRouter />
-      </div>
-    </>
+    </div>
   );
 }
 
