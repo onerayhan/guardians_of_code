@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
         android:layout_marginTop="250dp"
-        android:text="Enter Phone Number"
+        android:text="Enter Username"
         android:textAppearance="?attr/textAppearanceHeadline6" />
 
     <LinearLayout

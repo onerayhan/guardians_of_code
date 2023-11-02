@@ -13,10 +13,7 @@ class PasswordStepFragment : Fragment() {
     // İlerlemeyi kontrol etmek için bir listener tanımlayalım
     private var listener: RegistrationStepsListener? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_password_step, container, false)
     }
 

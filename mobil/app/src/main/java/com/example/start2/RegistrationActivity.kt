@@ -1,77 +1,78 @@
 package com.example.start2
-import android.os.Bundle
-import android.widget.Button
-import android.widget.DatePicker
-import android.widget.EditText
+
 import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.util.Log
+import android.widget.Button
+import android.widget.ImageButton
+import androidx.activity.viewModels
+import androidx.fragment.app.FragmentManager
 
-class RegistrationActivity : AppCompatActivity() {
+import androidx.lifecycle.ViewModel
 
-    // Variables to store user input across steps
-    private var birthday: String = ""
-    private var preferredUsername: String = ""
-    private var password: String = ""
+class RegistrationActivity : AppCompatActivity(), RegistrationStepsListener{
+
+    private val TAG = "RegistrationActivity"
+    private val registrationViewModel by viewModels<RegistrationViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        showBirthdayStep()  // Begin with the birthday step
-    }
+        setContentView(R.layout.activity_registration)
 
-    private fun showBirthdayStep() {
-        setContentView(R.layout.step_birthday)
-
-        val datePicker: DatePicker = findViewById(R.id.datePicker)
-        val nextButton: Button = findViewById(R.id.nextButtonBirthday)
-
-        nextButton.setOnClickListener {
-            // Store the selected date
-            val day = datePicker.dayOfMonth
-            val month = datePicker.month
-            val year = datePicker.year
-            birthday = "$day/$month/$year"
-
-            showUsernameStep()
+        val phoneNumber = intent.getStringExtra("phoneNumber")
+        phoneNumber?.let {
+            registrationViewModel.savePhoneNumber(it)
         }
-    }
 
-    private fun showUsernameStep() {
-        setContentView(R.layout.step_username)
+        val backButton = findViewById<ImageButton>(R.id.back_button)
+        backButton.setOnClickListener {
 
-        val usernameEditText: EditText = findViewById(R.id.preferredNameEditText)
-        val nextButton: Button = findViewById(R.id.nextButtonUsername)
 
-        nextButton.setOnClickListener {
-            preferredUsername = usernameEditText.text.toString()
-
-            // Optionally, add validation for username here
-
-            showPasswordStep()
-        }
-    }
-
-    private fun showPasswordStep() {
-        setContentView(R.layout.step_password)
-
-        val passwordEditText: EditText = findViewById(R.id.passwordEditText)
-        val confirmPasswordEditText: EditText = findViewById(R.id.confirmPasswordEditText)
-        val registerButton: Button = findViewById(R.id.registerButton)
-
-        registerButton.setOnClickListener {
-            val enteredPassword = passwordEditText.text.toString()
-            val confirmedPassword = confirmPasswordEditText.text.toString()
-
-            if (enteredPassword == confirmedPassword) {
-                password = enteredPassword
-                completeRegistration()
+            if (supportFragmentManager.findFragmentById(R.id.fragment_container) is BirthdayStepFragment) {
+                supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                finish() // Eğer MainFragment Activity'nin bir parçası değilse Activity'yi kapat
             } else {
-
-                confirmPasswordEditText.error = "Passwords don't match"
+                supportFragmentManager.popBackStack()
             }
         }
+
+        Log.d(TAG, "onCreate called")
+
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, BirthdayStepFragment())
+                .addToBackStack(null)
+                .commit()
+
+            Log.d(TAG, "Initial fragment (BirthdayStepFragment) is set")
+        }
     }
 
-    private fun completeRegistration() {
-        // Use the birthday, preferredUsername, and password variables to complete registration.
-        // For example, you can make an API call to register the user.
+    override fun onBirthdaySelected(birthday: String) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, UsernameStepFragment())
+            .addToBackStack(null)
+            .commit()
+
+        registrationViewModel.saveBirthday(birthday)
+
     }
+
+    override fun onUsernameSelected(username: String) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, PasswordStepFragment())
+            .addToBackStack(null)
+            .commit()
+
+        registrationViewModel.saveUsername(username)
+    }
+
+    override fun onPasswordSelected(password: String) {
+        registrationViewModel.savePassword(password)
+        registrationViewModel.sendUserDataToApi()
+
+    }
+
+
+
 }

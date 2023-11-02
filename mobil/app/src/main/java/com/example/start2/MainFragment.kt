@@ -8,17 +8,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import com.example.start2.utils.CountryHelper
+import org.json.JSONObject
+
 
 class MainFragment : Fragment() {
 
+
     private lateinit var binding: FragmentMainBinding
 
-
-
-   /*** override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
-    }***/
+    } // essential to override thanks to ocw, the layout could be inflated to fragment by converting them to kotlin objects
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -47,26 +50,49 @@ class MainFragment : Fragment() {
 
         binding.button.setOnClickListener {
             var phoneNumber = binding.phoneNumberEditText.text.toString()
+
             if (" " in phoneNumber) {
                 phoneNumber = phoneNumber.replace(" ", "")
             }
 
             if (isNumberRegistered(phoneNumber)) {
-                binding.button.visibility = View.GONE
-                binding.passwordEditText.visibility = View.VISIBLE
-                binding.loginButton.visibility = View.VISIBLE
+                updateUIForRegisteredNumber();
 
-                binding.loginButton.setOnClickListener {
-                    // Handle login logic here (e.g., API call to authenticate user)
-                }
             } else {
-                val intent = Intent(requireContext(), RegistrationActivity::class.java)
-                startActivity(intent)            }
+                navigateToRegistration(phoneNumber);
+                       }
+
+
+            }
+        binding.loginButton.setOnClickListener {
+
+            val password = binding.passwordEditText.text.toString()
+            val phoneNumber = binding.phoneNumberEditText.text.toString().replace(" ", "")
+            val jsonObject = JSONObject().apply {
+                put("phoneNumber", phoneNumber)
+                put("password", password)
+            }
+            // Handle login logic here (e.g., API call to authenticate user)
         }
+
+
+    }
+    private fun updateUIForRegisteredNumber() {
+        binding.button.visibility = View.GONE
+        binding.passwordEditText.visibility = View.VISIBLE
+        binding.loginButton.visibility = View.VISIBLE
+    }
+
+    private fun navigateToRegistration(phoneNumber: String) {
+        val intent = Intent(requireContext(), RegistrationActivity::class.java)
+        intent.putExtra("EXTRA_PHONE_NUMBER", phoneNumber)
+
+        startActivity(intent)
     }
 
     private fun isNumberRegistered(phoneNumber: String): Boolean {
-        // This is just a mock function for demonstration purposes.
+
+
         return false
     }
 }

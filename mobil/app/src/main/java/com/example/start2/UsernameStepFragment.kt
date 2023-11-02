@@ -18,10 +18,7 @@ class UsernameStepFragment : Fragment() {
     private lateinit var binding: FragmentUsernameStepBinding
     private var registrationListener: RegistrationStepsListener? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentUsernameStepBinding.inflate(inflater, container, false)
         binding = _binding!!
         return binding.root
