@@ -5,10 +5,15 @@ import { BsSpotify } from "react-icons/bs";
 import { Formik, Form, Field, useField, FormikHelpers } from "formik";
 import * as Yup from 'yup';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import axios, { AxiosError } from "axios";
+import { useSignIn } from "react-auth-kit";
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
+import { useState } from "react";
 
 interface Values {
+  phone: string;
   username: string;
-  email: string;
   password: string;
 }
 
@@ -16,13 +21,21 @@ interface EmailCheckerProps {
   name: string;
 }
 
+interface PhoneCheckerProps {
+  name: string;
+} 
+
 interface PasswordCheckerProps {
   name: string;
 }
 
 const validationSchema = Yup.object({
-  username: Yup.string().required('This field is required.'),
-  email: Yup.string().email('Invalid email address.').required('This field is required.'),
+  username: Yup.string().email('Invalid email address.').required('This field is required.'),
+  phone: Yup.string()
+  .min(11, "Please enter a valid phone number.")
+  .max(14, "Please enter a valid phone number.")
+  .matches(/\+\d+/, "Please enter a valid phone number.")
+  .required('This field is required.'),
   password: Yup.string()
   .min(8, 'Must be 8 characters or more')
   .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
@@ -30,25 +43,6 @@ const validationSchema = Yup.object({
   .matches(/[@$!%*?&]/, 'Password must contain at least one special character')
   .required('This field is required.'),
 });
-
-const UsernameChecker: React.FC<EmailCheckerProps> = ({ name }) => {
-    const [field, meta] = useField(name);
-  
-    return (
-      <div className="relative">
-        <div className="relative flex items-center w-[400px] h-12 bg-white rounded-xl">
-          <Field
-            {...field}
-            className="w-full h-full text-center font-semibold text-black text-opacity-80 rounded-xl"
-            placeholder="User Name"
-          />
-        </div>
-        {meta.touched && meta.error ? (
-          <p className="text-red-500 font">{meta.error}</p>
-        ) : null}
-      </div>
-    );
-  };
 
 const EmailChecker: React.FC<EmailCheckerProps> = ({ name }) => {
   const [field, meta] = useField(name);
@@ -61,6 +55,32 @@ const EmailChecker: React.FC<EmailCheckerProps> = ({ name }) => {
           className="w-full h-full text-center font-semibold text-black text-opacity-80 rounded-xl"
           placeholder="E-Mail Address"
         />
+      </div>
+      {meta.touched && meta.error ? (
+        <p className="text-red-500 font">{meta.error}</p>
+      ) : null}
+    </div>
+  );
+};
+
+const PhoneChecker: React.FC<PhoneCheckerProps> = ({ name }) => {
+  const [field, meta] = useField(name);
+  const [value, setValue] = useState<string | undefined>();
+
+  const handlePhoneChange = (phone: string) => {
+    setValue(phone);
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative flex items-center w-[400px] h-12 bg-white rounded-xl">
+      <PhoneInput
+        {...field}
+        className= "w-[400px] h-12 text-center font-semibold text-black text-opacity-80 rounded-xl"
+        placeholder='+1 234 567 890'
+        value={value}
+        onChange={handlePhoneChange}
+      />
       </div>
       {meta.touched && meta.error ? (
         <p className="text-red-500 font">{meta.error}</p>
@@ -109,6 +129,32 @@ const SignUp = () => {
     });
 
     const { showSignIn, showForgotPassword } = useUserEntry();
+    const [error, setError] = React.useState("");
+    const signUp = useSignIn();
+    
+      const onSubmitRequest = async (values: any) => {
+      console.log("Values: ", values);
+      setError("");
+  
+      try {
+          const response = await axios.post(
+              "http://13.51.167.155/api/register",
+              values.email, 
+          );
+  
+          signUp({
+              token: response.data.token,
+              expiresIn: 3600,
+              tokenType: "Bearer",
+              authState: { email: values.email}
+          })
+      } catch(err) {
+          if (err && err instanceof AxiosError)
+              setError(err.response?.data.message);
+          else if (err && err instanceof Error) setError(err.message);
+  
+          console.log("Error: ", err);
+      }}
 
   return (
         <div className="flex flex-col items-center justify-center h-full pl-14">
@@ -137,7 +183,7 @@ const SignUp = () => {
                 <Formik
                     initialValues={{
                         username: "",
-                        email: "",
+                        phone: "",
                         password: ""
                     }}
                     validationSchema={validationSchema}
@@ -147,14 +193,15 @@ const SignUp = () => {
                     ) => {
                         setTimeout(() => {
                         alert(JSON.stringify(values, null, 2));
+                        onSubmitRequest(values);
                         setSubmitting(false);
                         }, 500);
                     }}
                     >
                     {({ isValid, isSubmitting }) => (
                         <Form className="flex flex-col items-center justify-center gap-y-4">
-                            <UsernameChecker name="username" />
-                            <EmailChecker name="email" />
+                            <EmailChecker name="username" />
+                            <PhoneChecker name="phone" />
                             <PasswordChecker name="password" />
                             <button type="submit" disabled={!isValid || isSubmitting} className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit</button>
                         </Form>

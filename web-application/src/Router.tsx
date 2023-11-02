@@ -9,13 +9,13 @@ const AppRouter = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/asd" element={<UserEntry formType={'signin'} closeUserEntry={function (): void {
+        <Route path="/loginrequired" element={<UserEntry formType={'signin'} closeUserEntry={function (): void {
           throw new Error('Function not implemented.');
         } } />} />
         <Route 
           path="/friends" 
           element={
-            <RequireAuth loginPath="/asd">
+            <RequireAuth loginPath="/loginrequired">
               <Friends />
             </RequireAuth>
           } 

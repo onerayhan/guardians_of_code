@@ -9,7 +9,7 @@ import axios, { AxiosError } from "axios";
 import { useSignIn } from "react-auth-kit";
 
 interface Values {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -22,7 +22,7 @@ interface PasswordCheckerProps {
 }
 
 const validationSchema = Yup.object({
-  email: Yup.string().email('Invalid email address.').required('Required for login, duh.'),
+  username: Yup.string().email('Invalid email address.').required('Required for login, duh.'),
 });
 
 const EmailChecker: React.FC<EmailCheckerProps> = ({ name }) => {
@@ -91,17 +91,19 @@ const SignIn = () => {
     setError("");
 
     try {
-        const response = await axios.post(
-            "http://localhost:3000/api/login",
+        axios.post(
+            "http://13.51.167.155/api/register",
             values
         );
-
-        signIn({
-            token: response.data.token,
-            expiresIn: 3600,
-            tokenType: "Bearer",
-            authState: { email: values.email}
-        })
+        
+        {/* 
+            signIn({
+              token: response.data.token,
+              expiresIn: 3600,
+              tokenType: "Bearer",
+              authState: { email: values.email}
+            })
+      */}
     } catch(err) {
         if (err && err instanceof AxiosError)
             setError(err.response?.data.message);
@@ -138,7 +140,7 @@ const SignIn = () => {
         <span className="flex-shrink mx-4 text-secondary-color">...or use your E-Mail for logging in</span>
         <Formik
           initialValues={{
-            email: "",
+            username: "",
             password: ""
           }}
           validationSchema={validationSchema}
@@ -148,14 +150,14 @@ const SignIn = () => {
           ) => {
             setTimeout(() => {
               alert(JSON.stringify(values, null, 2));
-              //onSubmitRequest(values);
+              onSubmitRequest(values);
               setSubmitting(false);
             }, 500);
           }}
         >
           {({ isValid, isSubmitting }) => (
             <Form className="flex flex-col items-center justify-center gap-y-4">
-              <EmailChecker name="email" />
+              <EmailChecker name="username" />
               <PasswordChecker name="password" />
               <button type="submit" disabled={!isValid || isSubmitting} className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit</button>
             </Form>
