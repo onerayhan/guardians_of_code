@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
-import UserEntry from './pages/UserEntry';
-import Friends from './pages/Friends'; // Assuming you have a SecureComponent
+import Friends from './pages/Friends';
+import Modal from './components/UserEntry/EntranceModal';
 import { RequireAuth } from 'react-auth-kit'
 
 const AppRouter = () => {
@@ -9,16 +9,31 @@ const AppRouter = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/loginrequired" element={<UserEntry formType={'signin'} closeUserEntry={function (): void {
-          throw new Error('Function not implemented.');
-        } } />} />
         <Route 
           path="/friends" 
           element={
-            <RequireAuth loginPath="/loginrequired">
+            <RequireAuth loginPath="/signin">
               <Friends />
             </RequireAuth>
           } 
+        />
+        <Route
+          path="/signin"
+          element={<Modal formType={'signin'} closeUserEntry={function (): void {
+            throw new Error('Function not implemented.');
+          } } />}
+        />
+        <Route
+          path="/signup"
+          element={<Modal formType={'signup'} closeUserEntry={function (): void {
+            throw new Error('Function not implemented.');
+          } } />}
+        />
+        <Route
+          path="/signup"
+          element={<Modal formType={'signup'} closeUserEntry={function (): void {
+            throw new Error('Function not implemented.');
+          } } />}
         />
       </Routes>
     </Router>

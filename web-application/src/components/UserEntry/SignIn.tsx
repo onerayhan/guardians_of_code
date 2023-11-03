@@ -1,5 +1,4 @@
-import React, { useEffect, ChangeEvent } from "react";
-import { useUserEntry } from "../../contexts/UserEntryContext";
+import React, { useEffect, ChangeEvent, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { BsSpotify } from "react-icons/bs";
 import { Formik, Form, Field, useField, FormikHelpers } from "formik";
@@ -7,6 +6,7 @@ import * as Yup from 'yup';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios, { AxiosError } from "axios";
 import { useSignIn } from "react-auth-kit";
+import { useNavigate } from "react-router-dom";
 
 interface Values {
   username: string;
@@ -24,6 +24,18 @@ interface PasswordCheckerProps {
 const validationSchema = Yup.object({
   username: Yup.string().email('Invalid email address.').required('Required for login, duh.'),
 });
+
+const SignUpButtonHandler: React.FC = () => {
+  const history = useNavigate();
+
+  const handleClick = () => {
+    history('/signup');
+  };
+
+  return (
+    <button className="text-white text-opacity-80 hover:text-opacity-100" onClick={handleClick}>Sign Up</button>
+  );
+}
 
 const EmailChecker: React.FC<EmailCheckerProps> = ({ name }) => {
   const [field, meta] = useField(name);
@@ -43,6 +55,9 @@ const EmailChecker: React.FC<EmailCheckerProps> = ({ name }) => {
     </div>
   );
 };
+
+//<p className="text-white text-opacity-80">Forgot your password? <button onClick={showForgotPassword} className="text-white text-opacity-80 hover:text-opacity-100">Renew Password</button></p>
+
 
 const PasswordChecker: React.FC<PasswordCheckerProps> = ({ name }) => {
   const [field, meta] = useField(name);
@@ -79,9 +94,6 @@ const PasswordChecker: React.FC<PasswordCheckerProps> = ({ name }) => {
 };
 
 const SignIn = () => {
-  useEffect(() => {
-    document.title = "Sign In";
-  });
 
   const [error, setError] = React.useState("");
   const signIn = useSignIn();
@@ -91,19 +103,18 @@ const SignIn = () => {
     setError("");
 
     try {
-        axios.post(
-            "http://13.51.167.155/api/register",
-            values
-        );
-        
-        {/* 
-            signIn({
-              token: response.data.token,
-              expiresIn: 3600,
-              tokenType: "Bearer",
-              authState: { email: values.email}
-            })
-      */}
+      const response = await axios.get(
+        "http://13.51.167.155/api/login",
+        { params: { username: values.username, password: values.password } }
+      );
+
+      signIn({
+          token: response.data.token,
+          expiresIn: 3600,
+          tokenType: "Bearer",
+          authState: { username: values.username}
+      })
+
     } catch(err) {
         if (err && err instanceof AxiosError)
             setError(err.response?.data.message);
@@ -111,8 +122,6 @@ const SignIn = () => {
 
         console.log("Error: ", err);
     }}
-
-  const { showSignUp, showForgotPassword } = useUserEntry();
 
   return (
     <div className="flex flex-col items-center justify-center h-full pl-14">
@@ -159,15 +168,17 @@ const SignIn = () => {
             <Form className="flex flex-col items-center justify-center gap-y-4">
               <EmailChecker name="username" />
               <PasswordChecker name="password" />
-              <button type="submit" disabled={!isValid || isSubmitting} className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit</button>
+              <div>
+                <button type="submit" disabled={!isValid || isSubmitting} className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit</button>
+                <p className="text-red-500 font">{error}</p>
+              </div>
             </Form>
           )}
         </Formik>
       </div>
 
       <div className="flex flex-col items-center justify-center gap-y-4 mt-8">
-        <p className="text-white text-opacity-80">Don't have an account? <button onClick={showSignUp} className="text-white text-opacity-80 hover:text-opacity-100">Sign Up</button></p>
-        <p className="text-white text-opacity-80">Forgot your password? <button onClick={showForgotPassword} className="text-white text-opacity-80 hover:text-opacity-100">Renew Password</button></p>
+        <p className="text-white text-opacity-80">Don't have an account? <SignUpButtonHandler/></p>
       </div>
     </div>
   );

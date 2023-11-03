@@ -1,7 +1,7 @@
 import React from 'react';
 import AppRouter from './Router';
 import { useUserEntry } from './contexts/UserEntryContext';
-import UserEntry from './pages/UserEntry';
+import Modal from './components/UserEntry/EntranceModal';
 import "./tailwind.css";
 
 const App: React.FC = () => {
@@ -10,7 +10,7 @@ const App: React.FC = () => {
   return (
     <div className="app">
       {isUserEntryVisible && formType && (
-        <UserEntry formType={formType} closeUserEntry={hideUserEntry} />
+        <Modal formType={formType} closeUserEntry={hideUserEntry} />
       )}
       <AppRouter />
     </div>

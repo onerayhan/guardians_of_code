@@ -1,5 +1,4 @@
 import React, { useEffect, ChangeEvent } from "react";
-import { useUserEntry } from "../../contexts/UserEntryContext";
 import { FcGoogle } from "react-icons/fc";
 import { BsSpotify } from "react-icons/bs";
 import { Formik, Form, Field, useField, FormikHelpers } from "formik";
@@ -10,6 +9,7 @@ import { useSignIn } from "react-auth-kit";
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Values {
   phone: string;
@@ -27,6 +27,18 @@ interface PhoneCheckerProps {
 
 interface PasswordCheckerProps {
   name: string;
+}
+
+const SignInButtonHandler: React.FC = () => {
+  const history = useNavigate();
+
+  const handleClick = () => {
+    history('/signin');
+  };
+
+  return (
+    <button className="text-white text-opacity-80 hover:text-opacity-100" onClick={handleClick}>Sign In</button>
+  );
 }
 
 const validationSchema = Yup.object({
@@ -124,30 +136,34 @@ const PasswordChecker: React.FC<PasswordCheckerProps> = ({ name }) => {
 };
 
 const SignUp = () => {
-    useEffect(() => {
-        document.title = "Sign Up";
-    });
 
-    const { showSignIn, showForgotPassword } = useUserEntry();
     const [error, setError] = React.useState("");
-    const signUp = useSignIn();
+    const signIn = useSignIn();
     
       const onSubmitRequest = async (values: any) => {
       console.log("Values: ", values);
       setError("");
   
       try {
-          const response = await axios.post(
-              "http://13.51.167.155/api/register",
-              values.email, 
-          );
-  
-          signUp({
-              token: response.data.token,
-              expiresIn: 3600,
-              tokenType: "Bearer",
-              authState: { email: values.email}
-          })
+        axios.post(
+          // Register endpoint
+          "http://13.51.167.155/api/register",
+          values
+        );
+
+        const response_login = await axios.get(
+          // Login endpoint
+          "http://13.51.167.155/api/login",
+          { params: { username: values.username, password: values.password } }
+        );
+
+        signIn({
+          token: response_login.data.token,
+          expiresIn: 3600,
+          tokenType: "Bearer",
+          authState: { email: values.email}
+        })
+
       } catch(err) {
           if (err && err instanceof AxiosError)
               setError(err.response?.data.message);
@@ -204,14 +220,14 @@ const SignUp = () => {
                             <PhoneChecker name="phone" />
                             <PasswordChecker name="password" />
                             <button type="submit" disabled={!isValid || isSubmitting} className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit</button>
+                            <p className="text-red-500 font">{error}</p>
                         </Form>
                     )}
                 </Formik>
             </div>
 
             <div className="flex flex-col items-center justify-center gap-y-4 mt-8">
-                <p className="text-white text-opacity-80">Already have an account? <button onClick={showSignIn} className="text-white text-opacity-80 hover:text-opacity-100">Sign In</button></p>
-                <p className="text-white text-opacity-80">Forgot your password? <button onClick={showForgotPassword} className="text-white text-opacity-80 hover:text-opacity-100">Renew Password</button></p>
+                <p className="text-white text-opacity-80">Already have an account? <SignInButtonHandler/></p>
             </div>
         </div>
     );

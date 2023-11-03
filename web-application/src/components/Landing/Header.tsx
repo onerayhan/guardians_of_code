@@ -1,5 +1,4 @@
 import React from 'react';
-import { useUserEntry } from '../../contexts/UserEntryContext'
 import { FiUser } from 'react-icons/fi'
 import {useIsAuthenticated} from 'react-auth-kit';
 import {useAuthUser} from 'react-auth-kit'
@@ -9,11 +8,34 @@ const Header: React.FC = () => {
   const buttonStyle = 
     "border-[2px] rounded-[10px] border-[#232A4E] px-[25px] py-[7px]";
   const liStyle = "mr-[3rem] hover:cursor-pointer text-[#B3B8CD]"
-
-  const { showSignIn, showSignUp } = useUserEntry() as { showSignIn: () => void; showSignUp: () => void }; // Assuming useUserEntry returns an object with showSignIn and showSignUp methods
   const isAuthenticated = useIsAuthenticated();
 
   const auth = useAuthUser()
+
+  const SignInButtonHandler: React.FC = () => {
+    const history = useNavigate();
+  
+    const handleClick = () => {
+      history('/signin');
+    };
+  
+    return (
+      <button className={`mr-[35px] hover:bg-[#232A4E] text-white ${buttonStyle}`} onClick={handleClick}>Sign In</button>
+    );
+  }
+
+  const SignUpButtonHandler: React.FC = () => {
+    const history = useNavigate();
+  
+    const handleClick = () => {
+      history('/signup');
+    };
+  
+    return (
+      <button className={buttonStyle+` bg-[#232A4E] text-white hover:border-stone-400`} onClick={handleClick}>Sign Up</button>
+    );
+  }
+
 
   const AnalysisButton: React.FC = () => {
     const history = useNavigate();
@@ -95,12 +117,8 @@ const Header: React.FC = () => {
           ) : 
           ( // User is not logged in, show sign in and sign up links
             <div className='flex items-center justify-center'>
-              <button className={`mr-[35px] hover:bg-[#232A4E] text-white ${buttonStyle}`} onClick={showSignIn}>
-                Sign In
-              </button>
-              <button className={buttonStyle+` bg-[#232A4E] text-white hover:border-stone-400`} onClick={showSignUp}>
-                Sign Up
-              </button>
+              <SignInButtonHandler />
+              <SignUpButtonHandler />
             </div>
           )
         }
