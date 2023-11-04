@@ -12,7 +12,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Values {
-  phone: string;
   username: string;
   password: string;
 }
@@ -42,12 +41,12 @@ const SignInButtonHandler: React.FC = () => {
 }
 
 const validationSchema = Yup.object({
-  username: Yup.string().email('Invalid email address.').required('This field is required.'),
-  phone: Yup.string()
-  .min(11, "Please enter a valid phone number.")
-  .max(14, "Please enter a valid phone number.")
-  .matches(/\+\d+/, "Please enter a valid phone number.")
-  .required('This field is required.'),
+  username: Yup.string().required('This field is required.'),
+  //phone: Yup.string()
+  //.min(11, "Please enter a valid phone number.")
+  //.max(14, "Please enter a valid phone number.")
+  //.matches(/\+\d+/, "Please enter a valid phone number.")
+  //.required('This field is required.'),
   password: Yup.string()
   .min(8, 'Must be 8 characters or more')
   .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
@@ -148,20 +147,20 @@ const SignUp = () => {
         axios.post(
           // Register endpoint
           "http://13.51.167.155/api/register",
-          values
+          { username: values.username, password: values.password }
         );
 
-        const response_login = await axios.get(
+        const response_login = await axios.post(
           // Login endpoint
           "http://13.51.167.155/api/login",
-          { params: { username: values.username, password: values.password } }
+          { username: values.username, password: values.password }
         );
 
         signIn({
           token: response_login.data.token,
           expiresIn: 3600,
           tokenType: "Bearer",
-          authState: { email: values.email}
+          authState: { username: values.username}
         })
 
       } catch(err) {
@@ -199,7 +198,6 @@ const SignUp = () => {
                 <Formik
                     initialValues={{
                         username: "",
-                        phone: "",
                         password: ""
                     }}
                     validationSchema={validationSchema}
@@ -217,7 +215,6 @@ const SignUp = () => {
                     {({ isValid, isSubmitting }) => (
                         <Form className="flex flex-col items-center justify-center gap-y-4">
                             <EmailChecker name="username" />
-                            <PhoneChecker name="phone" />
                             <PasswordChecker name="password" />
                             <button type="submit" disabled={!isValid || isSubmitting} className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit</button>
                             <p className="text-red-500 font">{error}</p>

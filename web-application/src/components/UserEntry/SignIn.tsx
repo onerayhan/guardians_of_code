@@ -22,7 +22,7 @@ interface PasswordCheckerProps {
 }
 
 const validationSchema = Yup.object({
-  username: Yup.string().email('Invalid email address.').required('Required for login, duh.'),
+  username: Yup.string().required('Required for login, duh.'),
 });
 
 const SignUpButtonHandler: React.FC = () => {
@@ -103,9 +103,9 @@ const SignIn = () => {
     setError("");
 
     try {
-      const response = await axios.get(
+      const response = await axios.post(
         "http://13.51.167.155/api/login",
-        { params: { username: values.username, password: values.password } }
+        {username: values.username, password: values.password}
       );
 
       signIn({
