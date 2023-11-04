@@ -1,6 +1,7 @@
 module.exports = {
   mode: 'jit',
   purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+  content: ['node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}'],
   darkMode: false,
   theme: {
     extend: {
@@ -10,12 +11,16 @@ module.exports = {
       },
       transitionProperty: {
       'opacity': 'opacity',
+      },
+      fontFamily: {
+        "lalezar": ['Lalezar', 'cursive'],
       }
-
   },
   variants: {
     extend: {
     },
   },
-  plugins: [],
+  plugins: [
+    require('flowbite/plugin')
+  ],
 }}

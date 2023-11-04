@@ -127,7 +127,7 @@ const SignIn = () => {
     <div className="flex flex-col items-center justify-center h-full pl-14">
       <div className="flex flex-col items-center justify-center gap-y-4">
         <h1 className="text-4xl text-white font-bold">Sign In</h1>
-        <p className="text-white text-opacity-80">Sign into Guardian.fm to enjoy its full capabilities.</p>
+        <p className="text-white text-opacity-80">Sign into Armonify to enjoy its full capabilities.</p>
       </div>
 
       <div className="flex flex-col items-center justify-center gap-y-4 mt-8">

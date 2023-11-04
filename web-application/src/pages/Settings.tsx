@@ -1,6 +1,6 @@
 import Header from "../components/Header";
 
-const Friends = () => 
+const Settings = () => 
 {
     return (
       <div className="bg-[#081730]">
@@ -9,4 +9,4 @@ const Friends = () =>
     );
 };
   
-export default Friends;
+export default Settings;

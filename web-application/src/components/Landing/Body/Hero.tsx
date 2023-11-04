@@ -56,7 +56,7 @@ const Hero: React.FC = () => {
           </span>
           {/* download ads */}
           <div>
-            <span className="text-[13px] text-[#cccad5]">Download now on IOS and Android</span>
+            <span className="text-[13px] text-[#cccad5]">Download now for Android!</span>
             <DownloadAds />
           </div>
         </div>
