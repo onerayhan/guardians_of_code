@@ -8,7 +8,7 @@ import {useIsAuthenticated} from 'react-auth-kit';
 import {useAuthUser} from 'react-auth-kit'
 import { useNavigate } from 'react-router-dom';
 import { useSignOut } from 'react-auth-kit';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Header: React.FC = () => {
   const buttonStyle = 
@@ -20,10 +20,49 @@ const Header: React.FC = () => {
   const signOut = useSignOut();
   const scrollDirection = useScrollDirection();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownToggleRef = React.useRef<HTMLButtonElement>(null);
+  const [buttonWidth, setButtonWidth] = useState<number>(0);
 
-const toggleDropdown = () => {
-  setDropdownOpen(!dropdownOpen);
-};
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+          dropdownToggleRef.current && !dropdownToggleRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false); // Directly set it to false instead of toggling
+      }
+    };
+  
+    // Add event listener when dropdown is open
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+  
+    // Return a clean-up function
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (dropdownOpen) {
+        setDropdownOpen(false);
+      }
+    };
+  
+    if (dropdownOpen) {
+      window.addEventListener("scroll", handleScroll);
+    }
+  
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [dropdownOpen]);
 
   function useScrollDirection() {
     const [scrollDirection, setScrollDirection] = React.useState<"up" | "down" | null>(null);
@@ -177,28 +216,30 @@ const toggleDropdown = () => {
       </div>
 
       {/* BUTTONS */}
-
-        {isAuthenticated() === false ? 
+        {isAuthenticated() === false? 
           (
           <div className="flex items-center">
-            <button id="dropdownDividerButton" data-dropdown-toggle="dropdownDivider" className="text-white relative flex justify-between bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" onClick={toggleDropdown}><FaRegUserCircle size={15}/><div className='pl-[10px]'>koezgen</div><svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <button id="dropdownDividerButton" ref={dropdownToggleRef} data-dropdown-toggle="dropdownDivider" className="text-white relative flex justify-between bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center
+             dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" onClick={toggleDropdown}>
+              <FaRegUserCircle size={15}/><div className='pl-[10px]'>koezgen</div><svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
               </svg>
             </button>
-            <div id="dropdownDivider" className={`absolute z-10 ${dropdownOpen ? '' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg mt-[220px] shadow dark:bg-gray-700 dark:divide-gray-600`}>
+            <div id="dropdownDivider" ref={dropdownRef} style={{ width: dropdownToggleRef.current?.offsetWidth }} className={`absolute z-10 ${dropdownOpen && scrollDirection !== "down" ? '' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg mt-[220px] shadow dark:bg-gray-700 dark:divide-gray-600`}>
               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDividerButton">
                 <li>
-                  <a onClick={navigateToUserPage} className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><FiUser size={15}/>My Profile</a>
+                  <a onClick={navigateToUserPage} className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'><FiUser size={15}/></div>My Profile</a>
                 </li>
                 <li>
-                  <a onClick={navigateToInbox} className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><LuMail size={15}/>Inbox<div className='bg-[#d4353f] flex justify-center items-center rounded w-[10px] h-[10px]'><span className="text-xs">1</span></div></a>
+                  <a onClick={navigateToInbox} className="flex items-center justify-start  px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'>
+                    <LuMail size={15}/></div>Inbox<div className='pl-[10px]'><div className='bg-[#d4353f] flex justify-center items-center rounded w-[10px] h-[10px]'><span className="text-xs">1</span></div></div></a>
                 </li>
                 <li>
-                  <a onClick={navigateToSettings} className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><FiSettings size={15}/>Settings</a>
+                  <a onClick={navigateToSettings} className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'><FiSettings size={15}/></div>Settings</a>
                 </li>
               </ul>
               <div className="py-2">
-                <a onClick={handleSignOut} className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"><BiLogOut size={15}/>Log Out</a>
+                <a onClick={handleSignOut} className="flex items-center justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"><div className='pr-[8px]'><BiLogOut size={15}/></div>Log Out</a>
               </div>
             </div>
           </div>
