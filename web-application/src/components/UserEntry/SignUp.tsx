@@ -10,6 +10,7 @@ import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {SignInWithGoogle} from "./Firebase.tsx";
 
 interface Values {
   username: string;
@@ -180,10 +181,10 @@ const SignUp = () => {
 
             <div className="flex flex-col items-center justify-center gap-y-4 mt-8">
                 <div className="flex justify-between gap-4">
-                    <button className="w-[200px] h-12 rounded-xl bg-white text-black text-opacity-80 text-center font-semibold">
+                    <button onClick={ SignInWithGoogle } className="w-[200px] h-12 rounded-xl bg-white text-black text-opacity-80 text-center font-semibold">
                         <div>
-                            <FcGoogle size={20} className="inline-block mr-2"/>
-                            Sign Up with Google
+                            <FcGoogle size={20} className="inline-block mr-2" />
+                            Sign In with Google
                         </div>
                     </button>
                     <button className="w-[200px] h-12 rounded-xl bg-white text-black text-opacity-80 text-center font-semibold">
