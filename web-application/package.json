@@ -15,6 +15,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.15",
     "autoprefixer": "^10.4.16",
+    "firebase": "^10.5.2",
     "flowbite": "^2.0.0",
     "flowbite-react": "^0.6.4",
     "postcss": "^8.4.31",
