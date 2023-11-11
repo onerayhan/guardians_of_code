@@ -1,0 +1,18 @@
+CREATE TABLE users (
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    birthday VARCHAR(100) NOT NULL,
+    profile_picture BLOB,
+    public_id VARCHAR(32) PRIMARY KEY
+);
+
+CREATE TABLE follow_system (
+    follower_username VARCHAR(100) NOT NULL,
+    followed_username VARCHAR(100) NOT NULL,
+    PRIMARY KEY (follower_username, followed_username),
+    FOREIGN KEY (follower_username) REFERENCES users(username),
+    FOREIGN KEY (followed_username) REFERENCES users(username)
+);
+
+
