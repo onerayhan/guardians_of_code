@@ -1,5 +1,4 @@
 import Header from "../components/Header";
-
 const Analysis = () => 
 {
     return (

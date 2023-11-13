@@ -1,11 +1,7 @@
 import { FC } from 'react';
 import { useAuthUser } from 'react-auth-kit';
 
-interface UserInfoProps {
-    user: String;
-  }
-
-const UserInfo: FC<UserInfoProps> = ({ user }) => {
+const UserInfo: FC = () => {
 
     const auth = useAuthUser();
     const username = auth()?.username;

@@ -38,7 +38,7 @@ const SignUpButtonHandler: React.FC = () => {
     );
 }
 
-const EmailChecker: React.FC<EmailCheckerProps> = ({ name }) => {
+const UnameInput: React.FC<EmailCheckerProps> = ({ name }) => {
     const [field, meta] = useField(name);
 
     return (
@@ -47,7 +47,7 @@ const EmailChecker: React.FC<EmailCheckerProps> = ({ name }) => {
                 <Field
                     {...field}
                     className="w-full h-full text-center font-semibold text-black text-opacity-80 rounded-xl"
-                    placeholder="E-Mail Address"
+                    placeholder="Username"
                 />
             </div>
             {meta.touched && meta.error ? (
@@ -156,18 +156,18 @@ const SignIn = () => {
                     validationSchema={validationSchema}
                     onSubmit={(
                         values: Values,
-                        { setSubmitting }: FormikHelpers<Values>
+                        { setSubmitting, resetForm }: FormikHelpers<Values>
                     ) => {
                         setTimeout(() => {
-                            alert(JSON.stringify(values, null, 2));
                             onSubmitRequest(values);
+                            resetForm();
                             setSubmitting(false);
-                        }, 500);
+                        }, 100);
                     }}
                 >
                     {({ isValid, isSubmitting }) => (
                         <Form className="flex flex-col items-center justify-center gap-y-4">
-                            <EmailChecker name="username" />
+                            <UnameInput name="username" />
                             <PasswordChecker name="password" />
                             <div>
                                 <button type="submit" disabled={!isValid || isSubmitting} className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit</button>

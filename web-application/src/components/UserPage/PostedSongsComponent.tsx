@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {FcLike} from 'react-icons/fc';
 import {BiRepost} from 'react-icons/bi';
 import { Button } from 'flowbite-react';

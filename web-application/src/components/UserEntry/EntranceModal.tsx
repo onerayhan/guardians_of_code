@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { ImCross } from 'react-icons/im';
 import SignIn from './SignIn';
 import SignUp from './SignUp';

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
-import Friends from './pages/Friends';
+import Friends from './pages/friends';
 import Settings from './pages/Settings';
 import Analysis from './pages/Analysis';
 import Placeholder1 from './pages/Placeholder1';
@@ -24,7 +24,7 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route 
-          path="/user/:username" 
+          path="/:username"
           element={
             <RequireAuth loginPath="/signin">
               <UserPage user={username}/>
@@ -32,7 +32,7 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/analysis" 
+          path="/:username/analysis"
           element={
             <RequireAuth loginPath="/signin">
               <Analysis />
@@ -40,7 +40,7 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/friends" 
+          path="/:username/friends"
           element={
             <RequireAuth loginPath="/signin">
               <Friends />
@@ -48,7 +48,7 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/settings" 
+          path="/:username/settings"
           element={
             <RequireAuth loginPath="/signin">
               <Settings />
@@ -56,7 +56,7 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/analysis" 
+          path="/:username/analysis"
           element={
             <RequireAuth loginPath="/signin">
               <Analysis />
@@ -64,7 +64,7 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/placeholder1" 
+          path="/:username/placeholder1"
           element={
             <RequireAuth loginPath="/signin">
               <Placeholder1 />
@@ -72,7 +72,7 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/placeholder2" 
+          path="/:username/placeholder2"
           element={
             <RequireAuth loginPath="/signin">
               <Placeholder2 />
