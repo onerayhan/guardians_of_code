@@ -42,13 +42,6 @@ app.config['SECRET_KEY'] = '5p#r7GZ9!J^T8&d@E*2$yS'
 def generate_public_id():
     return str(uuid.uuid4().hex)
 
-def check_password(username, password):
-    user = users.query.filter_by(username=username).first()
-    if user.password == password:
-        return True
-    else:
-        return False
-
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -110,10 +103,20 @@ def delete_user():
     db.session.delete(user)
     db.session.commit()
     
-    return jsonify({'message': 'User successfully deleted'}), 200        
+    return jsonify({'message': 'User successfully deleted'}), 200 
+
+def follower_finder(user):
+    followers_query = db.session.query(FollowSystem.follower_username).filter_by(followed_username=user.username)
+    followers = [follower[0] for follower in followers_query.all()]
+    return followers
+
+def followed_finder(user):
+    followed_query = db.session.query(FollowSystem.followed_username).filter_by(follower_username=user.username)
+    followed = [followed_user[0] for followed_user in followed_query.all()]
+    return followed       
     
 @app.route('/api/user_info', methods=['POST'])
-def get_user_follower_following():
+def get_user_info():
     data = request.get_json()
     username = data.get('username')
     
@@ -121,14 +124,23 @@ def get_user_follower_following():
     if not user:
         return jsonify({'message': 'Invalid username'}), 404
     
-    followers_query = db.session.query(FollowSystem.follower_username).filter_by(followed_username=user.username)
-    followers = [follower[0] for follower in followers_query.all()]
-
-
-    followed_query = db.session.query(FollowSystem.followed_username).filter_by(follower_username=user.username)
-    followed = [followed_user[0] for followed_user in followed_query.all()]
+    followers = follower_finder(user)    
+    followed = followed_finder(user)
     
-    return jsonify({f'followers for {username}': followers, f'followed for {username}': followed})
+    user_info = {'username': user.username,
+                 'email': user.email,
+                 'birthday': user.birthday,
+                 'profile_picture': user.profile_picture,
+                 'follower_count': len(followers),
+                 'followed_count': len(followed)}
+    return jsonify(user_info)
+
+def check_password(username, password):
+    user = users.query.filter_by(username=username).first()
+    if user.password == password:
+        return True
+    else:
+        return False
 
 @app.route('/api/change_password', methods=['POST'])
 def change_password():
@@ -213,7 +225,12 @@ def unfollow_user():
 def get_all_users():
     all_users = users.query.all()    
     users_list = [
-        {'username': user.username, 'password': user.password, 'email': user.email, 'birthday': user.birthday, 'profile_picture': user.profile_picture, 'public_id': user.public_id}
+        {'username': user.username,
+         'password': user.password,
+         'email': user.email,
+         'birthday': user.birthday,
+         'profile_picture': user.profile_picture,
+         'public_id': user.public_id}
         for user in all_users
     ]
     
