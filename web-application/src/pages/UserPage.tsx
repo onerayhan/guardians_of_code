@@ -1,5 +1,6 @@
 import Header from "../components/Header";
 import UserInfo from "../components/UserPage/UserInfo";
+import Profile from "../components/UserPage/Profile";
 import { FC } from "react";
 
 interface username {
@@ -12,6 +13,7 @@ const UserPage: FC<username> = ({ user }) =>
       <div className="bg-[#081730]">
         <Header />
         <UserInfo user={user}/>
+          <Profile/>
       </div>
     );
 };

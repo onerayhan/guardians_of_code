@@ -4,7 +4,7 @@ import { Avatar } from 'flowbite-react';
 import SongsDisplay from './SongsDisplay';
 import Followers from './Followers';
 import Followings from './Followings';
-import './Default_pfp.svg.png';
+
 
 
 function Profile() {
