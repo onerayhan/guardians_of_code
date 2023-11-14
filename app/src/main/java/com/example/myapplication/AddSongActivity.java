@@ -25,12 +25,12 @@ public class AddSongActivity extends Activity {
             }
         });
 
-        // Other initialization code...
+        
     }
 
     private void startFilePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/*"); // Set the MIME type to audio
+        intent.setType("audio/*"); 
         startActivityForResult(intent, FILE_PICKER_REQUEST_CODE);
     }
 
@@ -41,8 +41,7 @@ public class AddSongActivity extends Activity {
         if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data != null) {
                 Uri selectedFileUri = data.getData();
-                // Handle the selected file URI
-                // selectedFileUri points to the selected audio file
+                
             }
         }
     }
