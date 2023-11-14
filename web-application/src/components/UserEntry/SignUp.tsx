@@ -10,6 +10,8 @@ import 'react-phone-number-input/style.css'
 import { useNavigate } from "react-router-dom";
 import {SignInWithGoogle} from "./Firebase.tsx";
 import "react-datepicker/dist/react-datepicker.css";
+import Spotify_Entry_Handler from "./Spotify_Entry_Handler.tsx";
+
 interface Values {
     username: string;
     password: string;
@@ -17,7 +19,6 @@ interface Values {
     email: string;
     confirmPassword: string;
 }
-
 interface EmailCheckerProps {
     name: string;
 }
@@ -207,12 +208,7 @@ const SignUp = () => {
                             Sign Up with Google
                         </div>
                     </button>
-                    <button className="w-[200px] h-12 rounded-xl bg-white text-black text-opacity-80 text-center font-semibold">
-                        <div>
-                            <BsSpotify size={20} className="inline-block mr-2"/>
-                            Sign Up with Spotify
-                        </div>
-                    </button>
+                    <Spotify_Entry_Handler/>
                 </div>
 
                 <span className="flex-shrink mx-4 text-secondary-color">...or Register via Mail</span>
