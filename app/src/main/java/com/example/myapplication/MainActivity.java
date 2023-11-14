@@ -60,12 +60,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAdapterAboutToEmpty(int i) {
-                // Callback when the adapter is about to be empty
+               
             }
 
             @Override
             public void onScroll(float v) {
-                // Callback during scrolling
+                
             }
         });
 
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Custom adapter to handle images
+    
     private class ImageAdapter extends BaseAdapter {
 
         private Context context;
@@ -138,16 +138,16 @@ public class MainActivity extends AppCompatActivity {
             ImageView imageView;
 
             if (convertView == null) {
-                // If convertView is null, inflate a new ImageView
+                
                 LayoutInflater inflater = LayoutInflater.from(context);
                 imageView = (ImageView) inflater.inflate(R.layout.item, parent, false)
                         .findViewById(R.id.image);
             } else {
-                // If convertView is not null, reuse it
+                
                 imageView = (ImageView) convertView;
             }
 
-            // Set the image resource for the ImageView
+            
             imageView.setImageResource(imageResIds.get(position));
 
             return imageView;
