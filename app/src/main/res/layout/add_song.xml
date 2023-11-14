@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Your Song"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"/>
+    <EditText
+        android:id="@+id/editTextSongName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Song Name"
+        android:inputType="text"
+        android:layout_marginBottom="16dp"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvManual"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Import Manually"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="importManually"/>
+
+
+
+        <ImageButton
+            android:id="@+id/btnManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_gallery"
+            android:contentDescription="Pick Audio File"
+            android:layout_marginStart="8dp"
+            android:onClick="pickAudioManually"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvSpotify"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Import from Spotify"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="importFromSpotify"/>
+
+        <Button
+            android:id="@+id/btnSpotify"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Import"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvSoundcloud"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Import from Soundcloud"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="importFromSoundcloud"/>
+
+        <Button
+            android:id="@+id/btnSoundcloud"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Import"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+
+
+
+
+</LinearLayout>
