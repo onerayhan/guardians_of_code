@@ -99,7 +99,7 @@ def login():
     if not username or not password:
         return jsonify({'message' : "Both email and password are required"}), 400
     
-    user = users.query.filter_by(username=username).first()
+    user = username_to_user(username)
     
     if user and user.password == password:        
         token = jwt.encode({
@@ -122,7 +122,7 @@ def delete_user():
     data = request.get_json()
     username = data.get('username')
     
-    user = users.query.filter_by(username=username).first()
+    user = username_to_user(username)
     if not user:
         return jsonify({'message': 'Invalid username'}), 404
     
@@ -136,7 +136,7 @@ def get_user_info():
     data = request.get_json()
     username = data.get('username')
     
-    user = users.query.filter_by(username=username).first()
+    user = username_to_user(username)
     if not user:
         return jsonify({'message': 'Invalid username'}), 404
     
@@ -162,7 +162,7 @@ def change_password():
     if not username or not old_password or not new_password:
         return jsonify({'message': 'Username/old password/new password are required'}), 400
 
-    user = users.query.filter_by(username=username).first()
+    user = username_to_user(username)
 
     if not user or not check_password(username, old_password):
         return jsonify({'message': 'Invalid username or old password'}), 401
@@ -170,7 +170,17 @@ def change_password():
     user.password = new_password
     db.session.commit()
 
-    return jsonify({'message': 'Password changed successfully'}), 200 
+    return jsonify({'message': 'Password changed successfully'}), 200
+
+@app.route('/api/user_followings', methods=['POST'])
+def user_followings():
+    data = request.get_json()
+    username = data.get('username')
+    
+    user = username_to_user(username)
+    followers = follower_finder(user)
+    followed = followed_finder(user)
+    return jsonify({f'Followers of {username}': followers, f'{username} follows': followed})    
     
 @app.route('/api/follow', methods=['POST'])
 def follow_user():

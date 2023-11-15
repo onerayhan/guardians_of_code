@@ -21,6 +21,10 @@ def followed_finder(user):
     followed = [followed_user[0] for followed_user in followed_query.all()]
     return followed 
 
+def username_to_user(username):
+    user = users.query.filter_by(username=username).first()
+    return user
+
 def check_password(username, password):
     user = users.query.filter_by(username=username).first()
     if user.password == password:
