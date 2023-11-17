@@ -19,8 +19,19 @@
                     }
                 });
             }
+
+            function deleteLogs() {                
+                $.ajax({
+                    url: '/delete_log',
+                    type: 'POST',
+                    success: function(response) {
+                        console.log(response); 
+                    }
+                });
+            }
             
-            refreshLogs();
+            deleteLogs();
+            RefreshLogs();
         });
     </script>
 </head>

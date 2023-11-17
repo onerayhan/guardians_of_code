@@ -21,9 +21,9 @@ def view_logs():
     with open('/var/log/gunicorn/log.txt', 'r') as log_file:
         logs = log_file.readlines()
 
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':        
-        return '\n'.join(logs)   
-     
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return '\n'.join(logs)
+
     return render_template('logs.html', logs=logs)
 
 @app.route('/spoti_login')
