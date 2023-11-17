@@ -1,12 +1,15 @@
-from flask import Flask, jsonify, request, redirect, session
+from flask import Flask, jsonify, request, redirect, session, send_file
 from flask_cors import CORS
 from urllib.parse import urlencode
 from config import Config
 from models import db, users, FollowSystem
+#from song_models import *
 from utils import *
 import base64
 from datetime import datetime, timedelta
 import jwt
+from PIL import Image
+from io import BytesIO
 
 app = Flask(__name__)
 CORS(app)
@@ -72,17 +75,16 @@ def register():
     username = data.get('username')    
     password = data.get('password')
     email = data.get('email')
-    birthday = data.get('birthday')  
-    #profile_picture = data.get('profile_picture')
+    birthday = data.get('birthday')     
     
     if not email or not password or not birthday or not username:
-        return jsonify({'message': 'Email/Password/Birthday/Username are required'}), 400
+        return jsonify({'error': 'Email/Password/Birthday/Username are required'}), 400
     
     if users.query.filter_by(username=username).first():
-        return jsonify({'message': 'Such username already exists'}), 409  
+        return jsonify({'error': 'Such username already exists'}), 409  
     
     if users.query.filter_by(email=email).first():
-        return jsonify({'message': 'Such email already exists'}), 409          
+        return jsonify({'error': 'Such email already exists'}), 409          
 
     public_id = generate_public_id()
     db.session.add(users(username=username, email=email, password=password, birthday=birthday, public_id=public_id))
@@ -97,7 +99,7 @@ def login():
     #device_token = data.get('device_token')
     
     if not username or not password:
-        return jsonify({'message' : "Both email and password are required"}), 400
+        return jsonify({'error' : "Both email and password are required"}), 400
     
     user = username_to_user(username)
     
@@ -115,7 +117,32 @@ def login():
 
         return jsonify({'message': 'User login successful', 'token': token}), 200
     else:
-        return jsonify({'message': 'Invalid username or password '}), 401
+        return jsonify({'error': 'Invalid username or password '}), 401
+
+@app.route('/api/upload_photo', methods=['POST'])
+def upload_photo():
+    if 'photo' not in request.files:
+        return jsonify({'error': 'Invalid request. Make sure to include a photo'}), 400
+
+    if 'username' not in request.form:
+        return jsonify({'error': 'Invalid request. Make sure to include a username'}), 400
+    
+    photo = request.files['photo']
+    username = request.form['username']
+        
+    allowed_extensions = {'png', 'jpg', 'jpeg'}
+    if '.' not in photo.filename or photo.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        return jsonify({'error': 'Invalid file format'}), 400
+        
+    photo_binary_data = photo.read()
+        
+    user = username_to_user(username)
+    if user:
+        user.profile_picture = photo_binary_data
+        db.session.commit()
+        return jsonify({'message': 'Photo uploaded and user profile picture updated successfully'})
+    else:
+        return jsonify({'error': 'User not found'}), 404    
 
 @app.route('/api/user_delete', methods=['POST']) 
 def delete_user():
@@ -124,7 +151,7 @@ def delete_user():
     
     user = username_to_user(username)
     if not user:
-        return jsonify({'message': 'Invalid username'}), 404
+        return jsonify({'error': 'Invalid username'}), 404
     
     db.session.delete(user)
     db.session.commit()
@@ -138,7 +165,7 @@ def get_user_info():
     
     user = username_to_user(username)
     if not user:
-        return jsonify({'message': 'Invalid username'}), 404
+        return jsonify({'error': 'Invalid username'}), 404
     
     followers = follower_finder(user)    
     followed = followed_finder(user)
@@ -160,12 +187,12 @@ def change_password():
     new_password = data.get('new_password')
 
     if not username or not old_password or not new_password:
-        return jsonify({'message': 'Username/old password/new password are required'}), 400
+        return jsonify({'error': 'Username/old password/new password are required'}), 400
 
     user = username_to_user(username)
 
     if not user or not check_password(username, old_password):
-        return jsonify({'message': 'Invalid username or old password'}), 401
+        return jsonify({'error': 'Invalid username or old password'}), 401
     
     user.password = new_password
     db.session.commit()
@@ -188,15 +215,15 @@ def follow_user():
     follower_username = data.get('follower_username')
     followed_username = data.get('followed_username')
     
-    follower = users.query.filter_by(username=follower_username).first()
-    followed = users.query.filter_by(username=followed_username).first()
+    follower = username_to_user(follower_username)
+    followed = username_to_user(followed_username)
 
     if not follower or not followed:
-        return jsonify({'message': 'Invalid usernames'}), 404
+        return jsonify({'error': 'Invalid usernames'}), 404
     
     existing_relationship = FollowSystem.query.filter_by(follower_username=follower.username, followed_username=followed.username).first()
     if existing_relationship:
-        return jsonify({'message': 'Relationship already exists'}), 400
+        return jsonify({'error': 'Relationship already exists'}), 400
     
     new_relationship = FollowSystem(follower_username=follower.username, followed_username=followed.username)
     db.session.add(new_relationship)
@@ -211,15 +238,15 @@ def unfollow_user():
     followed_username = data.get('followed_username')
 
     
-    follower = users.query.filter_by(username=follower_username).first()
-    followed = users.query.filter_by(username=followed_username).first()
+    follower = username_to_user(follower_username)
+    followed = username_to_user(followed_username)
 
     if not follower or not followed:
-        return jsonify({'message': 'Invalid usernames'}), 404
+        return jsonify({'error': 'Invalid usernames'}), 404
     
     existing_relationship = FollowSystem.query.filter_by(follower_username=follower.username, followed_username=followed.username).first()
     if not existing_relationship:
-        return jsonify({'message': 'Relationship does not exist'}), 404
+        return jsonify({'error': 'Relationship does not exist'}), 404
     
     db.session.delete(existing_relationship)
     db.session.commit()
@@ -239,7 +266,24 @@ def unfollow_user():
 #    if user:
 #        return jsonify({'public_id': user.public_id}), 200
 #    else:
-#        return jsonify({'message': 'User not found'}), 404
+#        return jsonify({'error': 'User not found'}), 404
+
+@app.route('/api/profile_picture', methods=['POST'])
+def get_profile_picture():
+    data = request.get_json()
+    username = data.get('username')
+    user = username_to_user(username)
+
+    if user and user.profile_picture:
+        image = Image.open(BytesIO(user.profile_picture))
+        img_io = BytesIO()
+        image.save(img_io, 'JPEG')  
+        img_io.seek(0)
+
+        return send_file(img_io, mimetype='image/jpeg')
+    else:        
+        return jsonify({'error': 'User or user.profile_picture not found'}), 404
+        
 
 @app.route('/api/get_all_follows', methods=['GET'])
 def get_all_follows():
