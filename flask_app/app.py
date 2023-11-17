@@ -1,9 +1,9 @@
-from flask import Flask, jsonify, request, redirect, session, send_file
+from flask import Flask, jsonify, request, redirect, session, send_file, render_template
 from flask_cors import CORS
 from urllib.parse import urlencode
 from config import Config
 from models import db, users, FollowSystem
-#from song_models import *
+from song_models import *
 from utils import *
 import base64
 from datetime import datetime, timedelta
@@ -15,6 +15,16 @@ app = Flask(__name__)
 CORS(app)
 app.config.from_object(Config)
 db.init_app(app)
+
+@app.route('/logs', methods=['GET'])
+def view_logs():
+    with open('/var/log/gunicorn/log.txt', 'r') as log_file:
+        logs = log_file.readlines()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':        
+        return '\n'.join(logs)   
+     
+    return render_template('logs.html', logs=logs)
 
 @app.route('/spoti_login')
 def spoti_login():
