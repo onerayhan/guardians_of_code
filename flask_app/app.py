@@ -209,6 +209,51 @@ def change_password():
 
     return jsonify({'message': 'Password changed successfully'}), 200
 
+@app.route('/api/add_song', methods=['POST'])
+def add_song():
+    data = request.get_json()
+    name = data.get('name')
+    
+    if not name:
+        return jsonify({'error': 'A song name has to be given'}), 400
+
+    if is_duplicate(data):
+        return jsonify({'error': 'Same song exits in the database'}), 400
+
+    new_song = Song(
+        song_id=data.get('song_id'),
+        name=data.get('name'),
+        length=data.get('length'),
+        tempo=data.get('tempo'),
+        recording_type=data.get('recording_type'),
+        listens=data.get('listens'),
+        release_year=data.get('release_year'),
+        added_timestamp=data.get('added_timestamp')
+    )
+    
+    db.session.add(new_song)
+    db.session.commit()
+
+    return jsonify({'message': 'Song added successfully'}), 201
+
+@app.route('/api/remove_song', methods=['POST'])
+def remove_song():
+    data = request.get_json()
+    song_id = data.get('song_id')
+   
+    if song_id:
+        return jsonify({'error': 'A song_id has to be given'}), 400
+
+    song = song_id_to_song(song_id)
+    
+    if not song:
+        return jsonify({'error': 'Song not found'}), 404
+
+    db.session.delete(song)
+    db.session.commit()
+
+    return jsonify({'message': 'Song removed successfully'}), 200
+
 @app.route('/api/user_followings', methods=['POST'])
 def user_followings():
     data = request.get_json()
@@ -313,8 +358,7 @@ def get_all_users():
         {'username': user.username,
          'password': user.password,
          'email': user.email,
-         'birthday': user.birthday,
-         'profile_picture': user.profile_picture,
+         'birthday': user.birthday,         
          'public_id': user.public_id}
         for user in all_users
     ]

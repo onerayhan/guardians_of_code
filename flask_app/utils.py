@@ -1,6 +1,7 @@
 import uuid
 import secrets
 from models import db, users, FollowSystem
+from song_models import Song
 import requests
 from config import Config
 from spotify_cred import *
@@ -25,8 +26,12 @@ def username_to_user(username):
     user = users.query.filter_by(username=username).first()
     return user
 
+def song_id_to_song(song_id):
+    song = Song.query.filter_by(song_id=song_id).first()
+    return song
+
 def check_password(username, password):
-    user = users.query.filter_by(username=username).first()
+    user = username_to_user(username)
     if user.password == password:
         return True
     else:
@@ -49,3 +54,16 @@ def get_user_infos(access_token):
     response = requests.get(f"{SPOTIFY_API_BASE_URL}me", headers=headers)   
 
     return response.json()
+
+def is_duplicate(song_data):
+    existing_song = Song.query.filter_by(
+        name=song_data.get('name'),
+        artist=song_data.get('artist'),
+        album=song_data.get('album'),
+        release_year=song_data.get('release_year')
+    ).first()
+
+    if existing_song:
+        return True
+    else:
+        return False
