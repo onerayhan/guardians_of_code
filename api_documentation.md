@@ -113,7 +113,7 @@ Uploads a user's profile photo. Ensure that the request includes a valid photo f
 - Content-Type: multipart/form-data
 ```json
 {
-  "photo": (JPEG file),
+  "photo": "(JPEG file)",
   "username": "example_username"
 }
 ```
