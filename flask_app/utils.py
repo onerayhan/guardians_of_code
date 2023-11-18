@@ -57,10 +57,10 @@ def get_user_infos(access_token):
 
 def is_duplicate(song_data):
     existing_song = Song.query.filter_by(
-        name=song_data.get('name'),
-        artist=song_data.get('artist'),
-        album=song_data.get('album'),
-        release_year=song_data.get('release_year')
+        song_name=song_data.get('song_name'),
+        length=song_data.get('length'),
+        listens=song_data.get('listens'),
+        tempo=song_data.get('tempo')
     ).first()
 
     if existing_song:
