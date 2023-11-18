@@ -216,7 +216,7 @@ def add_song():
     username = data.get('username')
     
     if not song_name or not username:
-        return jsonify({'error': 'A song name has to be given'}), 400
+        return jsonify({'error': 'A song name & username has to be given'}), 400
 
     if is_duplicate(data):
         return jsonify({'error': 'Same song exits in the database'}), 400
@@ -235,19 +235,7 @@ def add_song():
     db.session.add(new_song)
     db.session.commit()
     
-    song_details = {
-            'song_id': new_song.song_id,
-            'song_name': new_song.song_name,
-            'length': str(new_song.length),  # Convert Time to string in HH:MM:SS format
-            'tempo': new_song.tempo,
-            'recording_type': new_song.recording_type,
-            'listens': new_song.listens,
-            'release_year': new_song.release_year,
-            'added_timestamp': new_song.added_timestamp,
-            'username': new_song.username
-        }
-
-    return jsonify({'message': f'{song_name} added successfully by {username}', 'song_details': song_details}), 201
+    return jsonify({'message': f'{song_name} added successfully by {username}'}), 20
 
 @app.route('/api/remove_song', methods=['POST'])
 def remove_song():
@@ -268,6 +256,32 @@ def remove_song():
     db.session.commit()
 
     return jsonify({'message': f'{song_name} removed successfully by {username}'}), 200
+
+@app.route('/api/user_songs', methods=['POST'])
+def user_songs():
+    data = request.get_json()
+    username = data.get('username')
+    
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+        
+    
+    user_songs = Song.query.filter_by(username=username)
+    
+    user_song_details = [
+        {'song_id': song.song_id,
+         'song_name': song.song_name,
+         'length': str(song.length),
+         'tempo': song.tempo,
+         'recording_type': song.recording_type,
+         'listens': song.listens,
+         'release_year': song.release_year,
+         'added_timestamp': song.added_timestamp,
+         'username': song.username}
+        for song in user_songs 
+    ]
+    
+    return jsonify(user_song_details), 200
 
 @app.route('/api/user_followings', methods=['POST'])
 def user_followings():

@@ -242,31 +242,14 @@ Adds a new song to the database.
 
 ### Response
 
-- **Success:** 
-  - Status Code: 201 Created
-  - JSON Object:
-    ```json
-    {
-      "message": "Song added successfully by {username}",
-      "song_details": {
-        "song_id": "song_id",
-        "song_name": "song_name",
-        "length": "HH:MM:SS",
-        "tempo": "Integer",
-        "recording_type": "LIVE",
-        "listens": "listens",
-        "release_year": "release_year",
-        "added_timestamp": "YYYY-MM-DD HH:MM:SS",
-        "username": "username"
-      }
-    }
-    ```
+- **Success:** Song_name succesfully added by user
+  
 - **Failure:** 
   - Status Code: 400 Bad Request
   - JSON Object:
     ```json
     {
-      "error": "A song name has to be given"
+      "error": "A song name & username has to be given"
     }
     ```
   - Status Code: 400 Bad Request
@@ -319,6 +302,27 @@ Removes an existing song from the database.
       "error": "Song not found"
     }
     ```
+
+## Review User Song Info
+
+**Request**
+
+- **URL:** `/api/user_songs`
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `username` (string): User's username.
+
+**Description**
+
+Retrieves all of the songs a user has added with their info.
+
+**Response**
+
+- **Success:** JSON object containing song info about the songs added by the user.
+- **Failure:** Error message if user not found.
 
 ## User Followings
 
