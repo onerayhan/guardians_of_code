@@ -140,7 +140,7 @@ def upload_photo():
     photo = request.files['photo']
     username = request.form['username']
         
-    allowed_extensions = {'png', 'jpg', 'jpeg'}
+    allowed_extensions = {'jpeg'}
     if '.' not in photo.filename or photo.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
         return jsonify({'error': 'Invalid file format'}), 400
         
@@ -212,39 +212,54 @@ def change_password():
 @app.route('/api/add_song', methods=['POST'])
 def add_song():
     data = request.get_json()
-    name = data.get('name')
+    song_name = data.get('song_name')
+    username = data.get('username')
     
-    if not name:
+    if not song_name or not username:
         return jsonify({'error': 'A song name has to be given'}), 400
 
     if is_duplicate(data):
         return jsonify({'error': 'Same song exits in the database'}), 400
 
-    new_song = Song(
-        song_id=data.get('song_id'),
-        name=data.get('name'),
+    new_song = Song(        
+        song_name=data.get('song_name'),
         length=data.get('length'),
         tempo=data.get('tempo'),
         recording_type=data.get('recording_type'),
         listens=data.get('listens'),
         release_year=data.get('release_year'),
-        added_timestamp=data.get('added_timestamp')
+        added_timestamp=data.get('added_timestamp'),
+        username=data.get('username')
     )
     
     db.session.add(new_song)
     db.session.commit()
+    
+    song_details = {
+            'song_id': new_song.song_id,
+            'song_name': new_song.song_name,
+            'length': str(new_song.length),  # Convert Time to string in HH:MM:SS format
+            'tempo': new_song.tempo,
+            'recording_type': new_song.recording_type,
+            'listens': new_song.listens,
+            'release_year': new_song.release_year,
+            'added_timestamp': new_song.added_timestamp,
+            'username': new_song.username
+        }
 
-    return jsonify({'message': 'Song added successfully'}), 201
+    return jsonify({'message': f'{song_name} added successfully by {username}', 'song_details': song_details}), 201
 
 @app.route('/api/remove_song', methods=['POST'])
 def remove_song():
     data = request.get_json()
     song_id = data.get('song_id')
-   
-    if song_id:
+    username = data.get('username')    
+    
+    if not song_id:
         return jsonify({'error': 'A song_id has to be given'}), 400
 
     song = song_id_to_song(song_id)
+    song_name = song.song_name
     
     if not song:
         return jsonify({'error': 'Song not found'}), 404
@@ -252,7 +267,7 @@ def remove_song():
     db.session.delete(song)
     db.session.commit()
 
-    return jsonify({'message': 'Song removed successfully'}), 200
+    return jsonify({'message': f'{song_name} removed successfully by {username}'}), 200
 
 @app.route('/api/user_followings', methods=['POST'])
 def user_followings():

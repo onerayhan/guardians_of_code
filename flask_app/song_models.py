@@ -6,13 +6,14 @@ class Performer(db.Model):
 
 class Song(db.Model):
     song_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255), nullable=False)
+    song_name = db.Column(db.String(255), nullable=False)
     length = db.Column(db.Time)
     tempo = db.Column(db.Integer)
     recording_type = db.Column(db.Enum('LIVE', 'STUDIO', 'RADIO'))
     listens = db.Column(db.Integer, default=0)
     release_year = db.Column(db.DateTime)
     added_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+    username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
 
 class Album(db.Model):
     album_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -63,7 +64,7 @@ class ExternalService(db.Model):
     service_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     service_name = db.Column(db.String(255), nullable=False)
     access_token = db.Column(db.String(255), nullable=False)
-    username = db.Column(db.String(100), db.ForeignKey('users.username'))
+    username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
 
 class ImportedSong(db.Model):
     import_id = db.Column(db.Integer, primary_key=True, autoincrement=True)

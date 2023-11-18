@@ -14,8 +14,8 @@ class FollowSystem(db.Model):
     follower_username = db.Column(db.String(100), nullable=False, primary_key=True)
     followed_username = db.Column(db.String(100), nullable=False, primary_key=True)
     __table_args__ = (
-        db.ForeignKeyConstraint(['follower_username'], ['users.username']),
-        db.ForeignKeyConstraint(['followed_username'], ['users.username'])
+        db.ForeignKeyConstraint(['follower_username'], ['users.username'], ondelete='CASCADE'),
+        db.ForeignKeyConstraint(['followed_username'], ['users.username'], ondelete='CASCADE')
     )
 
 #class DeviceToken(db.Model):
