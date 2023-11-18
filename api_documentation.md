@@ -111,10 +111,12 @@ Uploads a user's profile photo. Ensure that the request includes a valid photo f
 
 - POST /api/upload_photo
 - Content-Type: multipart/form-data
-- {
--   "photo": (JPEG file),
--   "username": "example_username"
-- }
+```json
+{
+  "photo": (JPEG file),
+  "username": "example_username"
+}
+```
 
 ## Get Profile Picture
 
@@ -143,9 +145,11 @@ Retrieves the profile picture of a user. Ensure that the request includes a vali
 
 - POST /api/profile_picture
 - Content-Type: application/json
-- {
--   "username": "example_username"
-- }
+```json
+{
+  "username": "example_username"
+}
+```
 
 ## Delete User
 
