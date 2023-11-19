@@ -1,6 +1,5 @@
 import React from "react";
 import { FcGoogle } from "react-icons/fc";
-import { BsSpotify } from "react-icons/bs";
 import { Formik, Form, Field, useField, FormikHelpers } from "formik";
 import * as Yup from 'yup';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';

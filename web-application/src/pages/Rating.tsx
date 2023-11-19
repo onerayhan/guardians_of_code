@@ -1,6 +1,6 @@
 import Header from "../components/Header";
 
-const Placeholder2 = () => 
+const Rating = () =>
 {
     return (
       <div className="bg-[#081730]">
@@ -9,4 +9,4 @@ const Placeholder2 = () =>
     );
 };
   
-export default Placeholder2;
+export default Rating;

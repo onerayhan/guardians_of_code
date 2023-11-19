@@ -2,13 +2,14 @@ import React from 'react';
 import { FiUser } from 'react-icons/fi'
 import { FiSettings } from 'react-icons/fi'
 import { BiLogOut } from 'react-icons/bi'
-import { LuMail } from 'react-icons/lu'
+import { LuMusic4} from 'react-icons/lu'
 import {useIsAuthenticated} from 'react-auth-kit';
 import {useAuthUser} from 'react-auth-kit'
 import { useNavigate } from 'react-router-dom';
 import { useSignOut } from 'react-auth-kit';
 import { useState } from 'react';
 import { Avatar } from 'flowbite-react';
+import axios from "axios";
 
 const Header: React.FC = () => {
   const buttonStyle = 
@@ -20,8 +21,8 @@ const Header: React.FC = () => {
   const signOut = useSignOut();
   const scrollDirection = useScrollDirection();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
   const dropdownToggleRef = React.useRef<HTMLButtonElement>(null);
-  //const [buttonWidth, setButtonWidth] = useState<number>(0);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -31,7 +32,7 @@ const Header: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
           dropdownToggleRef.current && !dropdownToggleRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false); // Directly set it to false instead of toggling
+        setDropdownOpen(false);
       }
     };
   
@@ -39,12 +40,32 @@ const Header: React.FC = () => {
     if (dropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-  
-    // Return a clean-up function
+
+    const fetch_photo = async () => {
+      const username = auth()?.username;
+      const apiUrl = "http://13.51.167.155/api/profile_picture";
+      try {
+        const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
+        const data = response.data;
+        const url = URL.createObjectURL(data);
+        setProfilePhoto(url);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    }
+
+    fetch_photo();
+
+    // Prevent memory leaks
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      if (profilePhoto) {
+        URL.revokeObjectURL(profilePhoto);
+      }
     };
-  }, [dropdownOpen]);
+
+  }, []);
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
@@ -85,7 +106,7 @@ const Header: React.FC = () => {
     }, [scrollDirection]);
   
     return scrollDirection;
-  };
+  }
   
   const navigateToUserPage = () => {
     const username = auth()?.username;
@@ -94,10 +115,10 @@ const Header: React.FC = () => {
     }
   };
 
-  const navigateToInbox = () => {
+  const navigateToSongAdd = () => {
     const username = auth()?.username;
     if (username) {
-      navigate(`/${username}/inbox`);
+      navigate(`/${username}/addsongs`);
     }
   };
 
@@ -161,25 +182,25 @@ const Header: React.FC = () => {
     );
   };
 
-  const Placeholder1: React.FC = () => {
+  const RatingButton: React.FC = () => {
     const username = auth()?.username;
     const handleClick = () => {
-      navigate(`/${username}/placeholder1`);
+      navigate(`/${username}/rating`);
     };
 
     return (
-        <button onClick={handleClick} className='font-lalezar text-lg'>Placeholder</button>
+        <button onClick={handleClick} className='font-lalezar text-lg'>Rating</button>
     );
   };
 
-  const Placeholder2: React.FC = () => {
+  const RecommendationsButton: React.FC = () => {
     const username = auth()?.username;
     const handleClick = () => {
-      navigate(`/${username}/placeholder2`);
+      navigate(`/${username}/recommendations`);
     };
 
     return (
-        <button onClick={handleClick} className='font-lalezar text-lg'>Placeholder</button>
+        <button onClick={handleClick} className='font-lalezar text-lg'>Recommendations</button>
     );
   };
 
@@ -204,9 +225,9 @@ const Header: React.FC = () => {
             <li className={liStyle}>
               <FriendsButton /></li>
             <li className={liStyle}>
-              <Placeholder1 /></li>
+              <RatingButton /></li>
             <li className={liStyle}>
-              <Placeholder2 /></li>
+              <RecommendationsButton /></li>
         </ul>
       </div>
 
@@ -216,7 +237,7 @@ const Header: React.FC = () => {
           <div className="flex items-center">
             <button id="dropdownDividerButton" ref={dropdownToggleRef} data-dropdown-toggle="dropdownDivider" className="text-white relative flex justify-between bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center
              dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" onClick={toggleDropdown}>
-              <Avatar img={auth()?.profile_photo} size="xs"/><div className='pl-[10px]'>{auth()?.username}</div><svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+              <Avatar img={profilePhoto} size="xs"/><div className='pl-[10px]'>{auth()?.username}</div><svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
               </svg>
             </button>
@@ -226,8 +247,8 @@ const Header: React.FC = () => {
                   <a onClick={navigateToUserPage} className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'><FiUser size={15}/></div>My Profile</a>
                 </li>
                 <li>
-                  <a onClick={navigateToInbox} className="flex items-center justify-start  px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'>
-                    <LuMail size={15}/></div>Inbox<div className='pl-[10px]'><div className='bg-[#d4353f] flex justify-center items-center rounded w-[10px] h-[10px]'><span className="text-xs">1</span></div></div></a>
+                  <a onClick={navigateToSongAdd} className="flex items-center justify-start  px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'>
+                    <LuMusic4 size={15}/></div>Add Songs</a>
                 </li>
                 <li>
                   <a onClick={navigateToSettings} className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'><FiSettings size={15}/></div>Settings</a>

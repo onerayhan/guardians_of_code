@@ -3,13 +3,15 @@ import Landing from './pages/Landing';
 import Friends from './pages/friends';
 import Settings from './pages/Settings';
 import Analysis from './pages/Analysis';
-import Placeholder1 from './pages/Placeholder1';
-import Placeholder2 from './pages/Placeholder2';
+import Rating from './pages/Rating';
+import AddSongs from './pages/AddSongs';
+import Recommendations from './pages/Recommendations';
 import Modal from './components/UserEntry/EntranceModal';
 import UserPage from './pages/UserPage';
 import { RequireAuth } from 'react-auth-kit'
 import { useIsAuthenticated } from 'react-auth-kit'
 import { useAuthUser } from 'react-auth-kit'
+import UserProfile from './pages/UserProfile';
 
 const AppRouter = () => {
 
@@ -31,6 +33,7 @@ const AppRouter = () => {
             </RequireAuth>
           } 
         />
+          <Route path="/:userId" element={<UserProfile />} />
         <Route 
           path="/:username/analysis"
           element={
@@ -48,10 +51,10 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/:username/settings"
+          path="/:username/addsongs"
           element={
             <RequireAuth loginPath="/signin">
-              <Settings />
+              <AddSongs/>
             </RequireAuth>
           } 
         />
@@ -64,21 +67,29 @@ const AppRouter = () => {
           } 
         />
         <Route 
-          path="/:username/placeholder1"
+          path="/:username/rating"
           element={
             <RequireAuth loginPath="/signin">
-              <Placeholder1 />
+              <Rating />
             </RequireAuth>
           } 
         />
         <Route 
-          path="/:username/placeholder2"
+          path="/:username/recommendations"
           element={
             <RequireAuth loginPath="/signin">
-              <Placeholder2 />
+              <Recommendations />
             </RequireAuth>
           } 
         />
+          <Route
+              path="/:username/settings"
+              element={
+                  <RequireAuth loginPath="/signin">
+                      <Settings />
+                  </RequireAuth>
+              }
+          />
         <Route
           path="/signin"
           element={<Modal formType={'signin'} closeUserEntry={function (): void {

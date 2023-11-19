@@ -57,8 +57,8 @@ const UnameInput: React.FC<EmailCheckerProps> = ({ name }) => {
     );
 };
 
+// Deprecated feature
 //<p className="text-white text-opacity-80">Forgot your password? <button onClick={showForgotPassword} className="text-white text-opacity-80 hover:text-opacity-100">Renew Password</button></p>
-
 
 const PasswordChecker: React.FC<PasswordCheckerProps> = ({ name }) => {
     const [field, meta] = useField(name);

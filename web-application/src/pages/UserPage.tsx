@@ -1,9 +1,6 @@
 import Header from "../components/Header";
-import Followers from "../components/UserPage/Followers";
-import Followings from "../components/UserPage/Followings";
-import LikedSongsComponent from "../components/UserPage/LikedSongsComponent.tsx";
 import Profile from "../components/UserPage/Profile";
-import SongsDisplay from "../components/UserPage/SongsDisplay.tsx";
+import SongsComponent from "../components/UserPage/SongsComponent.tsx";
 import { FC } from "react";
 
 interface username {
@@ -13,14 +10,14 @@ interface username {
 const UserPage: FC<username> = () =>
 {
     return (
-      <div className="bg-[#081730]">
+      <body className="bg-[#081730]">
         <Header />
         <Profile/>
-        <Followers/>
-        <Followings/>
-        <LikedSongsComponent/>
-        <SongsDisplay/>
-      </div>
+        <SongsComponent />
+        <div className="bg-[#081730] py-10">
+
+        </div>
+      </body>
     );
 };
   

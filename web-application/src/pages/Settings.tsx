@@ -1,11 +1,17 @@
 import Header from "../components/Header";
+import SettingsBody from "../components/Settings/SettingsBody"
+import DeleteUserButton from "../components/Settings/DeleteUserButton";
+import SettingsPP from "../components/Settings/SettingsPP";
 
-const Settings = () => 
+const Settings = () =>
 {
     return (
-      <div className="bg-[#081730]">
+      <body className="bg-[#081730]">
         <Header />
-      </div>
+        <SettingsPP />
+        <SettingsBody />
+        <DeleteUserButton />
+      </body>
     );
 };
   
