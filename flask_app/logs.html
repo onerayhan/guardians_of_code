@@ -9,20 +9,17 @@
                 $.ajax({
                     url: '/logs',
                     type: 'GET',
-                    success: function(data) {
-                        // Replace the existing logs with the updated logs
+                    success: function(data) {                        
                         if (data.trim() !== "") {
                             $('pre').html(data);
                         }
                     },
-                    complete: function() {
-                        // Schedule the next refresh after a delay (e.g., 2 seconds)
+                    complete: function() {                        
                         setTimeout(refreshLogs, 2000);
                     }
                 });
             }
-
-            // Initial call to start the refresh process
+            
             refreshLogs();
         });
     </script>
