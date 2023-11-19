@@ -9,29 +9,21 @@
                 $.ajax({
                     url: '/logs',
                     type: 'GET',
-                    success: function(data) {                        
+                    success: function(data) {
+                        // Replace the existing logs with the updated logs
                         if (data.trim() !== "") {
                             $('pre').html(data);
                         }
                     },
-                    complete: function() {                        
+                    complete: function() {
+                        // Schedule the next refresh after a delay (e.g., 2 seconds)
                         setTimeout(refreshLogs, 2000);
                     }
                 });
             }
 
-            function deleteLogs() {                
-                $.ajax({
-                    url: '/delete_log',
-                    type: 'POST',
-                    success: function(response) {
-                        console.log(response); 
-                    }
-                });
-            }
-            
-            deleteLogs();
-            RefreshLogs();
+            // Initial call to start the refresh process
+            refreshLogs();
         });
     </script>
 </head>
