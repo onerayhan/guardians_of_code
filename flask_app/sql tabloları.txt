@@ -1,0 +1,143 @@
+CREATE TABLE users (
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    birthday VARCHAR(100) NOT NULL,
+    profile_picture BLOB,
+    public_id VARCHAR(32) PRIMARY KEY
+);
+
+CREATE TABLE follow_system (
+    follower_username VARCHAR(100) NOT NULL,
+    followed_username VARCHAR(100) NOT NULL,
+    PRIMARY KEY (follower_username, followed_username),
+    FOREIGN KEY (follower_username) REFERENCES users(username),
+    FOREIGN KEY (followed_username) REFERENCES users(username)
+);
+
+
+CREATE TABLE performer (
+    performer_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE song (
+    song_id INT PRIMARY KEY AUTO_INCREMENT,
+    song_name VARCHAR(255) NOT NULL,
+    length TIME,
+    tempo INT,
+    recording_type ENUM('LIVE', 'STUDIO', 'RADIO'),
+    listens INT DEFAULT 0,
+    release_year INT,
+    added_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP(),
+    username VARCHAR(100) NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
+
+CREATE TABLE album (
+    album_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    release_year DATETIME
+);
+
+
+CREATE TABLE user_rating (
+    rating_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL,
+    song_id INT,
+    album_id INT,
+    performer_id INT,
+    rating INT NOT NULL,
+    rating_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP(),
+    FOREIGN KEY (song_id) REFERENCES song(song_id) ON DELETE CASCADE,
+    FOREIGN KEY (album_id) REFERENCES album(album_id) ON DELETE CASCADE,
+    FOREIGN KEY (performer_id) REFERENCES performer(performer_id) ON DELETE CASCADE,
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
+
+CREATE TABLE genre (
+    genre_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL
+);
+
+
+CREATE TABLE mood (
+    mood_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL
+);
+
+
+CREATE TABLE instrument (
+    instrument_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL
+);
+
+
+CREATE TABLE song_performer (
+    song_id INT,
+    performer_id INT,
+    PRIMARY KEY (song_id, performer_id),
+    FOREIGN KEY (song_id) REFERENCES song(song_id) ON DELETE CASCADE,
+    FOREIGN KEY (performer_id) REFERENCES performer(performer_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE song_album (
+    song_id INT,
+    album_id INT,
+    PRIMARY KEY (song_id, album_id),
+    FOREIGN KEY (song_id) REFERENCES song(song_id) ON DELETE CASCADE,
+    FOREIGN KEY (album_id) REFERENCES album(album_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE song_genre (
+    song_id INT,
+    genre_id INT,
+    PRIMARY KEY (song_id, genre_id),
+    FOREIGN KEY (song_id) REFERENCES song(song_id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id) REFERENCES genre(genre_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE song_mood (
+    song_id INT,
+    mood_id INT,
+    PRIMARY KEY (song_id, mood_id),
+    FOREIGN KEY (song_id) REFERENCES song(song_id) ON DELETE CASCADE,
+    FOREIGN KEY (mood_id) REFERENCES mood(mood_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE song_instrument (
+    song_id INT,
+    instrument_id INT,
+    PRIMARY KEY (song_id, instrument_id),
+    FOREIGN KEY (song_id) REFERENCES song(song_id) ON DELETE CASCADE,
+    FOREIGN KEY (instrument_id) REFERENCES instrument(instrument_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE external_service (
+    service_id INT PRIMARY KEY AUTO_INCREMENT,
+    service_name VARCHAR(255) NOT NULL,
+    access_token VARCHAR(255) NOT NULL,
+    username VARCHAR(100) NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
+
+CREATE TABLE imported_song (
+    import_id INT PRIMARY KEY AUTO_INCREMENT,
+    song_id INT,
+    service_id INT,
+    external_song_id VARCHAR(255),
+    import_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP(),
+    FOREIGN KEY (song_id) REFERENCES song(song_id) ON DELETE CASCADE,
+    FOREIGN KEY (service_id) REFERENCES external_service(service_id) ON DELETE CASCADE
+);
+
+
