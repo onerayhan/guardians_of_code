@@ -5,14 +5,21 @@ import {Box, Button, Stack} from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom';
 import {FaSpotify} from "react-icons/fa";
 import React, {useEffect, useState} from "react";
+import { FaUserGroup } from "react-icons/fa6";
+import { AiOutlineUsergroupDelete } from "react-icons/ai";
 import axios from "axios";
+import { IoPersonRemove } from "react-icons/io5";
+import { MdOutlineBlock } from "react-icons/md";
+
 
 function Profile() {
     const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
     const [showFollowersModal, setShowFollowersModal] = useState(false);
     const [showFollowingModal, setShowFollowingModal] = useState(false);
+    const [showGroupsModal, setShowGroupsModal] = useState(false);
     const [followers, setFollowers] = useState<string[]>([]);
     const [following, setFollowing] = useState<string[]>([]);
+    const [groups, setGroups] = useState<string[]>([]);
     const auth = useAuthUser();
     const username = auth()?.username;
     const navigate = useNavigate();
@@ -47,7 +54,21 @@ function Profile() {
             }
         };
 
+        const fetchGroups = async () => {
+            const apiUrl = "http://13.51.167.155/api/user_groups";
+            try {
+                const response = await axios.post(apiUrl, {username: `${auth()?.username}`});
+                const data = response.data;
+                const groupNames = data[`Groups of ${auth()?.username}`] || [];
 
+                setGroups(groupNames);
+                } catch (error) {
+                    console.log(error);
+                }
+            };
+
+
+        fetchGroups();
         fetchUsers();
         fetch_photo();
 
@@ -101,6 +122,76 @@ function Profile() {
             );
         };
 
+        const FollowingDisplay = ({ user }: { user: string }) => {
+            const [profPhoto, setProfPhoto] = useState<string | undefined>(undefined);
+
+            useEffect(() => {
+                const fetch_photo = async () => {
+                    const username = user;
+                    const apiUrl = "http://13.51.167.155/api/profile_picture";
+                    try {
+                        const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
+                        const data = response.data;
+                        const url = URL.createObjectURL(data);
+                        setProfPhoto(url);
+                    }
+                    catch (error) {
+                        console.log(error);
+                    }
+                };
+
+                fetch_photo();
+            }, []);
+
+            const handleNavigate = () => {
+                navigate(`/${user}`);
+            }
+
+            const handleUnfollow = async () => {
+                const apiUrl = "http://13.51.167.155/api/unfollow";
+                try {
+                    const response = await axios.post(apiUrl, { follower_username: `${auth()?.username}`, followed_username: `${user}` });
+                    const data = response.data;
+                    console.log(data);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+
+            const handleBlock = async () => {
+                const apiUrl = "http://13.51.167.155/api/block_user";
+                try {
+                    const response = await axios.post(apiUrl, { follower_username: `${auth()?.username}`, followed_username: `${user}` });
+                    const data = response.data;
+                    console.log(data);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+
+            }
+
+            return (
+                <Box p={4} display="flex" alignItems="center" justifyContent="space-between" bg="gray.100" borderRadius="md">
+                    <Avatar img={profPhoto} size="md" />
+                    <Button onClick={handleNavigate}>{user}</Button>
+                    <Button onClick={handleUnfollow} colorScheme={"red"}><IoPersonRemove />Unfollow</Button>
+                    <Button onClick={handleBlock} colorScheme={"orange"}><MdOutlineBlock />Block</Button>
+                </Box>
+            );
+        };
+
+        const GroupsDisplay = ({ group }: { group: string }) => {
+
+            return(
+                <Box p={4} display="flex" alignItems="center" justifyContent="space-between" bg="gray.100" borderRadius="md">
+                    <span>{group}</span>
+                    <Button colorScheme="red" onClick={() => navigate(`/group/${group}`)}><AiOutlineUsergroupDelete />Leave Group</Button>
+                </Box>
+            );
+        }
+
         return (
             <>
                 <Button onClick={() => setShowFollowersModal(true)}>
@@ -110,8 +201,14 @@ function Profile() {
                 <Button onClick={() => setShowFollowingModal(true)}>
                     Following: {following.length}
                 </Button>
+                <div className="px-2"></div>
+                <Button colorScheme="cyan" onClick={() => setShowGroupsModal(true)}>
+                    <FaUserGroup size={20}/>
+                    <div className="px-1"></div>
+                    Show Groups
+                </Button>
 
-                <Modal show={showFollowersModal} size="sm" onClose={() => setShowFollowersModal(false)}>
+                <Modal show={showFollowersModal} size="xl" onClose={() => setShowFollowersModal(false)}>
                     <Modal.Header>Followers</Modal.Header>
                     <Modal.Body>
                         <Stack spacing={4}>
@@ -122,12 +219,23 @@ function Profile() {
                     </Modal.Body>
                 </Modal>
 
-                <Modal show={showFollowingModal} size="sm" onClose={() => setShowFollowingModal(false)}>
+                <Modal show={showFollowingModal} size="xl" onClose={() => setShowFollowingModal(false)}>
                     <Modal.Header>Following</Modal.Header>
                     <Modal.Body>
                         <Stack spacing={4}>
                             {following.map(following => (
-                                <UserDisplay key={following} user={following} />
+                                <FollowingDisplay key={following} user={following} />
+                            ))}
+                        </Stack>
+                    </Modal.Body>
+                </Modal>
+
+                <Modal show={showGroupsModal} size="xl" onClose={() => setShowGroupsModal(false)}>
+                    <Modal.Header>Groups</Modal.Header>
+                    <Modal.Body>
+                        <Stack spacing={4}>
+                            {groups.map(groups => (
+                                <GroupsDisplay key={groups} group={groups} />
                             ))}
                         </Stack>
                     </Modal.Body>

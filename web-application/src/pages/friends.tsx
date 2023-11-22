@@ -1,11 +1,18 @@
 import Header from "../components/Header";
+import UserSearch from "../components/Friends/UserSearch";
+import FriendRecoms from "../components/Friends/FriendRecoms";
+import FormFriendGroups from "../components/Friends/FormFriendGroups";
 
 const Friends = () => 
 {
     return (
-      <div className="bg-[#081730]">
+      <body className="bg-[#081730]">
         <Header />
-      </div>
+        <UserSearch />
+        <FriendRecoms />
+        <FormFriendGroups />
+        <div className="bg-[#081730] py-20"></div>
+      </body>
     );
 };
   

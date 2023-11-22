@@ -10,10 +10,10 @@ interface Song {
   genre: string;
   duration: string;
   year: number;
-  basis_of_recommendation: string;
+  origin_friend: string;
 }
 
-function RecommendationsTable() {
+function FriendRecomsTable() {
 
   const [RecomSongs, setRecomSongs] = useState<Song[]>([]);
   const auth = useAuthUser();
@@ -27,7 +27,7 @@ function RecommendationsTable() {
           <Td>{song.genre}</Td>
           <Td>{song.duration}</Td>
           <Td>{song.year}</Td>
-          <Td>{song.basis_of_recommendation}</Td>
+          <Td>{song.origin_friend}</Td>
         </Tr>
     );
   };
@@ -47,29 +47,27 @@ function RecommendationsTable() {
 
     getRecomSongs();
   }, []);
-  
-return (
 
-
-<TableContainer maxH="500px" overflowY="auto">
-  <Table variant='striped' colorScheme='teal' size='lg'>
-    <Thead className="sticky top-0 bg-[#081730] ">
-      <Tr>
-        <Th>Song Name</Th> 
-        <Th>Artist Name</Th>
-        <Th>Album Name</Th>
-        <Th>Genre</Th>
-        <Th>Duration</Th>
-        <Th>Year</Th>
-        <Th>Basis of Recommendation</Th>
-      </Tr>
-    </Thead>
-    <Tbody>
-      {RecomSongs.map(song => <RecomDisplaySong key={song.song_name} song={song} />)}
-    </Tbody>
-  </Table>
-</TableContainer>
+  return (
+      <TableContainer maxH="500px" overflowY="auto">
+        <Table variant='striped' colorScheme='teal' size='lg'>
+          <Thead className="sticky top-0 bg-[#081730] ">
+            <Tr>
+              <Th>Song Name</Th>
+              <Th>Artist Name</Th>
+              <Th>Album Name</Th>
+              <Th>Genre</Th>
+              <Th>Duration</Th>
+              <Th>Year</Th>
+              <Th>Origin Friend</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {RecomSongs.map(song => <RecomDisplaySong key={song.song_name} song={song} />)}
+          </Tbody>
+        </Table>
+      </TableContainer>
   );
 }
 
-export default RecommendationsTable;
+export default FriendRecomsTable;
