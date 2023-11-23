@@ -182,8 +182,7 @@ def get_user_info():
     
     user_info = {'username': user.username,
                  'email': user.email,
-                 'birthday': user.birthday,
-                 'profile_picture': user.profile_picture,
+                 'birthday': user.birthday,                 
                  'follower_count': len(followers),
                  'followed_count': len(followed)}
     
@@ -219,7 +218,7 @@ def add_song():
         return jsonify({'error': 'A song name & username has to be given'}), 400
 
     if is_duplicate(data):
-        return jsonify({'error': 'Same song exits in the database'}), 400
+        return jsonify({'error': 'Song already exists!'}), 400
 
     new_song = Song(        
         song_name=data.get('song_name'),
@@ -229,13 +228,13 @@ def add_song():
         listens=data.get('listens'),
         release_year=data.get('release_year'),
         added_timestamp=data.get('added_timestamp'),
-        username=data.get('username')
+        username=username
     )
     
     db.session.add(new_song)
     db.session.commit()
     
-    return jsonify({'message': f'{song_name} added successfully by {username}'}), 20
+    return jsonify({'message': f'{song_name} added successfully by {username}'}), 200
 
 @app.route('/api/remove_song', methods=['POST'])
 def remove_song():
@@ -263,10 +262,12 @@ def user_songs():
     username = data.get('username')
     
     if not username:
-        return jsonify({'error': 'A username has to be given'}), 400
-        
+        return jsonify({'error': 'A username has to be given'}), 400        
     
     user_songs = Song.query.filter_by(username=username)
+    
+    if not user_songs:
+        user_song_details = []
     
     user_song_details = [
         {'song_id': song.song_id,
@@ -366,12 +367,15 @@ def get_profile_picture():
 
         return send_file(img_io, mimetype='image/jpeg')
     else:        
-        return jsonify({'error': 'User or user.profile_picture not found'}), 404
-        
+        return jsonify({'error': 'User or user.profile_picture not found'}), 404        
 
 @app.route('/api/get_all_follows', methods=['GET'])
 def get_all_follows():
     all_follows = FollowSystem.query.all()
+    
+    if not all_follows:
+        all_follows = []
+    
     follow_list = [
         {'follower_username': follow.follower_username,
          'followed_username': follow.followed_username}
@@ -382,7 +386,11 @@ def get_all_follows():
    
 @app.route('/api/get_all_users', methods=['GET'])
 def get_all_users():
-    all_users = users.query.all()    
+    all_users = users.query.all()  
+    
+    if not all_users:
+        all_users = []        
+      
     users_list = [
         {'username': user.username,
          'password': user.password,
@@ -390,7 +398,7 @@ def get_all_users():
          'birthday': user.birthday,         
          'public_id': user.public_id}
         for user in all_users
-    ]
+    ]    
     
     return jsonify(users_list)
 
