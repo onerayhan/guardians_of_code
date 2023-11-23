@@ -1,11 +1,15 @@
 import Header from "../components/Header";
+import RatingPage from "../components/Rating/RatingPage.tsx";
+import RefreshButton from "../components/Rating/RefreshButton.tsx"
 
 const Rating = () =>
 {
     return (
-      <div className="bg-[#081730]">
+      <body className="bg-[#081730] overflow-y-auto">
         <Header />
-      </div>
+          <RatingPage />
+          <RefreshButton />
+      </body>
     );
 };
   
