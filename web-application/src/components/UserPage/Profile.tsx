@@ -110,14 +110,15 @@ function Profile() {
                 fetch_photo();
             }, []);
 
-            const handleNavigate = () => {
-                navigate(`/${user}`);
+            const handleNavigate = (user: string) => {
+                setShowFollowingModal(false);
+                navigate(`/user/${user}`);
             }
 
             return (
                 <Box p={4} display="flex" alignItems="center" justifyContent="space-between" bg="gray.100" borderRadius="md">
                     <Avatar img={profPhoto} size="md" />
-                    <Button onClick={handleNavigate}>{user}</Button>
+                    <Button onClick={() => handleNavigate(user)}>{user}</Button>
                 </Box>
             );
         };
@@ -143,8 +144,9 @@ function Profile() {
                 fetch_photo();
             }, []);
 
-            const handleNavigate = () => {
-                navigate(`/${user}`);
+            const handleNavigate = (user: string) => {
+                setShowFollowingModal(false);
+                navigate(`/user/${user}`);
             }
 
             const handleUnfollow = async () => {
@@ -175,7 +177,7 @@ function Profile() {
             return (
                 <Box p={4} display="flex" alignItems="center" justifyContent="space-between" bg="gray.100" borderRadius="md">
                     <Avatar img={profPhoto} size="md" />
-                    <Button onClick={handleNavigate}>{user}</Button>
+                    <Button onClick={() => handleNavigate(user)}>{user}</Button>
                     <Button onClick={handleUnfollow} colorScheme={"red"}><IoPersonRemove />Unfollow</Button>
                     <Button onClick={handleBlock} colorScheme={"orange"}><MdOutlineBlock />Block</Button>
                 </Box>
@@ -245,7 +247,7 @@ function Profile() {
     }
 
   return (
-    <div className="flex flex-col items-center text-center bg-[#081730] ">
+    <div className="flex flex-col items-center text-center bg-[#081730] overflow-y-auto">
       <div className="flex flex-col items-center justify-center w-full bg-[#081730] text-white p-2.5">
         <Avatar img={profilePhoto} size="xl" rounded bordered color="gray" />
         <h2 className='mt-5'>{auth()?.username}</h2><div className="py-2"></div>

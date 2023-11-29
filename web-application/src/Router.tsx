@@ -33,7 +33,7 @@ const AppRouter = () => {
             </RequireAuth>
           } 
         />
-          <Route path="/:userId" element={<UserProfile />} />
+          <Route path="/user/:userId" element={<UserProfile />} />
         <Route 
           path="/:username/analysis"
           element={

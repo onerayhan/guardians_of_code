@@ -86,7 +86,7 @@ const SongsComponent:React.FC = () => {
     }, []);
 
   return (
-      <div className="justify-center pl-[150px] pr-[150px] pb-5">
+      <div className="pl-[150px] pr-[150px] pb-5 overflow-y-auto w-auto">
         <Tabs isFitted variant='enclosed'>
           <TabList>
             <Tab backgroundColor={"white"}><GoThumbsup size={20}/>Liked Songs</Tab>
