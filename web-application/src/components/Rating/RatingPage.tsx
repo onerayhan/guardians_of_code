@@ -2,14 +2,14 @@ import {
     Box,
     SimpleGrid,
     Card,
-    CardBody, Heading, CardFooter, Stack, useToast
+    CardBody, Heading, CardFooter, Stack, useToast, Button
 } from '@chakra-ui/react'
 import React, { useEffect, useState} from 'react';
 import {useAuthUser} from "react-auth-kit";
 import axios from "axios";
 import {StarIcon} from "@chakra-ui/icons";
 import {Divider} from "antd";
-import { Rating } from '@simuratli/rating'
+import { AiTwotoneLike } from "react-icons/ai";
 
 interface Song {
     song_id: number;
@@ -33,7 +33,7 @@ function RatingPage() {
 
     const RatingStars: React.FC<RatingStarsProps> = ({ song, totalStars = 5 }) => {
         const [rating, setRating] = useState(0);
-        const apiURL = "http://13.51.167.155/api/";
+        const apiURL = "http://13.51.167.155/api/rate_song";
 
         const handleRating = async (i: number) => {
             try {
@@ -54,21 +54,60 @@ function RatingPage() {
                 setRating(i); // Set the rating after successful submission
             } catch (error) {
                 console.error("Error submitting rating:", error);
-                // Optionally, you can show a toast for error as well
+                toast({
+                    title: "Error submitting rating!",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true
+                });
             }
         };
 
+        const handleLike = async () => {
+            try {
+
+                const apiURL = "http://13.51.167.155/api/like_song";
+
+                await axios.post(apiURL, {
+                    song_id: song.song_id,
+                    username: auth()?.username,
+                });
+
+                toast({
+                    title: "Like submitted",
+                    description: `Successfully liked song ${song.song_name}`, // Template literal for dynamic song name
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true
+                });
+            }
+
+            catch (error) {
+                console.error("Error submitting like:", error);
+                toast({
+                    title: "Error submitting like!",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true
+                });
+            }
+        }
+
         return (
-            <Box display="flex">
-                {[...Array(totalStars)].map((_, i) => (
-                    <StarIcon
-                        key={i}
-                        onClick={() => handleRating(i + 1)}
-                        color={i < rating ? "yellow.400" : "gray.300"}
-                        cursor="pointer"
-                    />
-                ))}
-            </Box>
+            <div className="flex">
+                <Box display="flex" className="pr-12">
+                    {[...Array(totalStars)].map((_, i) => (
+                        <StarIcon
+                            key={i}
+                            onClick={() => handleRating(i + 1)}
+                            color={i < rating ? "yellow.400" : "gray.300"}
+                            cursor="pointer"
+                        />
+                    ))}
+                </Box>
+                <Button onClick={() => handleLike()} leftIcon={<AiTwotoneLike />} className="justify-center">
+                </Button>
+            </div>
         );
     };
 

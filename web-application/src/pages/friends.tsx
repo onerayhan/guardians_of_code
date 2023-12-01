@@ -6,7 +6,7 @@ import FormFriendGroups from "../components/Friends/FormFriendGroups";
 const Friends = () => 
 {
     return (
-      <body className="bg-[#081730]">
+      <body className="bg-[#081730] overflow-y-auto">
         <Header />
         <UserSearch />
         <FriendRecoms />

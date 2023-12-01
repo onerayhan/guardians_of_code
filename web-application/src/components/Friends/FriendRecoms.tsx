@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Thead, Th, Td} from '@chakra-ui/react';
+import {Thead, Th, Td, Button} from '@chakra-ui/react';
 import { useAuthUser } from "react-auth-kit";
 import axios from "axios";
 import {
@@ -8,9 +8,10 @@ import {
     Tr,
     TableContainer,
 } from '@chakra-ui/react'
+import {useNavigate} from "react-router-dom";
 
 interface RecomsArray {
-    username: number;
+    username: string;
     follower_count: string;
     followed_count: string;
     profile_picture?: string;
@@ -20,12 +21,19 @@ const FriendRecoms:React.FC = () => {
 
     const [RecomUsers, setRecomUsers] = useState<RecomsArray[]>([]);
     const auth = useAuthUser();
+    const navigate = useNavigate();
+
+    const navigateUser = (user: string) => {
+        navigate(`/user/${user}`);
+    }
 
     const RecomDisplayUser = ({ user }: { user: RecomsArray }) => {
         return (
             <Tr>
                 <Td>{user.profile_picture}</Td>
-                <Td>{user.username}</Td>
+                <Td>
+                    <Button onClick = {() => navigateUser(user.username)}>{user.username}</Button>
+                </Td>
                 <Td>{user.follower_count}</Td>
                 <Td>{user.followed_count}</Td>
             </Tr>

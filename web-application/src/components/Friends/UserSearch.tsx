@@ -8,6 +8,7 @@ import {Avatar} from "flowbite-react";
 import {useAuthUser} from "react-auth-kit";
 import { useToast } from '@chakra-ui/react'
 import { FaSearch } from "react-icons/fa";
+import {useNavigate} from "react-router-dom";
 
 // Define your validation schema using Yup
 const validationSchema = Yup.object().shape({
@@ -34,6 +35,7 @@ const UsernameSubmit: React.FC = () => {
     const [isFollowed, setFollowed] = useState(false);
     const auth = useAuthUser();
     const toast = useToast();
+    const navigate = useNavigate();
 
     const FollowUser = async (user: UserInfo, followerUsername: string) => {
         try {
@@ -65,6 +67,10 @@ const UsernameSubmit: React.FC = () => {
             });
         }
     };
+
+    const navigateUser = (user: string) => {
+        navigate(`/user/${user}`);
+    }
 
     const onSubmitRequest = async (user: string) => {
         setError("");
@@ -138,9 +144,9 @@ const UsernameSubmit: React.FC = () => {
 
                         <HStack spacing={4} className="flex-grow">
                             <CardBody>
-                                <Heading size='md'>{userInfo.username}</Heading>
-                                <Text py='2'>Followers: {userInfo.follower_count}</Text>
-                                <Text py='2'>Following: {userInfo.followed_count}</Text>
+                                <Button onClick = {() => navigateUser(userInfo.username)}>{userInfo.username}</Button>
+                                <Text py='2' className="font-lalezar">Followers: {userInfo.follower_count}</Text>
+                                <Text py='2' className="font-lalezar">Following: {userInfo.followed_count}</Text>
                             </CardBody>
 
                             <CardFooter>
