@@ -35,6 +35,7 @@ interface SongsArray {
     added_timestamp: string;
 }
 
+
 const UserProfile = () => {
     const { userId } = useParams();
     const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
