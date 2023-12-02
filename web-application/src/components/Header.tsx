@@ -204,6 +204,17 @@ const Header: React.FC = () => {
     );
   };
 
+  const SearchButton: React.FC = () => {
+    const username = auth()?.username;
+    const handleClick = () => {
+      navigate(`/${username}/search`);
+    };
+
+    return (
+        <button onClick={handleClick} className='font-lalezar text-lg'>Search</button>
+    );
+  };
+
   const navigate_button = (path: string) => () => {
     const history = useNavigate();
     history(path);
@@ -228,6 +239,8 @@ const Header: React.FC = () => {
               <RatingButton /></li>
             <li className={liStyle}>
               <RecommendationsButton /></li>
+            <li className={liStyle}>
+                <SearchButton /></li>
         </ul>
       </div>
 

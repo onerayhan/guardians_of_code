@@ -6,6 +6,9 @@ import Analysis from './pages/Analysis';
 import Rating from './pages/Rating';
 import AddSongs from './pages/AddSongs';
 import Recommendations from './pages/Recommendations';
+import ArtistPage from './pages/ArtistPage';
+import AlbumPage from './pages/AlbumPage';
+import Search from './pages/Search';
 import Modal from './components/UserEntry/EntranceModal';
 import UserPage from './pages/UserPage';
 import { RequireAuth } from 'react-auth-kit'
@@ -66,7 +69,23 @@ const AppRouter = () => {
             </RequireAuth>
           } 
         />
-        <Route 
+          <Route
+              path="/artist/:performer"
+              element={
+                  <RequireAuth loginPath="/signin">
+                      <ArtistPage />
+                  </RequireAuth>
+              }
+          />
+          <Route
+              path="/album/:album"
+              element={
+                  <RequireAuth loginPath="/signin">
+                      <AlbumPage  />
+                  </RequireAuth>
+              }
+          />
+          <Route
           path="/:username/rating"
           element={
             <RequireAuth loginPath="/signin">
@@ -82,6 +101,14 @@ const AppRouter = () => {
             </RequireAuth>
           } 
         />
+          <Route
+              path="/:username/search"
+              element={
+                  <RequireAuth loginPath="/signin">
+                      <Search />
+                  </RequireAuth>
+              }
+          />
           <Route
               path="/:username/settings"
               element={

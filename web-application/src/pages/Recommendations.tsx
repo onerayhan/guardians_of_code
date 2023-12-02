@@ -4,10 +4,10 @@ import RecommendationsPage from "../components/Recommendations/RecommendationsPa
 const Recommendations = () =>
 {
     return (
-        <div className="bg-[#081730]">
+        <body className="bg-[#081730] overflow-y-auto">
             <Header />
             <RecommendationsPage/>
-        </div>
+        </body>
     );
 };
 

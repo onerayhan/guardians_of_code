@@ -10,6 +10,7 @@ import axios from "axios";
 import {StarIcon} from "@chakra-ui/icons";
 import {Divider} from "antd";
 import { AiTwotoneLike } from "react-icons/ai";
+import SpotifySearch from "../Search/SpotifySearch.tsx";
 
 interface Song {
     song_id: number;
@@ -104,9 +105,9 @@ function RatingPage() {
                             cursor="pointer"
                         />
                     ))}
+                    <Button onClick={() => handleLike()} leftIcon={<AiTwotoneLike />} className="ml-16">
+                    </Button>
                 </Box>
-                <Button onClick={() => handleLike()} leftIcon={<AiTwotoneLike />} className="justify-center">
-                </Button>
             </div>
         );
     };
@@ -229,8 +230,8 @@ function RatingPage() {
     }, []);
 
     return (
-        <div>
-            <div className="relative w-full flex flex-col items-center top-12 py-12">
+        <div className="overflow-y-auto">
+            <div className="relative w-full flex flex-col items-center top-12 py-8">
                 <h1 className="text-6xl font-lalezar text-white">Rate Songs to Get Recommendations.</h1>
             </div>
             <div>
