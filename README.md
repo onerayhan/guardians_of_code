@@ -6,6 +6,7 @@ SUtatify is an integrated web platform and backend service designed for music en
 ---
 
 ### Features
+- Interactive User Interface for Music Management, built with Chakra UI for a seamless and responsive user experience.
 - Spotify Authentication
 - User Registration and Management
 - Song Management
