@@ -16,6 +16,8 @@ CORS(app)
 app.config.from_object(Config)
 db.init_app(app)
 
+#Config.py hidden due to security reasons (same with ip4 address for ec2 instance)
+
 @app.route('/logs', methods=['GET'])
 def view_logs():
     with open('/var/log/gunicorn/log.txt', 'r') as log_file:
@@ -77,7 +79,7 @@ def callback():
 
     except Exception as e:
         app.logger.error(f"Error in callback: {e}")
-        return "Fail in callback // Hamzaya sor", 500
+        return "Fail in callback // Hamzaya sor", 500  
     
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -91,10 +93,10 @@ def register():
         return jsonify({'error': 'Email/Password/Birthday/Username are required'}), 400
     
     if users.query.filter_by(username=username).first():
-        return jsonify({'error': 'Such username already exists'}), 409  
+        return jsonify({'error': 'Such username already exists'}), 403  
     
     if users.query.filter_by(email=email).first():
-        return jsonify({'error': 'Such email already exists'}), 409          
+        return jsonify({'error': 'Such email already exists'}), 403         
 
     public_id = generate_public_id()
     db.session.add(users(username=username, email=email, password=password, birthday=birthday, public_id=public_id))
@@ -218,7 +220,7 @@ def add_song():
         return jsonify({'error': 'A song name & username has to be given'}), 400
 
     if is_duplicate(data):
-        return jsonify({'error': 'Song already exists!'}), 400
+        return jsonify({'error': 'Song already exists!'}), 403
 
     new_song = Song(        
         song_name=data.get('song_name'),
@@ -231,22 +233,294 @@ def add_song():
         username=username
     )
     
-    db.session.add(new_song)
-    db.session.commit()
+    db.session.add(new_song) 
+    db.session.commit()    
+    
+    if data.get('album_name'):
+        song_album = Album.query.filter_by(name=data.get('album_name')).first()
+        if not song_album:
+            song_album = Album(name=data.get('album_name'), release_year=data.get('album_release_year'))
+            db.session.add(song_album)
+                   
+        new_song.add_album(song_album)
+    
+    if data.get('performer_name'):
+        song_performer = Performer.query.filter_by(name=data.get('performer_name')).first()
+        if not song_performer:
+            song_performer = Performer(name=data.get('performer_name'))
+            db.session.add(song_performer)
+            db.session.commit()
+
+        new_song.add_performer(song_performer)
+        
+    if data.get('genre'):
+        song_genre = Genre.query.filter_by(name=data.get('genre'))
+        if not song_genre:
+            song_genre = Genre(name=data.get('genre'))
+            db.session.add(song_genre)
+            db.session.commit()
+        
+        new_song.add_genre(song_genre)
+        
+    if data.get('mood'):
+        song_mood = Mood.query.filter_by(name=data.get('mood'))
+        if not song_mood:
+            song_mood = Mood(name=data.get('mood'))
+            db.session.add(song_mood)
+            db.session.commit()
+
+        new_song.add_mood(song_mood)
+        
+    if data.get('instrument'):
+        song_instrument = Instrument.query.filter_by(name=data.get('instrument'))
+        if not song_instrument:
+            song_instrument = Instrument(name=data.get('instrument'))
+            db.session.add(song_instrument)  
+            db.session.commit()   
+    
+        new_song.add_instrument(song_instrument)    
     
     return jsonify({'message': f'{song_name} added successfully by {username}'}), 200
 
+@app.route('/api/add_songs_batch', methods=['POST'])
+def add_songs_batch(): 
+    data = request.get_json()  
+    username = data.get('username')
+    song_list = data.get('songs', [])
+    
+    if not username:
+        return jsonify({'error': 'A username must be given'}), 400
+
+    if not song_list or not isinstance(song_list, list):
+        return jsonify({'error': 'A list of songs must be provided'}), 400     
+
+    response_data = []
+
+    for index, song in enumerate(song_list):
+        song_name = song.get('song_name')        
+
+        if not song_name:
+            return jsonify({'error': f'A song name has to be given at the song number: {index}'}), 400
+            
+
+        if is_duplicate(song):
+            return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!'}), 403
+            
+
+        new_song = Song(
+            song_name=song.get('song_name'),
+            length=song.get('length'),
+            tempo=song.get('tempo'),
+            recording_type=song.get('recording_type'),
+            listens=song.get('listens'),
+            release_year=song.get('release_year'),
+            added_timestamp=song.get('added_timestamp'),
+            username=username
+        )
+        
+        db.session.add(new_song)
+        db.session.commit()
+    
+        if song.get('album_name'):
+            song_album = Album.query.filter_by(name=song.get('album_name')).first()
+            if not song_album:
+                song_album = Album(name=song.get('album_name'), release_year=song.get('album_release_year'))
+                db.session.add(song_album)  
+                db.session.commit()  
+                
+            new_song.add_album(song_album)   
+
+    
+        if song.get('performer_name'):
+            song_performer = Performer.query.filter_by(name=song.get('performer_name')).first()
+            if not song_performer:
+                song_performer = Performer(name=song.get('performer_name'))
+                db.session.add(song_performer)
+                db.session.commit()
+                
+            new_song.add_performer(song_performer)
+    
+        if song.get('genre'):
+            song_genre = Genre.query.filter_by(name=song.get('genre'))
+            if not song_genre:
+                song_genre = Genre(name=song.get('genre'))
+                db.session.add(song_genre)
+                db.session.commit()
+                
+            new_song.add_genre(song_genre)
+        
+        if song.get('mood'):
+            song_mood = Mood.query.filter_by(name=song.get('mood'))
+            if not song_mood:
+                song_mood = Mood(name=song.get('mood'))
+                db.session.add(song_mood)
+                db.session.commit()
+                
+            new_song.add_mood(song_mood)
+    
+        if song.get('instrument'):
+            song_instrument = Instrument.query.filter_by(name=song.get('instrument'))
+            if not song_instrument:
+                song_instrument = Instrument(name=song.get('instrument'))
+                db.session.add(song_instrument) 
+                db.session.commit()       
+            
+            new_song.add_instrument(song_instrument)          
+
+        response_data.append({'message': f'{song_name} added successfully by {username}'})
+
+    return jsonify({'results': response_data}), 200
+
+@app.route('/api/add_rate_batch', methods=['POST'])
+def add_rate_batch(): 
+    data = request.get_json()  
+    username = data.get('username')
+    ratings_list = data.get('ratings', [])
+    
+    if not username:
+        return jsonify({'error': 'A username must be given'}), 400
+
+    if not ratings_list or not isinstance(ratings_list, list):
+        return jsonify({'error': 'A list of ratings must be provided'}), 400 
+    
+    response_data = []
+    
+    for index, rating in enumerate(ratings_list):        
+        rating_type = rating.get('rating_type')
+        
+        if rating_type == 'song_rate':
+            song_id = song_name_to_song(rating.get('song_name')).song_id
+            rating = rating.get('rating')
+            
+            if not song_id or not rating:
+                return jsonify({"error": f"song_name/rating is required in the line {index}"}), 400
+            
+            new_rating = User_Song_Rating(
+                username=username,
+                song_id=song_id,
+                rating=rating
+            )
+            
+            db.session.add(new_rating)
+            
+        elif rating_type == 'album_rate':
+            album_id = album_name_to_album(rating.get('album_name')).album_id
+            rating = rating.get('rating')
+            
+            if not album_id or not rating:
+                return jsonify({"error": f"album_name/rating is required in the line {index}"}), 400
+            
+            new_rating = User_Album_Rating(
+                username=username,
+                album_id=album_id,
+                rating=rating
+            )
+            
+            db.session.add(new_rating)
+            
+        elif rating_type == 'performer_rate':
+            performer_id = performer_name_to_performer(rating.get('performer_name')).performer_id
+            rating = rating.get('rating')
+            
+            if not performer_id or not rating:
+                return jsonify({"error": f"performer_name/rating is required in the line {index}"}), 400
+            
+            new_rating = User_Performer_Rating(
+                username=username,
+                performer_id=performer_id,
+                rating=rating
+            )
+
+            db.session.add(new_rating)
+            
+        else:
+            return jsonify({"error": f"Unacceptable rate type in the line {index}"})
+        
+        db.session.commit()
+        
+        response_data.append({'message': f'Rating of type {rating_type} added successfully by {username}'})
+    
+    return jsonify({'results': response_data}), 200          
+            
+            
+    
+
+@app.route('/api/user_song_ratings', methods=['POST'])
+def add_user_song_rating():
+    data = request.get_json()
+
+    username = data.get('username')
+    song_id = song_name_to_song(data.get('song_name')).song_id
+    rating = data.get('rating')
+    
+    if not username or not song_id or not rating:
+        return jsonify({"error": "Username/song_name/rating are required"}), 400
+
+    new_rating = User_Song_Rating(
+        username=username,
+        song_id=song_id,
+        rating=rating
+    )
+
+    db.session.add(new_rating)
+    db.session.commit()
+
+    return jsonify({"message": f"Song rating added successfully by {username}"}), 201
+
+@app.route('/api/user_album_ratings', methods=['POST'])
+def add_user_album_rating():
+    data = request.get_json()
+
+    username = data.get('username')
+    album_id = album_name_to_album(data.get('album_name')).album_id
+    rating = data.get('rating')
+
+    if not username or not album_id or not rating:
+        return jsonify({"error": "Username/album_name/rating are required"}), 400
+
+    new_rating = User_Album_Rating(
+        username=username,
+        album_id=album_id,
+        rating=rating
+    )
+
+    db.session.add(new_rating)
+    db.session.commit()
+
+    return jsonify({"message": f"Album rating added successfully by {username}"}), 201
+
+@app.route('/api/user_performer_ratings', methods=['POST'])
+def add_user_performer_rating():
+    data = request.get_json()
+
+    username = data.get('username')
+    performer_id = performer_name_to_performer(data.get('performer_id')).performer_id
+    rating = data.get('rating')
+
+    if not username or not performer_id or not rating:
+        return jsonify({"error": "Username/performer_name/rating are required"}), 400
+
+    new_rating = User_Performer_Rating(
+        username=username,
+        performer_id=performer_id,
+        rating=rating
+    )
+
+    db.session.add(new_rating)
+    db.session.commit()
+
+    return jsonify({"message": f"Performer rating added successfully {username}"}), 201
+
 @app.route('/api/remove_song', methods=['POST'])
 def remove_song():
-    data = request.get_json()
-    song_id = data.get('song_id')
-    username = data.get('username')    
+    data = request.get_json() 
+    username = data.get('username')   
+    song_name = data.get('songname')        
     
-    if not song_id:
-        return jsonify({'error': 'A song_id has to be given'}), 400
+    if not song_name:
+        return jsonify({'error': 'A song_name has to be given'}), 400
 
-    song = song_id_to_song(song_id)
-    song_name = song.song_name
+    song = song_name_to_song(song_name)   
     
     if not song:
         return jsonify({'error': 'Song not found'}), 404
@@ -267,7 +541,7 @@ def user_songs():
     user_songs = Song.query.filter_by(username=username)
     
     if not user_songs:
-        user_song_details = []
+        user_song_details = []    
     
     user_song_details = [
         {'song_id': song.song_id,
@@ -278,11 +552,40 @@ def user_songs():
          'listens': song.listens,
          'release_year': song.release_year,
          'added_timestamp': song.added_timestamp,
-         'username': song.username}
+         'username': song.username,
+         'album_name': song_name_to_album_name(song.song_name),
+         'performer_name': song_name_to_performer_name(song.song_name),
+         'mood': song_name_to_mood_name(song.song_name),
+         'genre': song_name_to_genre_name(song.song_name),
+         'instrument': song_name_to_instrument_name(song.song_name)}
         for song in user_songs 
     ]
     
     return jsonify(user_song_details), 200
+
+@app.route('/api/user_song_ratings', methods=['POST'])
+def get_user_song_ratings():
+    data = request.get_json()
+    username = data.get('username')
+    user_ratings = User_Song_Rating.query.filter_by(username=username).all()
+    ratings_data = [{"song_id": rating.name, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
+    return jsonify({"user_song_ratings": ratings_data})
+
+@app.route('/api/user_album_ratings', methods=['POST'])
+def get_user_album_ratings():
+    data = request.get_json()
+    username = data.get('username')
+    user_ratings = User_Album_Rating.query.filter_by(username=username).all()
+    ratings_data = [{"album_id": rating.album_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
+    return jsonify({"user_album_ratings": ratings_data})
+
+@app.route('/api/user_performer_ratings', methods=['POST'])
+def get_user_performer_ratings():
+    data = request.get_json()
+    username = data.get('username')
+    user_ratings = User_Performer_Rating.query.filter_by(username=username).all()
+    ratings_data = [{"performer_id": rating.performer_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
+    return jsonify({"user_performer_ratings": ratings_data})
 
 @app.route('/api/user_followings', methods=['POST'])
 def user_followings():

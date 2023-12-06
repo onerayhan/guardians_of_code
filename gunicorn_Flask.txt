@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name 13.51.167.155;
+    server_name (ec2 instance ipv4 here);
 
     location / {
         proxy_pass http://127.0.0.1:8000;

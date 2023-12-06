@@ -1,5 +1,11 @@
 import firebase_admin
 from firebase_admin import credentials, auth
+from firebase import service_acc_json
+
+
+cred = credentials.Certificate(service_acc_json)
+firebase_admin.initialize_app(cred)
+
 
 service_acc_json = {    
   "type": "service_account",
@@ -15,9 +21,6 @@ service_acc_json = {
   "universe_domain": "googleapis.com"    
 }
 
-cred = credentials.Certificate(service_acc_json)
-firebase_admin.initialize_app(cred)
-
 @app.route('/api/google_login', methods=['POST'])
 def google_login():
     data = request.get_json()
@@ -26,16 +29,10 @@ def google_login():
     if not id_token:
         return jsonify({'message': 'ID token is required'}), 400
 
-    try:
-        # Verify the ID token using Firebase Admin SDK
-        decoded_token = auth.verify_id_token(id_token)
-
-        # Get the user UID and other information
+    try:        
+        decoded_token = auth.verify_id_token(id_token)        
         user_uid = decoded_token['uid']
-
-        # You can use user_uid to check if the user already exists in your database
-
-        # Generate a JWT token for the user
+        
         jwt_token = jwt.encode({
             'user_uid': user_uid,
             'exp': datetime.utcnow() + timedelta(minutes=30)
@@ -49,3 +46,6 @@ def google_login():
         return jsonify({'message': 'Invalid ID token'}), 401
     except Exception as e:
         return jsonify({'message': f'Error: {str(e)}'}), 500
+
+
+

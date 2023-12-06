@@ -227,14 +227,20 @@ Changes the user's password.
 **Parameters (only song_name and username are needed & others are optional)**
 
 - `song_name` (string): The name of the song.
-- `username` (string): The username of the user adding the song.
-- `length` (string): The length of the song in HH:MM:SS format.
-- `tempo` (integer): The tempo of the song.
-- `recording_type` (string): The recording type of the song (e.g., 'LIVE', 'STUDIO', 'RADIO').
-- `listens` (integer): The number of times the song has been listened to.
-- `release_year` (string): The release year of the song.
-- `added_timestamp` (string): The timestamp when the song was added (format: "YYYY-MM-DD HH:MM:SS").
+- `username` (string): Username of the user adding the song.
+- `length` (string): Length of the song in HH:MM:SS format.
+- `tempo` (integer): Tempo of the song.
+- `recording_type` (string): Recording type of the song (e.g., 'LIVE', 'STUDIO', 'RADIO').
+- `listens` (integer): Number of times the song has been listened to.
+- `release_year` (integer): Release year of the song.
+- `added_timestamp` (string): Timestamp when the song was added (format: "YYYY-MM-DD HH:MM:SS").
 - `username` (string): The username of the user who added the song.
+- `album_name` (string): The name of the album that song is within.
+- `album_release_year` (integer): Release year of the album song is in.
+- `performer_name` (string): The name of the performer.
+- `genre` (string): The genre of the song.
+- `mood` (string): The 'mood' of the song.
+- `instrument` (string): Instrument of the song.
 
 **Description**
 
@@ -260,6 +266,202 @@ Adds a new song to the database.
     }
     ```
 
+## Add Songs Batch
+
+### Request
+
+- **URL:** `/api/add_songs_batch`
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `username` (string): The username of the user adding the songs (non-optional!).
+- `songs` (list): A list of song objects.
+
+**Song Object Parameters (only song_name is mandatory; others are optional)**
+
+- Same as add_song without the username parameter.
+
+**Example JSON Input**
+
+```json
+{
+  "username": "JohnDoe",
+  "songs": [
+    {
+      "song_name": "Imagine",
+      "length": "04:30",
+      "tempo": 120,
+      "recording_type": "Studio",
+      "listens": 5000,
+      "release_year": "1971",
+      "added_timestamp": "2023-01-15T12:30:00",
+      "album_name": "Imagine",
+      "performer_name": "John Lennon",
+      "genre": "Rock",
+      "mood": "Reflective",
+      "instrument": "Piano"
+    },
+    {
+      "song_name": "Bohemian Rhapsody",
+      "length": "05:54",
+      "tempo": 72,
+      "recording_type": "Studio",
+      "listens": 10000,
+      "release_year": "1975",
+      "added_timestamp": "2023-02-10T15:45:00",
+      "album_name": "A Night at the Opera",
+      "performer_name": "Queen",
+      "genre": "Rock",
+      "mood": "Epic",
+      "instrument": "Guitar"
+    }
+  ]
+}
+```
+
+**Description**
+
+Adds multiple songs to the database.
+
+### Response
+
+- **Success:** Song_name succesfully added by user
+  
+- **Failure:** 
+  - Not giving a list i.e empty songs[], no username input, + same errors with add_song
+
+## Add Rate Batch
+
+### Endpoint
+
+`POST /api/user_rate_batch`
+
+### Description
+This endpoint allows users to submit batches of ratings for songs, albums, or performers associated with a given username.
+
+### Request 
+
+- `username` (string, required): The username for which the ratings are submitted.
+- `ratings` (list, required): A list of rating objects, where each object includes:
+- `rating_type` (string, required): The type of rating, which can be one of the following: `song_rate`, `album_rate`, or `performer_rate`.
+-  Other parameters specific to the rating type (e.g., `song_name`, `album_name`, `performer_name`).
+- `rating` (int, required): The numerical rating assigned to the item.
+
+#### Example JSON Input
+```json
+{
+  "username": "john_doe",
+  "ratings": [
+    {
+      "rating_type": "song_rate",
+      "song_name": "Beautiful Song",
+      "rating": 4
+    },
+    {
+      "rating_type": "album_rate",
+      "album_name": "Awesome Album",
+      "rating": 5
+    },
+    {
+      "rating_type": "performer_rate",
+      "performer_name": "Talented Artist",
+      "rating": 4
+    }
+  ]
+}
+```
+
+### Response
+
+- **201 Created**: Successfully added the rating.
+```json
+{
+  "results": [
+    {"message": "Rating of type song_rate added successfully by john_doe"},
+    {"message": "Rating of type album_rate added successfully by john_doe"},
+    {"message": "Rating of type performer_rate added successfully by john_doe"}
+  ]
+}
+```
+- **Failure**
+  - Not giving a list i.e empty ratings[], no username input, + same errors with user_ratings
+
+
+## Add User Song Rating
+
+### Endpoint
+
+`POST /api/user_song_ratings`
+
+### Description
+
+Adds a user rating for a specific song.
+
+### Request Body
+
+- `username` (string, required): The username of the user submitting the rating.
+- `song_name` (string, required): The name of the song for which the user is submitting the rating.
+- `rating` (integer, required): Self evident.
+
+### Response
+
+- **201 Created**: Successfully added the song rating.
+  - Body: `{"message": "Song rating added successfully by {username}"}`
+
+- **400 Bad Request**: Missing required parameters.
+  - Body: `{"message": "Username/song_name/rating are required"}`
+
+## Add User Album Rating
+
+### Endpoint
+
+`POST /api/user_album_ratings`
+
+### Description
+
+Adds a user rating for a specific album.
+
+### Request Body
+
+- `username` (string, required): The username of the user submitting the rating.
+- `album_name` (string, required): The name of the album for which the user is submitting the rating.
+- `rating` (integer, required): Self evident.
+
+### Response
+
+- **201 Created**: Successfully added the album rating.
+  - Body: `{"message": "Album rating added successfully by {username}"}`
+
+- **400 Bad Request**: Missing required parameters.
+  - Body: `{"message": "Username/album_name/rating are required"}`
+
+## Add User Performer Rating
+
+### Endpoint
+
+`POST /api/user_performer_ratings`
+
+### Description
+
+Adds a user rating for a specific performer.
+
+### Request Body
+
+- `username` (string, required): The username of the user submitting the rating.
+- `performer_name` (integer, required): The name of the performer for which the user is submitting the rating.
+- `rating` (integer, required): Self evident.
+
+### Response
+
+- **201 Created**: Successfully added the performer rating.
+  - Body: `{"message": "Performer rating added successfully by {username}"}`
+
+- **400 Bad Request**: Missing required parameters.
+  - Body: `{"message": "Username/performer_name/rating are required"}`
+
+
 ## Remove Song
 
 ### Request
@@ -270,7 +472,7 @@ Adds a new song to the database.
 
 **Parameters**
 
-- `song_id` (integer): The ID of the song to be removed.
+- `song_name` (integer): The name of the song to be removed.
 - `username` (string): The username of the user removing the song.
 
 **Description**
@@ -292,7 +494,7 @@ Removes an existing song from the database.
   - JSON Object:
     ```json
     {
-      "error": "A song_id has to be given"
+      "error": "A song_name has to be given"
     }
     ```
   - Status Code: 404 Not Found
@@ -323,6 +525,64 @@ Retrieves all of the songs a user has added with their info.
 
 - **Success:** JSON object containing song info about the songs added by the user.
 - **Failure:** Error message if user not found.
+
+## Get User Song Ratings
+
+### Endpoint
+
+`POST /api/user_song_ratings`
+
+### Description
+
+Retrieves all song ratings submitted by a specific user.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose song ratings are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user song ratings.
+  - Body: `{"user_song_ratings": [{"song_id": <song_id>, "rating": <rating>, "rating_timestamp": <timestamp>}, ...]}`
+
+## Get User Album Ratings
+
+### Endpoint
+
+`POST /api/user_album_ratings`
+
+### Description
+
+Retrieves all album ratings submitted by a specific user.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose album ratings are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user album ratings.
+  - Body: `{"user_album_ratings": [{"album_id": <album_id>, "rating": <rating>,"rating_timestamp": <timestamp>}, ...]}`
+
+## Get User Performer Ratings
+
+### Endpoint
+
+`POST /api/user_performer_ratings`
+
+### Description
+
+Retrieves all performer ratings submitted by a specific user.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose performer ratings are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user performer ratings.
+  - Body: `{"user_performer_ratings": [{"performer_id": <performer_id>, "rating": <rating>,"rating_timestamp": <timestamp>}, ...]}`
+
 
 ## User Followings
 
