@@ -393,7 +393,7 @@ This endpoint allows users to submit batches of ratings for songs, albums, or pe
 
 ### Endpoint
 
-`POST /api/user_song_ratings`
+`POST /api/add_user_song_ratings`
 
 ### Description
 
@@ -417,7 +417,7 @@ Adds a user rating for a specific song.
 
 ### Endpoint
 
-`POST /api/user_album_ratings`
+`POST /api/add_user_album_ratings`
 
 ### Description
 
@@ -441,7 +441,7 @@ Adds a user rating for a specific album.
 
 ### Endpoint
 
-`POST /api/user_performer_ratings`
+`POST /api/add_user_performer_ratings`
 
 ### Description
 
@@ -545,6 +545,8 @@ Retrieves all song ratings submitted by a specific user.
 - **200 OK**: Successfully retrieved user song ratings.
   - Body: `{"user_song_ratings": [{"song_id": <song_id>, "rating": <rating>, "rating_timestamp": <timestamp>}, ...]}`
 
+- **Error**: Username has to be given.
+
 ## Get User Album Ratings
 
 ### Endpoint
@@ -564,6 +566,8 @@ Retrieves all album ratings submitted by a specific user.
 - **200 OK**: Successfully retrieved user album ratings.
   - Body: `{"user_album_ratings": [{"album_id": <album_id>, "rating": <rating>,"rating_timestamp": <timestamp>}, ...]}`
 
+- **Error**: Username has to be given.
+
 ## Get User Performer Ratings
 
 ### Endpoint
@@ -582,6 +586,150 @@ Retrieves all performer ratings submitted by a specific user.
 
 - **200 OK**: Successfully retrieved user performer ratings.
   - Body: `{"user_performer_ratings": [{"performer_id": <performer_id>, "rating": <rating>,"rating_timestamp": <timestamp>}, ...]}`
+
+- **Error**: Username has to be given.
+
+## User Genre Preferences
+
+### Endpoint
+
+`POST /api/user_genre_preference`
+
+### Description
+
+Retrieves genre preferences based on the songs associated with a specific user.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose performer preferences are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user performer preferences.
+  - Body: `{"genre": [{"genre": <genre_name>, "count": <song_count>}, ...]}`
+
+- **400 Bad Request**: Username has to be given.
+  - Body: `{"error": "A username has to be given"}`
+
+## User Album Preferences
+
+### Endpoint
+
+`POST /api/user_album_preference`
+
+### Description
+
+Retrieves performer preferences based on the songs associated with a specific user.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose performer preferences are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user performer preferences.
+  - Body: `{"album": [{"album": <album_name>, "count": <song_count>}, ...]}`
+
+- **400 Bad Request**: Username has to be given.
+  - Body: `{"error": "A username has to be given"}`
+
+## User Performer Preferences
+
+### Endpoint
+
+`POST /api/user_performer_preference`
+
+### Description
+
+Retrieves performer preferences based on the songs associated with a specific user.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose performer preferences are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user performer preferences.
+  - Body: `{"performers": [{"performer": <performer_name>, "count": <song_count>}, ...]}`
+
+- **400 Bad Request**: Username has to be given.
+  - Body: `{"error": "A username has to be given"}`
+
+## User Followings Genre Preference
+
+### Endpoint
+
+`POST /api/user_followings_genre_preference`
+
+### Description
+
+Retrieves genre preferences based on the songs of users whom the specified user follows.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose followings' genre preferences are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user followings genre preferences.
+  - Body: `{"genres": [{"genre": <genre_name>, "count": <song_count>}, ...]}`
+
+- **200 OK**: User does not follow anyone.
+  - Body: `{"message": "User does not follow anyone"}`
+
+- **400 Bad Request**: Username has to be given.
+  - Body: `{"error": "A username has to be given"}`
+
+## User Followings Album Preference
+
+### Endpoint
+
+`POST /api/user_followings_album_preference`
+
+### Description
+
+Retrieves album preferences based on the songs of users whom the specified user follows.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose followings' album preferences are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user followings album preferences.
+  - Body: `{"albums": [{"album": <album_name>, "count": <song_count>}, ...]}`
+
+- **200 OK**: User does not follow anyone.
+  - Body: `{"message": "User does not follow anyone"}`
+
+- **400 Bad Request**: Username has to be given.
+  - Body: `{"error": "A username has to be given"}`
+
+## User Followings Performer Preference
+
+### Endpoint
+
+`POST /api/user_followings_performer_preference`
+
+### Description
+
+Retrieves performer preferences based on the songs of users whom the specified user follows.
+
+### Request Body
+
+- `username` (string, required): The username of the user whose followings' performer preferences are being retrieved.
+
+### Response
+
+- **200 OK**: Successfully retrieved user followings performer preferences.
+  - Body: `{"performers": [{"performer": <performer_name>, "count": <song_count>}, ...]}`
+
+- **200 OK**: User does not follow anyone.
+  - Body: `{"message": "User does not follow anyone"}`
+
+- **400 Bad Request**: Username has to be given.
+  - Body: `{"error": "A username has to be given"}`
+
 
 
 ## User Followings

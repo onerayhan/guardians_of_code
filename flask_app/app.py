@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, redirect, session, send_file, render_
 from flask_cors import CORS
 from urllib.parse import urlencode
 from config import Config
-from models import db, users, FollowSystem
+from models import db, users, FollowSystem, t_user
 from song_models import *
 from utils import *
 import base64
@@ -28,30 +28,33 @@ def view_logs():
 
     return render_template('logs.html', logs=logs)
 
-@app.route('/spoti_login')
-def spoti_login():
+@app.route('/spoti_login/<username>')
+def spoti_login(username):   
     state = generate_random_state()
     session['state'] = state
+    session['username'] = username
 
     params = {
         'client_id': app.config['SPOTIFY_CLIENT_ID'],
         'response_type': 'code',
         'redirect_uri': app.config['SPOTIFY_REDIRECT_URI'],
         'scope': 'user-read-email user-read-private',
-        'state': state,
+        'state': state,        
     }
 
     spotify_auth_url = f"{SPOTIFY_AUTH_URL}?{urlencode(params)}"
     return redirect(spotify_auth_url)
 
 @app.route('/callback')
-def callback():
+def callback(): 
+        
     try:
         code = request.args.get('code')
         state = request.args.get('state')
 
         if state is None:
-            return redirect('/#' + urlencode({'error': 'state_mismatch'}))
+            return redirect('/#' + urlencode({'error': 'state_mismatch'}))  
+        
 
         auth_options = {
             'url': 'https://accounts.spotify.com/api/token',
@@ -68,18 +71,37 @@ def callback():
         }
 
         response = requests.post(auth_options['url'], data=auth_options['data'], headers=auth_options['headers'])
-
+        username = session.get('username')        
+        
         if response.status_code == 200:
             token_data = response.json()
-            session['access_token'] = token_data['access_token']                       
-            user_info = get_user_infos(session['access_token'])
-            return jsonify(user_info)
+            session['access_token'] = token_data['access_token']             
+            
+                        
+            external_service = External_Service.query.filter_by(username=username).first()
+            if external_service:
+                external_service.access_token = session['access_token']
+            
+            else:
+                db.session.add(External_Service(username=username, service_name='Spotify', access_token = session['access_token']))
+                db.session.commit()      
+            
+            return jsonify({'message': f'{username} spotify connection established.'})           
 
-        return "Token Request Failed", 500
+        else:
+            "Token Request Failed", 500
 
     except Exception as e:
         app.logger.error(f"Error in callback: {e}")
-        return "Fail in callback // Hamzaya sor", 500  
+        return "Fail in callback // Hamzaya sor", 500
+    
+@app.route('/api/check_spoti_connection/<username>')  
+def check_spoti_connection(username):
+    external_service = External_Service.query.filter_by(username=username).first()
+    if external_service:
+        return jsonify({'check': 'true'})
+    else:
+        return jsonify({'check': 'false'})
     
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -103,6 +125,11 @@ def register():
     db.session.commit()
     return jsonify({'message': 'User registered successfully', 'public_id': public_id}), 201
 
+@app.route('/api/username', methods=['GET'])
+def username():
+    username = session['username']
+    return jsonify({'username': username})
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -111,7 +138,9 @@ def login():
     #device_token = data.get('device_token')
     
     if not username or not password:
-        return jsonify({'error' : "Both email and password are required"}), 400
+        return jsonify({'error' : "Both username and password are required"}), 400
+    
+    session['username'] = username   
     
     user = username_to_user(username)
     
@@ -241,6 +270,7 @@ def add_song():
         if not song_album:
             song_album = Album(name=data.get('album_name'), release_year=data.get('album_release_year'))
             db.session.add(song_album)
+            db.session.commit()
                    
         new_song.add_album(song_album)
     
@@ -300,12 +330,10 @@ def add_songs_batch():
         song_name = song.get('song_name')        
 
         if not song_name:
-            return jsonify({'error': f'A song name has to be given at the song number: {index}'}), 400
-            
+            return jsonify({'error': f'A song name has to be given at the song number: {index}'}), 400            
 
         if is_duplicate(song):
-            return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!'}), 403
-            
+            return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!'}), 403            
 
         new_song = Song(
             song_name=song.get('song_name'),
@@ -445,7 +473,7 @@ def add_rate_batch():
             
     
 
-@app.route('/api/user_song_ratings', methods=['POST'])
+@app.route('/api/add_user_song_ratings', methods=['POST'])
 def add_user_song_rating():
     data = request.get_json()
 
@@ -467,7 +495,7 @@ def add_user_song_rating():
 
     return jsonify({"message": f"Song rating added successfully by {username}"}), 201
 
-@app.route('/api/user_album_ratings', methods=['POST'])
+@app.route('/api/add_user_album_ratings', methods=['POST'])
 def add_user_album_rating():
     data = request.get_json()
 
@@ -489,7 +517,7 @@ def add_user_album_rating():
 
     return jsonify({"message": f"Album rating added successfully by {username}"}), 201
 
-@app.route('/api/user_performer_ratings', methods=['POST'])
+@app.route('/api/add_user_performer_ratings', methods=['POST'])
 def add_user_performer_rating():
     data = request.get_json()
 
@@ -567,6 +595,9 @@ def user_songs():
 def get_user_song_ratings():
     data = request.get_json()
     username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
     user_ratings = User_Song_Rating.query.filter_by(username=username).all()
     ratings_data = [{"song_id": rating.name, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
     return jsonify({"user_song_ratings": ratings_data})
@@ -575,6 +606,9 @@ def get_user_song_ratings():
 def get_user_album_ratings():
     data = request.get_json()
     username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
     user_ratings = User_Album_Rating.query.filter_by(username=username).all()
     ratings_data = [{"album_id": rating.album_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
     return jsonify({"user_album_ratings": ratings_data})
@@ -583,14 +617,166 @@ def get_user_album_ratings():
 def get_user_performer_ratings():
     data = request.get_json()
     username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
     user_ratings = User_Performer_Rating.query.filter_by(username=username).all()
     ratings_data = [{"performer_id": rating.performer_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
     return jsonify({"user_performer_ratings": ratings_data})
+
+@app.route('/api/user_genre_preference', methods=['POST'])
+def user_genre_preferences():
+    data = request.get_json()
+    username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
+    genres = db.session.query(Genre.name, db.func.count(Song_Genre.song_id).label('count')) \
+        .join(Song_Genre, Genre.genre_id == Song_Genre.genre_id) \
+        .join(Song, Song_Genre.song_id == Song.song_id) \
+        .filter(Song.username == username) \
+        .group_by(Genre.name) \
+        .order_by(db.func.count(Song_Genre.song_id).desc()) \
+        .all()
+        
+    genre_preferences = {'genres': [{'genre': genre, 'count': count} for genre, count in genres]}
+    
+    return jsonify(genre_preferences)
+
+@app.route('/api/user_album_preference', methods=['POST'])
+def user_album_preferences():
+    data = request.get_json()
+    username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
+    albums = db.session.query(Album.name, db.func.count(Song_Album.song_id).label('count')) \
+        .join(Song_Album, Album.album_id == Song_Album.album_id) \
+        .join(Song, Song_Album.song_id == Song.song_id) \
+        .filter(Song.username == username) \
+        .group_by(Album.name) \
+        .order_by(db.func.count(Song_Album.song_id).desc()) \
+        .all()
+        
+    album_preferences = {'albums': [{'album': album, 'count': count} for album, count in albums]}
+    
+    return jsonify(album_preferences)
+
+@app.route('/api/user_performer_preference', methods=['POST'])
+def user_performer_preferences():
+    data = request.get_json()
+    username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
+    performers = db.session.query(Performer.name, db.func.count(Song_Performer.song_id).label('count')) \
+        .join(Song_Performer, Performer.performer_id == Song_Performer.performer_id) \
+        .join(Song, Song_Performer.song_id == Song.song_id) \
+        .filter(Song.username == username) \
+        .group_by(Performer.name) \
+        .order_by(db.func.count(Song_Performer.song_id).desc()) \
+        .all()
+        
+    performer_preferences = {'performers': [{'performer': performer, 'count': count} for performer, count in performers]}
+    
+    return jsonify(performer_preferences)
+
+@app.route('/api/user_followings_genre_preference', methods=['POST'])
+def user_followings_genre():
+    data = request.get_json()
+    username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
+    user = username_to_user(username)
+    followed_users = followed_finder(user)
+    
+    if not followed_users:
+        return {'message': 'User does not follow anyone'}, 200
+    
+    genres = []
+    for followed_user in followed_users:
+        song_list = Song.query.filter_by(username=followed_user.username).all()
+        for song in song_list:
+            genres.append(song_name_to_genre_name(song.username))
+
+    genre_count = {}
+    for genre in genres:
+        if genre in genre_count:
+            genre_count[genre] += 1
+        else:
+            genre_count[genre] = 1
+            
+    genre_preferences = {'genres': [{'genre': genre, 'count': count} for genre, count in genre_count.items()]}
+    
+    return jsonify(genre_preferences)
+
+@app.route('/api/user_followings_album_preference', methods=['POST'])
+def user_followings_album():
+    data = request.get_json()
+    username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
+    user = username_to_user(username)
+    followed_users = followed_finder(user)
+    
+    if not followed_users:
+        return {'message': 'User does not follow anyone'}, 200
+    
+    albums = []
+    for followed_user in followed_users:
+        song_list = Song.query.filter_by(username=followed_user.username).all()
+        for song in song_list:
+            albums.append(song_name_to_album_name(song.username))
+
+    album_count = {}
+    for album in albums:
+        if album in album_count:
+            album_count[album] += 1
+        else:
+            album_count[album] = 1
+            
+    album_preferences = {'albums': [{'album': album, 'count': count} for album, count in album_count.items()]}
+    
+    return jsonify(album_preferences)
+    
+@app.route('/api/user_followings_performer_preference', methods=['POST'])
+def user_followings_performer():
+    data = request.get_json()
+    username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400
+    
+    user = username_to_user(username)
+    followed_users = followed_finder(user)
+    
+    if not followed_users:
+        return {'message': 'User does not follow anyone'}, 200
+    
+    performers = []
+    for followed_user in followed_users:
+        song_list = Song.query.filter_by(username=followed_user.username).all()
+        for song in song_list:
+            performers.append(song_name_to_performer_name(song.username))
+
+    performer_count = {}
+    for performer in performers:
+        if performer in performer_count:
+            performer_count[performer] += 1
+        else:
+            performer_count[performer] = 1
+            
+    performer_preferences = {'performers': [{'performer': performer, 'count': count} for performer, count in performer_count.items()]}
+    
+    return jsonify(performer_preferences)     
 
 @app.route('/api/user_followings', methods=['POST'])
 def user_followings():
     data = request.get_json()
     username = data.get('username')
+    if not username:
+        return jsonify({'error': 'A username has to be given'}), 400    
     
     user = username_to_user(username)
     followers = follower_finder(user)

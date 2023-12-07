@@ -22,22 +22,27 @@ class Instrument(db.Model):
     name = db.Column(db.String(100), nullable=False)
 
 class Song_Album(db.Model):
+    __tablename__ = 'song_album'
     song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'), primary_key=True)
     album_id = db.Column(db.Integer, db.ForeignKey('album.album_id', ondelete='CASCADE'), primary_key=True)
 
 class Song_Performer(db.Model):
+    __tablename__ = 'song_performer'
     song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'), primary_key=True)
     performer_id = db.Column(db.Integer, db.ForeignKey('performer.performer_id', ondelete='CASCADE'), primary_key=True)
 
 class Song_Genre(db.Model):
+    __tablename__ = 'song_genre'
     song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'), primary_key=True)
     genre_id = db.Column(db.Integer, db.ForeignKey('genre.genre_id', ondelete='CASCADE'), primary_key=True)
 
 class Song_Mood(db.Model):
+    __tablename__ = 'song_mood'
     song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'), primary_key=True)
     mood_id = db.Column(db.Integer, db.ForeignKey('mood.mood_id', ondelete='CASCADE'), primary_key=True)
 
 class Song_Instrument(db.Model):
+    __tablename__ = 'song_instrument'
     song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'), primary_key=True)
     instrument_id = db.Column(db.Integer, db.ForeignKey('instrument.instrument_id', ondelete='CASCADE'), primary_key=True)
 
@@ -88,6 +93,7 @@ class Song(db.Model):
             db.session.commit()
     
 class User_Song_Rating(db.Model):
+    __tablename__ = 'user_song_rating'
     rating_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
     song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'), nullable=False)
@@ -95,6 +101,7 @@ class User_Song_Rating(db.Model):
     rating_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())
     
 class User_Album_Rating(db.Model):
+    __tablename__ = 'user_album_rating'
     rating_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
     album_id = db.Column(db.Integer, db.ForeignKey('album.album_id', ondelete='CASCADE'), nullable=False)
@@ -102,6 +109,7 @@ class User_Album_Rating(db.Model):
     rating_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())
     
 class User_Performer_Rating(db.Model):
+    __tablename__ = 'user_performer_rating'
     rating_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
     performer_id = db.Column(db.Integer, db.ForeignKey('performer.performer_id', ondelete='CASCADE'), nullable=False)
@@ -109,12 +117,14 @@ class User_Performer_Rating(db.Model):
     rating_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
 class External_Service(db.Model):
+    __tablename__ = 'external_service'
     service_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     service_name = db.Column(db.String(255), nullable=False)
     access_token = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
 
 class Imported_Song(db.Model):
+    __tablename__ = 'imported_song'
     import_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'))
     service_id = db.Column(db.Integer, db.ForeignKey('external_service.service_id', ondelete='CASCADE'))
