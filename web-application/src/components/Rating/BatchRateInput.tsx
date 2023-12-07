@@ -36,7 +36,7 @@ const MyDropzone: React.FC<{ onFileAccepted: (files: FileWithPreview[]) => void 
     return (
         <div {...getRootProps()} style={{ padding: 20, border: '2px dashed gray', textAlign: 'center' }}>
             <input {...getInputProps()} />
-            {isDragActive ? <p>Drop the files here ...</p> : <p>Accepted Formats Are: .json</p>}
+            {isDragActive ? <p>Drop the files here ...</p> : <p>Accepted Formats Are: .txt, .json</p>}
         </div>
     );
 };
@@ -56,7 +56,7 @@ const RateFileUpload: React.FC<SongFileUploadProps> = ({ isOpen, onClose }) => {
         files.forEach(file => formData.append('file', file));
 
         try {
-            const response = await axios.post('http://13.51.167.155/api/user_rate_batch', formData, {
+            const response = await axios.post('http://13.51.167.155/api/upload_song', formData, {
 
             });
             setUploadStatus('success');
@@ -78,7 +78,7 @@ const RateFileUpload: React.FC<SongFileUploadProps> = ({ isOpen, onClose }) => {
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Upload Batch Rate Info</ModalHeader>
+                    <ModalHeader>Upload Songs</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <MyDropzone onFileAccepted={onFileAccepted} />

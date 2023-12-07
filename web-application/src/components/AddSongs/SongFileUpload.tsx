@@ -78,7 +78,7 @@ const SongFileUpload: React.FC<SongFileUploadProps> = ({ isOpen, onClose }) => {
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Upload Your Profile Photo</ModalHeader>
+                    <ModalHeader>Upload Songs</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <MyDropzone onFileAccepted={onFileAccepted} />

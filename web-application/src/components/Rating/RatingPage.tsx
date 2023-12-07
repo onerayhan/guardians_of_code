@@ -320,19 +320,19 @@ function RatingPage() {
 
                 </Flex>
                 <SimpleGrid
-                        paddingTop="50px"
-                        paddingLeft="50px"
-                        paddingRight="50px"
-                        spacing={4}
-                        templateColumns='repeat(5, 1fr)'
-                    >
-                        {RatingSongs.slice(0, 15).map((song, index) => (
-                            <RateDisplaySong key={song.song_name} song={song}/>
-                        ))}
-                    </SimpleGrid>
+                    paddingTop="50px"
+                    paddingLeft="50px"
+                    paddingRight="50px"
+                    spacing={4}
+                    templateColumns='repeat(5, 1fr)'
+                >
+                    {RatingSongs.slice(0, 15).map((song, index) => (
+                        <RateDisplaySong key={song.song_name} song={song}/>
+                    ))}
+                </SimpleGrid>
             </div>
         </div>
-);
+    );
 }
 
 export default RatingPage;

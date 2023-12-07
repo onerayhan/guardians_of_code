@@ -89,32 +89,17 @@ function Profile() {
     const handleSpotifyIntegration = () => {
         const apiUrl = "http://13.51.167.155/spoti_login";
         const windowFeatures = "width=500,height=800,resizable=yes,scrollbars=yes,status=yes";
+        const popupWindow = window.open(apiUrl, "SpotifyLogin", windowFeatures);
 
-        const spotifyLoginWindow = window.open(apiUrl, 'SpotifyLogin', windowFeatures);
-
-        const handleMessage = async (event: MessageEvent) => {
-            if (event.origin !== "http://13.51.167.155") return;
-
-            const { code, state } = event.data as { code: string, state: string };
-
-            try {
-                const response = await axios.post('http://13.51.167.155/callback', { code, state });
-                updateAccessToken(response.data.accessToken as string);
-                if (spotifyLoginWindow) {
-                    spotifyLoginWindow.close();
-                }
-            } catch (error) {
-                console.error('Error:', error);
+        // Check if the popup window has been closed
+        const checkPopupClosed = setInterval(() => {
+            if (popupWindow && popupWindow.closed) {
+                clearInterval(checkPopupClosed);
+                console.log("Popup window closed. Handling post-login actions.");
+                window.location.reload();
             }
-        };
-
-        window.addEventListener('message', handleMessage);
-
-        return () => {
-            window.removeEventListener('message', handleMessage);
-        };
+        }, 100); // checks every 100 milliseconds
     };
-
 
     const UserList: React.FC = () => {
 
