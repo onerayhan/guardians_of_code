@@ -5,6 +5,7 @@ import { UserEntryProvider } from './contexts/UserEntryContext';
 import { ChakraProvider } from "@chakra-ui/react";
 import { AuthProvider } from "react-auth-kit"
 import './index.css'
+import {SpotifyProvider} from "./contexts/SpotifyContext.tsx";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 cookieSecure={false}
             >
                 <UserEntryProvider>
-                    <App />
+                    <SpotifyProvider>
+                        <App />
+                    </SpotifyProvider>
                 </UserEntryProvider>
             </AuthProvider>
         </ChakraProvider>

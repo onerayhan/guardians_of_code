@@ -6,7 +6,7 @@ import Analysis from './pages/Analysis';
 import Rating from './pages/Rating';
 import AddSongs from './pages/AddSongs';
 import Recommendations from './pages/Recommendations';
-import ArtistPage from './pages/ArtistPage';
+import ArtistProfile from './pages/ArtistPage';
 import AlbumPage from './pages/AlbumPage';
 import Search from './pages/Search';
 import Modal from './components/UserEntry/EntranceModal';
@@ -73,7 +73,7 @@ const AppRouter = () => {
               path="/artist/:performer"
               element={
                   <RequireAuth loginPath="/signin">
-                      <ArtistPage />
+                      <ArtistProfile />
                   </RequireAuth>
               }
           />

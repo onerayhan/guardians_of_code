@@ -10,6 +10,7 @@ import { AiOutlineUsergroupDelete } from "react-icons/ai";
 import axios from "axios";
 import { IoPersonRemove } from "react-icons/io5";
 import { MdOutlineBlock } from "react-icons/md";
+import {useSpotify} from "../../contexts/SpotifyContext.tsx";
 
 
 function Profile() {
@@ -20,9 +21,12 @@ function Profile() {
     const [followers, setFollowers] = useState<string[]>([]);
     const [following, setFollowing] = useState<string[]>([]);
     const [groups, setGroups] = useState<string[]>([]);
+    const [code, setcode] = useState<string | null>(null);
+    const [state, setstate] = useState<string | null>(null);
     const auth = useAuthUser();
     const username = auth()?.username;
     const navigate = useNavigate();
+    const { isAuthenticated, updateAccessToken } = useSpotify();
 
     useEffect(() => {
         const fetch_photo = async () => {
@@ -83,8 +87,34 @@ function Profile() {
     };
 
     const handleSpotifyIntegration = () => {
-        navigate(`/${username}/settings`);
+        const apiUrl = "http://13.51.167.155/spoti_login";
+        const windowFeatures = "width=500,height=800,resizable=yes,scrollbars=yes,status=yes";
+
+        const spotifyLoginWindow = window.open(apiUrl, 'SpotifyLogin', windowFeatures);
+
+        const handleMessage = async (event: MessageEvent) => {
+            if (event.origin !== "http://13.51.167.155") return;
+
+            const { code, state } = event.data as { code: string, state: string };
+
+            try {
+                const response = await axios.post('http://13.51.167.155/callback', { code, state });
+                updateAccessToken(response.data.accessToken as string);
+                if (spotifyLoginWindow) {
+                    spotifyLoginWindow.close();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        return () => {
+            window.removeEventListener('message', handleMessage);
+        };
     };
+
 
     const UserList: React.FC = () => {
 
@@ -258,7 +288,7 @@ function Profile() {
               <Button onClick={handleClick} leftIcon={<MdBuild />} colorScheme='orange' variant='solid'>
                   Settings
               </Button>
-              {false ?
+              {isAuthenticated ?
                   <Button isDisabled={true}>Spotify Connected</Button> :
                   <Button onClick={handleSpotifyIntegration} textColor="black" leftIcon={<FaSpotify />} colorScheme='green' variant='solid'>
                       Connect to Spotify
