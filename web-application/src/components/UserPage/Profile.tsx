@@ -23,6 +23,7 @@ function Profile() {
     const [groups, setGroups] = useState<string[]>([]);
     const [code, setcode] = useState<string | null>(null);
     const [state, setstate] = useState<string | null>(null);
+    const [spoti_auth, setSpotiAuth] = useState(false);
     const auth = useAuthUser();
     const username = auth()?.username;
     const navigate = useNavigate();
@@ -71,7 +72,18 @@ function Profile() {
                 }
             };
 
+        const fetch_spoti_status = async () => {
+            const apiUrl = `http://13.51.167.155/api/check_spoti_connection/${username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const data = response.data.check;
+                setSpotiAuth(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
 
+        fetch_spoti_status();
         fetchGroups();
         fetchUsers();
         fetch_photo();
@@ -87,7 +99,7 @@ function Profile() {
     };
 
     const handleSpotifyIntegration = () => {
-        const apiUrl = "http://13.51.167.155/spoti_login";
+        const apiUrl = `http://13.51.167.155/spoti_login/${auth()?.username}`;
         const windowFeatures = "width=500,height=800,resizable=yes,scrollbars=yes,status=yes";
         const popupWindow = window.open(apiUrl, "SpotifyLogin", windowFeatures);
 
@@ -98,7 +110,7 @@ function Profile() {
                 console.log("Popup window closed. Handling post-login actions.");
                 window.location.reload();
             }
-        }, 100); // checks every 100 milliseconds
+        }, 100);
     };
 
     const UserList: React.FC = () => {
@@ -273,7 +285,7 @@ function Profile() {
               <Button onClick={handleClick} leftIcon={<MdBuild />} colorScheme='orange' variant='solid'>
                   Settings
               </Button>
-              {isAuthenticated ?
+              {spoti_auth ?
                   <Button isDisabled={true}>Spotify Connected</Button> :
                   <Button onClick={handleSpotifyIntegration} textColor="black" leftIcon={<FaSpotify />} colorScheme='green' variant='solid'>
                       Connect to Spotify
