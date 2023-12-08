@@ -36,6 +36,39 @@ Handles the callback from Spotify after successful user authentication. Retrieve
 - **Success:** User information in JSON format.
 - **Failure:** Error message if the token request fails.
 
+## Check Spotify Connection
+
+**Request**
+
+- **Url** `/api/check_spoti_connection/<username>`
+- **Method** `GET`
+
+**Parameters**
+
+- `username`: encoded within url, f_string style.
+
+**Description**
+
+Checkes whether the given user has established connection with spotify.
+
+## Add Mobile Token
+
+**Request**
+
+- **Url** `/api/add_mobile_token/<username>`
+- **Method** `GET`
+
+**Parameters**
+
+- `username`: The username of the user.
+- `access_token`: Token used to access the user's spotify account.
+- `refresh_token`: Token used to refresh the access_token.
+
+**Description**
+
+Addition of token data
+
+
 ## User Registration
 
 **Request**
@@ -336,7 +369,7 @@ Adds multiple songs to the database.
 
 ### Endpoint
 
-`POST /api/user_rate_batch`
+`POST /api/add_rate_batch`
 
 ### Description
 This endpoint allows users to submit batches of ratings for songs, albums, or performers associated with a given username.
@@ -346,7 +379,7 @@ This endpoint allows users to submit batches of ratings for songs, albums, or pe
 - `username` (string, required): The username for which the ratings are submitted.
 - `ratings` (list, required): A list of rating objects, where each object includes:
 - `rating_type` (string, required): The type of rating, which can be one of the following: `song_rate`, `album_rate`, or `performer_rate`.
--  Other parameters specific to the rating type (e.g., `song_name`, `album_name`, `performer_name`).
+-  Other parameters specific to the rating type (e.g., `song_id`, `album_id`, `performer_id`).
 - `rating` (int, required): The numerical rating assigned to the item.
 
 #### Example JSON Input
@@ -356,17 +389,17 @@ This endpoint allows users to submit batches of ratings for songs, albums, or pe
   "ratings": [
     {
       "rating_type": "song_rate",
-      "song_name": "Beautiful Song",
+      "song_id": "id1",
       "rating": 4
     },
     {
       "rating_type": "album_rate",
-      "album_name": "Awesome Album",
+      "album_id": "id2",
       "rating": 5
     },
     {
       "rating_type": "performer_rate",
-      "performer_name": "Talented Artist",
+      "performer_id": "id3",
       "rating": 4
     }
   ]

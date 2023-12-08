@@ -121,7 +121,9 @@ class External_Service(db.Model):
     service_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     service_name = db.Column(db.String(255), nullable=False)
     access_token = db.Column(db.String(255), nullable=False)
+    refresh_token = db.Column(db.String(255), nullable=False)    
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
+    token_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())    
 
 class Imported_Song(db.Model):
     __tablename__ = 'imported_song'
