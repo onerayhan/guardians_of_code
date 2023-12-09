@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, redirect, session, send_file, render_
 from flask_cors import CORS
 from urllib.parse import urlencode
 from config import Config
-from models import db, users, FollowSystem, t_user
+from models import db, users, FollowSystem
 from song_models import *
 from utils import *
 import base64
@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 import jwt
 from PIL import Image
 from io import BytesIO
+import spotipy
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -43,7 +45,7 @@ def spoti_login(username):
     }
 
     spotify_auth_url = f"{SPOTIFY_AUTH_URL}?{urlencode(params)}"
-    return redirect(spotify_auth_url)
+    return redirect(spotify_auth_url) 
 
 @app.route('/callback')
 def callback(): 
@@ -71,19 +73,20 @@ def callback():
         }
 
         response = requests.post(auth_options['url'], data=auth_options['data'], headers=auth_options['headers'])
-        username = session.get('username')        
-        
+        username = session['username']
+                             
         if response.status_code == 200:
-            token_data = response.json()
-            session['access_token'] = token_data['access_token']             
             
-                        
+            token_data = json.dumps(response.json())       
+                                    
             external_service = External_Service.query.filter_by(username=username).first()
             if external_service:
                 external_service.access_token = session['access_token']
             
             else:
-                db.session.add(External_Service(username=username, service_name='Spotify', access_token = session['access_token']))
+                db.session.add(External_Service(username=username,
+                                                service_name='Spotify',                                                
+                                                token_data=token_data))
                 db.session.commit()      
             
             return jsonify({'message': f'{username} spotify connection established.'})           
@@ -93,8 +96,224 @@ def callback():
 
     except Exception as e:
         app.logger.error(f"Error in callback: {e}")
-        return "Fail in callback // Hamzaya sor", 500
+        return "Fail in callback // Hamzaya sor", 500    
+
+
+@app.route('/spoti/get_curr_user_tracks')
+def get_curr_user_tracks():     
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    results = []
+    curGroup = sp.current_user_saved_tracks(limit=10)['items']
+    for item in curGroup:
+        track = item['track']
+        val = {"track_name": track['name'],
+               "album_name": track['album']['name'],
+               "artist_names": [{'artist_name': artist['name']} for artist in track['artists']],
+               "popularity": track['popularity'],
+               "track_id": track['id'],
+               "album_release_year": track['album']['release_date'].split('-')[0],               
+               "track_duration_minutes": round(float(track['duration_ms']/1000/60), 2),
+               "track_photo_urls": [{'photo_url': image['url']} for image in track['images']],
+               "album_id": track['album']['id'],
+               "artist_ids": [{'artist_id': artist['id']} for artist in track['artists']]}             
+            
+        results.append(val)              
     
+    return jsonify(results)
+
+@app.route('/spoti/get_user_top_tracks')
+def get__user_top_tracks():
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    results = []
+    track_list = sp.current_user_top_tracks(limit=10)['items']
+    for item in track_list:
+        track = item['track']
+        val = {"track_name": track['name'],
+               "album_name": track['album']['name'],
+               "artist_names": [{'artist_name': artist['name']} for artist in track['artists']],
+               "popularity": track['popularity'],
+               "track_id": track['id'],
+               "track_release_year": track['album']['release_date'].split('-')[0],               
+               "track_duration_minutes": round(float(track['duration_ms']/1000/60), 2),
+               "track_photo_urls": [{'photo_url': image['url']} for image in track['images']],
+               "album_id": track['album']['id'],
+               "artist_ids": [{'artist_id': artist['id']} for artist in track['artists']]}           
+            
+        results.append(val)              
+    
+    return jsonify(results)
+
+@app.route('/spoti/get_tracks_info/<track_id_arr>')
+def get_tracks_info(track_id_arr):
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    results = []
+    tracks = sp.tracks(track_id_arr)['tracks']
+    for track in tracks:
+        val = {"track_name": track['name'],
+               "album_name": track['album']['name'],
+               "artist_names": [{'artist_name': artist['name']} for artist in track['artists']],
+               "popularity": track['popularity'],
+               "track_id": track['id'],
+               "track_release_year": track['album']['release_date'].split('-')[0],               
+               "track_duration_minutes": round(float(track['duration_ms']/1000/60), 2),
+               "track_photo_urls": [{'photo_url': image['url']} for image in track['images']],
+               "album_id": track['album']['id'],
+               "artist_ids": [{'artist_id': artist['id']} for artist in track['artists']]} 
+        
+        results.append(val)
+        
+    return jsonify(results)
+
+@app.route('/spoti/get_albums_info/<album_id_arr>')
+def get_albums_info(album_id_arr):
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    results = []
+    albums = sp.albums(album_id_arr)['albums']
+    for album in albums:
+        val = {"album_name": album['name'],
+               "album_release_year": album['release_date'].split('-')[0],
+               "album_photo_url": [{'photo_url': image['url']} for image in album['images']],
+               "popularity": album['popularity'],
+               "album_id": album['id']} 
+        
+        results.append(val)
+        
+    return jsonify(results)
+
+@app.route('/spoti/get_artists_info/<artist_id_arr>')
+def get_artists_info(artist_id_arr):
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    results = []
+    artists = sp.artists(artist_id_arr)['artists']
+    for artist in artists:
+        val = {"artist_name": artist['name'],
+               "popularity": artist['popularity'],
+               "artist_photo_urls": [{'url': image['url']} for image in artist['images']],
+               "artist_id": artist['id']} 
+        
+        results.append(val)
+        
+    return jsonify(results)
+
+@app.route('/spoti/get_artist_albums/<artist_id_arr>')
+def get_artist_album(artist_id_arr):
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    results = []
+    artist_albums = sp.artist_albums(artist_id_arr)['items']
+    for artist_album in artist_albums:
+        val = {"artist_album_name": artist_album['name'],
+               "album_release_year": artist_album['release_date'].split('-')[0],
+               "artist_photo_url": [{'photo_url': image['url']} for image in artist_album['images']],
+               "album_id": artist_album['id'],
+               "artists_id": [{'artists_id': artist['id']} for artist in artist_album['artists']]} 
+        
+        results.append(val)
+        
+    return jsonify(results)
+
+@app.route('/spoti/get_artist_top_tracks/<artist_id_arr>')
+def get_artist_top_track(artist_id_arr):
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    results = []
+    artist_top_tracks = sp.artist_top_tracks(artist_id_arr)['tracks']
+    for track in artist_top_tracks:
+        val = {"track_name": track['name'],
+               "album_name": track['album']['name'],
+               "artist_names": [{'artist_name': artist['name']} for artist in track['artists']],
+               "popularity": track['popularity'],
+               "track_id": track['id'],
+               "track_release_year": track['album']['release_date'].split('-')[0],               
+               "track_duration_minutes": round(float(track['duration_ms']/1000/60), 2),
+               "track_photo_urls": [{'photo_url': image['url']} for image in track['images']],
+               "album_id": track['album']['id'],
+               "artist_ids": [{'artist_id': artist['id']} for artist in track['artists']]} 
+        
+        results.append(val)
+        
+    return jsonify(results)
+
+@app.route('/spoti/get_recommendations', methods=['POST'])
+def get_recommendations():
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    
+    data = request.get_json()
+    seed_tracks = data.get('seed_tracks')
+    seed_artists = data.get('seed_artists')
+    seed_albums = data.get('seed_albums')
+    if data.get('seed_genres'):
+        seed_genres = sp.recommendation_genre_seeds()
+    else:
+        seed_genres = None   
+    
+    results = []
+    recommendation_tracks = sp.recommendations(seed_tracks=seed_tracks,
+                                               seed_artists=seed_artists,
+                                               seed_albums=seed_albums,
+                                               seed_genres=seed_genres)['tracks']
+    for track in recommendation_tracks:
+        val = {"track_name": track['name'],
+               "album_name": track['album']['name'],
+               "artist_names": [{'artist_name': artist['name']} for artist in track['artists']],
+               "popularity": track['popularity'],
+               "track_id": track['id'],
+               "track_release_year": track['album']['release_date'].split('-')[0],               
+               "track_duration_minutes": round(float(track['duration_ms']/1000/60), 2),
+               "track_photo_urls": [{'photo_url': image['url']} for image in track['images']],
+               "album_id": track['album']['id'],
+               "artist_ids": [{'artist_id': artist['id']} for artist in track['artists']]} 
+        
+        results.append(val)
+        
+    return jsonify(results)    
+  
+@app.route('/spoti/search', methods=['POST'])
+def spoti_search():
+    username = session['username']
+    access_token, authorized = get_token(username)    
+    if not authorized:
+        return "Unauthorized access"
+    sp = spotipy.Spotify(auth=access_token)
+    
+    data = request.get_json()
+    q = data.get('query')
+    type = data.get('type')    
+    
+    results = sp.search(q=q, type=type)  
+    
+    return jsonify(results)
+   
 @app.route('/api/check_spoti_connection/<username>')  
 def check_spoti_connection(username):
     external_service = External_Service.query.filter_by(username=username).first()
@@ -102,6 +321,25 @@ def check_spoti_connection(username):
         return jsonify({'check': 'true'})
     else:
         return jsonify({'check': 'false'})
+
+@app.route('/api/add_mobile_token', methods=['POST'])
+def add_mobile_token():
+    data = request.get_json()
+    username = data.get('username')    
+    token_data = data.get('token_data')
+    
+    external_service = External_Service.query.filter_by(username=username).first()
+    if external_service:
+        external_service.access_token = session['access_token']
+        return "User already in database, refresh_token changed"
+            
+    else:
+        db.session.add(External_Service(username=username,
+                                        service_name='Spotify',                                        
+                                        token_data=token_data))
+        db.session.commit()
+        return "User added to the database."
+    
     
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -118,7 +356,9 @@ def register():
         return jsonify({'error': 'Such username already exists'}), 403  
     
     if users.query.filter_by(email=email).first():
-        return jsonify({'error': 'Such email already exists'}), 403         
+        return jsonify({'error': 'Such email already exists'}), 403
+    
+    session['username'] = username          
 
     public_id = generate_public_id()
     db.session.add(users(username=username, email=email, password=password, birthday=birthday, public_id=public_id))
@@ -135,7 +375,8 @@ def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')  
-    #device_token = data.get('device_token')
+    #device_token = data.get('device_token') 
+    
     
     if not username or not password:
         return jsonify({'error' : "Both username and password are required"}), 400
@@ -333,7 +574,8 @@ def add_songs_batch():
             return jsonify({'error': f'A song name has to be given at the song number: {index}'}), 400            
 
         if is_duplicate(song):
-            return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!'}), 403            
+            #return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!'}), 403
+            continue            
 
         new_song = Song(
             song_name=song.get('song_name'),
@@ -342,7 +584,6 @@ def add_songs_batch():
             recording_type=song.get('recording_type'),
             listens=song.get('listens'),
             release_year=song.get('release_year'),
-            added_timestamp=song.get('added_timestamp'),
             username=username
         )
         
@@ -369,7 +610,7 @@ def add_songs_batch():
             new_song.add_performer(song_performer)
     
         if song.get('genre'):
-            song_genre = Genre.query.filter_by(name=song.get('genre'))
+            song_genre = Genre.query.filter_by(name=song.get('genre')).first()
             if not song_genre:
                 song_genre = Genre(name=song.get('genre'))
                 db.session.add(song_genre)
@@ -378,7 +619,7 @@ def add_songs_batch():
             new_song.add_genre(song_genre)
         
         if song.get('mood'):
-            song_mood = Mood.query.filter_by(name=song.get('mood'))
+            song_mood = Mood.query.filter_by(name=song.get('mood')).first()
             if not song_mood:
                 song_mood = Mood(name=song.get('mood'))
                 db.session.add(song_mood)
@@ -387,7 +628,7 @@ def add_songs_batch():
             new_song.add_mood(song_mood)
     
         if song.get('instrument'):
-            song_instrument = Instrument.query.filter_by(name=song.get('instrument'))
+            song_instrument = Instrument.query.filter_by(name=song.get('instrument')).first()
             if not song_instrument:
                 song_instrument = Instrument(name=song.get('instrument'))
                 db.session.add(song_instrument) 
@@ -417,7 +658,7 @@ def add_rate_batch():
         rating_type = rating.get('rating_type')
         
         if rating_type == 'song_rate':
-            song_id = song_name_to_song(rating.get('song_name')).song_id
+            song_id = rating.get('song_id')
             rating = rating.get('rating')
             
             if not song_id or not rating:
@@ -432,7 +673,7 @@ def add_rate_batch():
             db.session.add(new_rating)
             
         elif rating_type == 'album_rate':
-            album_id = album_name_to_album(rating.get('album_name')).album_id
+            album_id = rating.get('album_id')
             rating = rating.get('rating')
             
             if not album_id or not rating:
@@ -447,7 +688,7 @@ def add_rate_batch():
             db.session.add(new_rating)
             
         elif rating_type == 'performer_rate':
-            performer_id = performer_name_to_performer(rating.get('performer_name')).performer_id
+            performer_id = rating.get('performer_id')
             rating = rating.get('rating')
             
             if not performer_id or not rating:
@@ -468,17 +709,15 @@ def add_rate_batch():
         
         response_data.append({'message': f'Rating of type {rating_type} added successfully by {username}'})
     
-    return jsonify({'results': response_data}), 200          
-            
-            
-    
+    return jsonify({'results': response_data}), 200     
+                
 
 @app.route('/api/add_user_song_ratings', methods=['POST'])
 def add_user_song_rating():
     data = request.get_json()
 
     username = data.get('username')
-    song_id = song_name_to_song(data.get('song_name')).song_id
+    song_id = data.get('song_id')
     rating = data.get('rating')
     
     if not username or not song_id or not rating:
@@ -500,7 +739,7 @@ def add_user_album_rating():
     data = request.get_json()
 
     username = data.get('username')
-    album_id = album_name_to_album(data.get('album_name')).album_id
+    album_id = data.get('album_id')
     rating = data.get('rating')
 
     if not username or not album_id or not rating:
@@ -522,7 +761,7 @@ def add_user_performer_rating():
     data = request.get_json()
 
     username = data.get('username')
-    performer_id = performer_name_to_performer(data.get('performer_id')).performer_id
+    performer_id = data.get('performer_id')
     rating = data.get('rating')
 
     if not username or not performer_id or not rating:

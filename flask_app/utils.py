@@ -5,6 +5,9 @@ from song_models import *
 import requests
 from config import Config
 from spotify_cred import *
+from spotipy.oauth2 import SpotifyOAuth
+import time
+
 
 def generate_public_id():
     return str(uuid.uuid4().hex)
@@ -89,18 +92,42 @@ def check_password(username, password):
         return True
     else:
         return False
+    
+def username_to_external_service(username):
+    external_service = External_Service.query.filter_by(username=username).first()
+    if external_service:
+        return external_service
+    else:
+        return None
 
-def get_access_token(code):
-    data = {
-        'code': code,
-        'redirect_uri': Config.SPOTIFY_REDIRECT_URI,
-        'grant_type': 'authorization_code',
-        'client_id': Config.SPOTIFY_CLIENT_ID,
-        'client_secret': Config.SPOTIFY_CLIENT_SECRET,
-    }
-    response = requests.post(SPOTIFY_TOKEN_URL, data=data)   
+def create_spotify_oauth():
+    app_config = Config()
+    return SpotifyOAuth(
+            client_id=app_config['SPOTIFY_CLIEND_ID'],
+            client_secret=app_config['SPOTIFY_CLIENT_SECRET'],
+            redirect_uri=app_config['SPOTIFY_REDIRECT_URI'],
+            scope="user-library-read")
+    
+def get_token(username):
+    
+    token_valid = False    
+    external_service = username_to_external_service(username)
+    access_token = external_service.get_access_token()   
+    
+    if not external_service:
+        return None, token_valid
+        
+    now = int(time.time())
+    is_token_expired = external_service.expires_at - now < 60
+    
+    if (is_token_expired):
+        sp_oauth = create_spotify_oauth()
+        token_info = json.dumps(sp_oauth.refresh_access_token(external_service.refresh_token))
+        external_service.token_info = token_info
+        access_token = external_service.get_access_token()
 
-    return response.json()
+    token_valid = True
+    return access_token, token_valid 
 
 def get_user_infos(access_token):
     headers = {'Authorization': f'Bearer {access_token}'}

@@ -1,4 +1,5 @@
 from models import db
+import json
 
 class Album(db.Model):
     album_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -60,7 +61,7 @@ class Song(db.Model):
     def add_album(self, album):
         
         if album:
-            association = Song_Performer(song_id=self.song_id, album_id=album.album_id)
+            association = Song_Album(song_id=self.song_id, album_id=album.album_id)
             db.session.add(association)
             db.session.commit()
     
@@ -120,10 +121,25 @@ class External_Service(db.Model):
     __tablename__ = 'external_service'
     service_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     service_name = db.Column(db.String(255), nullable=False)
-    access_token = db.Column(db.String(255), nullable=False)
-    refresh_token = db.Column(db.String(255), nullable=False)    
+    token_data = db.Column(db.String(1000), nullable=False)   
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
-    token_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())    
+    
+    def get_access_token(self):
+        if self.token_data:
+            token_data_dict = json.loads(self.token_data)
+            return token_data_dict.get('access_token')
+    
+    def get_expires_at(self):        
+        if self.token_data:
+            token_data_dict = json.loads(self.token_data)
+            return token_data_dict.get('expires_at')
+
+    def get_refresh_token(self):        
+        if self.token_data:
+            token_data_dict = json.loads(self.token_data)
+            return token_data_dict.get('refresh_token')  
+
+        
 
 class Imported_Song(db.Model):
     __tablename__ = 'imported_song'
