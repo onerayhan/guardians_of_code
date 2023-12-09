@@ -21,8 +21,6 @@ function Profile() {
     const [followers, setFollowers] = useState<string[]>([]);
     const [following, setFollowing] = useState<string[]>([]);
     const [groups, setGroups] = useState<string[]>([]);
-    const [code, setcode] = useState<string | null>(null);
-    const [state, setstate] = useState<string | null>(null);
     const [spoti_auth, setSpotiAuth] = useState(false);
     const auth = useAuthUser();
     const username = auth()?.username;
@@ -32,7 +30,7 @@ function Profile() {
     useEffect(() => {
         const fetch_photo = async () => {
             const username = auth()?.username;
-            const apiUrl = "http://13.51.167.155/api/profile_picture";
+            const apiUrl = "http://51.20.128.164/api/profile_picture";
             try {
                 const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
                 const data = response.data;
@@ -45,7 +43,7 @@ function Profile() {
         };
 
         const fetchUsers = async () => {
-            const apiUrl = "http://13.51.167.155/api/user_followings";
+            const apiUrl = "http://51.20.128.164/api/user_followings";
             try {
                 const response = await axios.post(apiUrl, { username: `${auth()?.username}` });
                 const data = response.data;
@@ -60,9 +58,9 @@ function Profile() {
         };
 
         const fetchGroups = async () => {
-            const apiUrl = "http://13.51.167.155/api/user_groups";
+            const apiUrl = `http://51.20.128.164/api/display/display_user_group/${auth()?.username}`;
             try {
-                const response = await axios.post(apiUrl, {username: `${auth()?.username}`});
+                const response = await axios.get(apiUrl);
                 const data = response.data;
                 const groupNames = data[`Groups of ${auth()?.username}`] || [];
 
@@ -73,7 +71,7 @@ function Profile() {
             };
 
         const fetch_spoti_status = async () => {
-            const apiUrl = `http://13.51.167.155/api/check_spoti_connection/${username}`;
+            const apiUrl = `http://51.20.128.164/api/check_spoti_connection/${username}`;
             try {
                 const response = await axios.get(apiUrl);
                 const data = response.data.check;
@@ -99,11 +97,10 @@ function Profile() {
     };
 
     const handleSpotifyIntegration = () => {
-        const apiUrl = `http://13.51.167.155/spoti_login/${auth()?.username}`;
+        const apiUrl = `http://51.20.128.164/spoti_login/${auth()?.username}`;
         const windowFeatures = "width=500,height=800,resizable=yes,scrollbars=yes,status=yes";
         const popupWindow = window.open(apiUrl, "SpotifyLogin", windowFeatures);
 
-        // Check if the popup window has been closed
         const checkPopupClosed = setInterval(() => {
             if (popupWindow && popupWindow.closed) {
                 clearInterval(checkPopupClosed);
@@ -122,7 +119,7 @@ function Profile() {
             useEffect(() => {
                 const fetch_photo = async () => {
                     const username = user;
-                    const apiUrl = "http://13.51.167.155/api/profile_picture";
+                    const apiUrl = "http://51.20.128.164/api/profile_picture";
                     try {
                         const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
                         const data = response.data;
@@ -156,7 +153,7 @@ function Profile() {
             useEffect(() => {
                 const fetch_photo = async () => {
                     const username = user;
-                    const apiUrl = "http://13.51.167.155/api/profile_picture";
+                    const apiUrl = "http://51.20.128.164/api/profile_picture";
                     try {
                         const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
                         const data = response.data;
@@ -177,7 +174,7 @@ function Profile() {
             }
 
             const handleUnfollow = async () => {
-                const apiUrl = "http://13.51.167.155/api/unfollow";
+                const apiUrl = "http://51.20.128.164/api/unfollow";
                 try {
                     const response = await axios.post(apiUrl, { follower_username: `${auth()?.username}`, followed_username: `${user}` });
                     const data = response.data;
@@ -189,7 +186,7 @@ function Profile() {
             }
 
             const handleBlock = async () => {
-                const apiUrl = "http://13.51.167.155/api/block_user";
+                const apiUrl = "http://51.20.128.164/api/block_user";
                 try {
                     const response = await axios.post(apiUrl, { follower_username: `${auth()?.username}`, followed_username: `${user}` });
                     const data = response.data;

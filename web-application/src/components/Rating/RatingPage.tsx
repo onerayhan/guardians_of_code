@@ -16,7 +16,7 @@ import {
     useCheckbox,
     chakra,
     Icon,
-    UseCheckboxProps, useCheckboxGroup
+    UseCheckboxProps, useCheckboxGroup, HStack, VStack
 } from '@chakra-ui/react'
 import React, { useEffect, useState} from 'react';
 import {useAuthUser} from "react-auth-kit";
@@ -28,7 +28,7 @@ import {useNavigate} from "react-router-dom";
 import GenreInput from "./GenreInput.tsx";
 import AlbumInput from "./AlbumInput.tsx";
 import ArtistInput from "./ArtistInput.tsx";
-import { FaMusic, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import {FaMusic, FaCalendarAlt, FaClock, FaStar} from 'react-icons/fa';
 import { MdAlbum } from 'react-icons/md';
 import { IoMdMicrophone } from "react-icons/io";
 import {IoRefreshCircleSharp} from "react-icons/io5";
@@ -36,8 +36,12 @@ import RefreshButton from "./RefreshButton.tsx";
 import {BsFillSendFill} from "react-icons/bs";
 import { Text } from '@chakra-ui/react'
 import { IoMdOptions } from "react-icons/io";
+import StarRating from "./SongStar.tsx";
+import Ratings from "react-star-ratings";
+import {Avatar} from "flowbite-react";
 
 interface Song {
+    song_photo: string | undefined;
     song_id: number;
     song_name: string;
     artist_name: string;
@@ -62,16 +66,9 @@ function RatingPage() {
     const [rateType, setRateType] = useState<string>('');
     const [genre, setGenre] = useState<string>('');
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-    const { value: selectedSongIds, getCheckboxProps } = useCheckboxGroup();
     const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
     const [selectedSongs, setSelectedSongs] = useState<{ [songId: number]: boolean }>({});
-
-    const updateSongRating = (songId: number, newRating: number) => {
-        setSongRatings(prevRatings => ({
-            ...prevRatings,
-            [songId]: newRating,
-        }));
-    };
+    const [ratings, setRatings] = useState<{ [songId: number]: number }>({});
 
     const toggleSongSelection = (songId: number, isSelected: boolean) => {
         setSelectedSongs(prevSelections => ({
@@ -80,12 +77,27 @@ function RatingPage() {
         }));
     };
 
+    const updateRating = (songId: number, newRating: number) => {
+        setSongRatings(prevRatings => ({
+            ...prevRatings,
+            [songId]: newRating
+        }));
+
+        setRatings(prevRatings => ({
+            ...prevRatings,
+            [songId]: newRating
+        }));
+    };
+
     const RefreshButton = () =>
     {
         const sendRatings = () => {
 
-            // Reload the page after successful send.
-            window.location.reload();
+            for (const songId in ratings) {
+                if (ratings.hasOwnProperty(songId)) {
+                    console.log(`Song ID: ${songId}, Rating: ${ratings[songId]}`);
+                }
+            }
         };
 
         return (
@@ -105,57 +117,12 @@ function RatingPage() {
 
     };
 
+
     const addGenre = () => {
         if (genre && !selectedGenres.includes(genre)) {
             setSelectedGenres([...selectedGenres, genre]);
             setGenre('');
         }
-    };
-
-    interface CustomCheckboxProps {
-        value?: string; // Define other props as needed
-    }
-
-    interface CustomCheckboxProps extends UseCheckboxProps {
-        // Include any additional props you might need
-        // For example, a label for the checkbox
-        label?: string;
-    }
-
-    const CustomCheckbox: React.FC<CustomCheckboxProps> = ({ label, ...props }) => {
-        const { state, getCheckboxProps, getInputProps, htmlProps } = useCheckbox(props);
-
-        return (
-            <chakra.label
-                display='flex'
-                flexDirection='row'
-                alignItems='center'
-                gridColumnGap={2}
-                maxW='36'
-                bg='blue.50'
-                border='1px solid'
-                borderColor='green.500'
-                rounded='lg'
-                px={3}
-                py={1}
-                cursor='pointer'
-                {...htmlProps}
-            >
-                <input {...getInputProps()} hidden />
-                <Flex
-                    alignItems='center'
-                    justifyContent='center'
-                    border='2px solid'
-                    borderColor='green.500'
-                    w={4}
-                    h={4}
-                    {...getCheckboxProps()}
-                >
-                    {state.isChecked && <Box w={2} h={2} bg='green.500' />}
-                </Flex>
-                {label}
-            </chakra.label>
-        );
     };
 
     const removeGenre = (genreToRemove: string) => {
@@ -170,28 +137,25 @@ function RatingPage() {
         navigate(`/album/${albumName}`);
     }
 
-    const RatingStars: React.FC<RatingStarsProps> = ({ song, rating, onRatingChange }) => {
-        return (
-            <Box display="flex">
-                {[...Array(5)].map((_, i) => (
-                    <StarIcon
-                        key={i}
-                        onClick={() => onRatingChange(song.song_id, i + 1)}
-                        color={i < rating ? "yellow.400" : "gray.300"}
-                        cursor="pointer"
-                    />
-                ))}
-            </Box>
-        );
-    };
-
     const RateDisplaySong = ({ song }: { song: Song }) => {
         const currentRating = songRatings[song.song_id] || 0;
-        
+
+        const changeRating = (newRating: number) => {
+            updateRating(song.song_id, newRating);
+        };
+
         return (
             <Card maxW='500px'>
                 <CardBody>
                     <Stack spacing={3}>
+                        <Avatar size="xl" className="pl-5" img={song.song_photo}/>
+                        <div className="px-2"></div>
+                        <Flex alignItems="center">
+                            <Icon as={FaMusic} w={5} h={5} mr={2}/>
+                            <div className="px-2"></div>
+                            <Text className="font-semibold">{song.song_name}</Text>
+                        </Flex>
+                        <div className="px-2"></div>
                         <Flex alignItems="center">
                             <Icon as={IoMdMicrophone} w={5} h={5} mr={2}/>
                             <Button variant='ghost'
@@ -201,12 +165,6 @@ function RatingPage() {
                             <Icon as={MdAlbum} w={5} h={5} mr={2}/>
                             <Button variant='ghost'
                                     onClick={() => handleAlbumNavigate(song.album_name)}>{song.album_name}</Button>
-                        </Flex>
-                        <div className="px-2"></div>
-                        <Flex alignItems="center">
-                            <Icon as={FaMusic} w={5} h={5} mr={2}/>
-                            <div className="px-2"></div>
-                            <Text className="font-semibold">{song.song_name}</Text>
                         </Flex>
                         <div className="px-2"></div>
                         <Flex alignItems="center">
@@ -230,6 +188,20 @@ function RatingPage() {
                 </CardBody>
                 <Divider />
                 <CardFooter>
+                    <VStack className="flex align-center">
+                        <Text className="font-semibold"><Icon as={FaStar} w={5} h={5} mr={2}/>Rate this song</Text>
+                        <Ratings
+                            rating={currentRating}
+                            numberOfStars={5}
+                            changeRating={changeRating}
+                            starRatedColor="gold"
+                            starEmptyColor="grey"
+                            starHoverColor="lightblue"
+                            starDimension="20px"
+                            starSpacing="5px"
+                            name="rating"
+                        />
+                    </VStack>
                 </CardFooter>
             </Card>
         );
@@ -238,7 +210,8 @@ function RatingPage() {
     useEffect(() => {
         const mockSongs: Song[] = [
             {
-                song_id: 1,
+                song_photo: "https://i.scdn.co/image/ab67616d0000b273e3b6b8b6b6b6b6b6b6b6b6b6",
+                song_id: 16,
                 song_name: "Mock Song 1",
                 artist_name: "Mock Artist 1",
                 album_name: "Mock Album 1",
@@ -247,16 +220,18 @@ function RatingPage() {
                 year: 2020,
             },
             {
-                song_id: 1,
-                song_name: "Mock Song 2",
+                song_photo: "https://i.scdn.co/image/ab67616d0000b273e3b6b8b6b6b6b6b6b6b6b6b6",
+                song_id: 51,
+                song_name: "Mock Song 223422",
                 artist_name: "Mock Artist 2",
                 album_name: "Mock Album 2",
                 genre: "Rock",
                 duration: "4:05",
                 year: 2019,
             },            {
-                song_id: 1,
-                song_name: "Mock Song 1",
+                song_photo: undefined,
+                song_id: 11,
+                song_name: "Mock Song 12",
                 artist_name: "Mock Artist 1",
                 album_name: "Mock Album 1",
                 genre: "Pop",
@@ -264,8 +239,9 @@ function RatingPage() {
                 year: 2020,
             },
             {
-                song_id: 1,
-                song_name: "Mock Song 2",
+                song_photo: undefined,
+                song_id: 13,
+                song_name: "Mock Song 22",
                 artist_name: "Mock Artist 2",
                 album_name: "Mock Album 2",
                 genre: "Rock",
@@ -273,8 +249,9 @@ function RatingPage() {
                 year: 2019,
             },
             {
-                song_id: 1,
-                song_name: "Mock Song 1",
+                song_photo: undefined,
+                song_id: 231,
+                song_name: "Mock Song 12231",
                 artist_name: "Mock Artist 1",
                 album_name: "Mock Album 1",
                 genre: "Pop",
@@ -282,8 +259,9 @@ function RatingPage() {
                 year: 2020,
             },
             {
-                song_id: 1,
-                song_name: "Mock Song 2",
+                song_photo: undefined,
+                song_id: 31,
+                song_name: "Mock Song 2543",
                 artist_name: "Mock Artist 2",
                 album_name: "Mock Album 2",
                 genre: "Rock",
@@ -291,8 +269,9 @@ function RatingPage() {
                 year: 2019,
             },
             {
-                song_id: 1,
-                song_name: "Mock Song 1",
+                song_photo: undefined,
+                song_id: 1123,
+                song_name: "Mock Song 121",
                 artist_name: "Mock Artist 1",
                 album_name: "Mock Album 1",
                 genre: "Pop",
@@ -300,16 +279,18 @@ function RatingPage() {
                 year: 2020,
             },
             {
-                song_id: 1,
-                song_name: "Mock Song 2",
+                song_photo: undefined,
+                song_id: 541,
+                song_name: "Mock Song 232",
                 artist_name: "Mock Artist 2",
                 album_name: "Mock Album 2",
                 genre: "Rock",
                 duration: "4:05",
                 year: 2019,
             },            {
-                song_id: 1,
-                song_name: "Mock Song 1",
+                song_photo: undefined,
+                song_id: 112,
+                song_name: "Mock Song 231",
                 artist_name: "Mock Artist 1",
                 album_name: "Mock Album 1",
                 genre: "Pop",
@@ -317,8 +298,9 @@ function RatingPage() {
                 year: 2020,
             },
             {
-                song_id: 1,
-                song_name: "Mock Song 2",
+                song_photo: undefined,
+                song_id: 1642,
+                song_name: "Mock Song 31232",
                 artist_name: "Mock Artist 2",
                 album_name: "Mock Album 2",
                 genre: "Rock",
@@ -335,6 +317,7 @@ function RatingPage() {
             <div className="overflow-y-auto">
                 <div className="relative w-full flex flex-col items-center top-12 py-8">
                     <h1 className="text-6xl font-lalezar text-white">Rate Songs to Get Recommendations.</h1>
+                    <h1 className="text-2xl font-lalezar text-white">Rate Songs Between 1-5, the ones that you did not rate do not count!</h1>
                 </div>
                 <div>
                     <div className="py-8"></div>

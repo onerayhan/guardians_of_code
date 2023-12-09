@@ -43,7 +43,7 @@ const Header: React.FC = () => {
 
     const fetch_photo = async () => {
       const username = auth()?.username;
-      const apiUrl = "http://13.51.167.155/api/profile_picture";
+      const apiUrl = "http://51.20.128.164/api/profile_picture";
       try {
         const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
         const data = response.data;

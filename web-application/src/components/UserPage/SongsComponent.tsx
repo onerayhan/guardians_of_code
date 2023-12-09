@@ -30,8 +30,9 @@ const SongsComponent:React.FC = () => {
 
   const toast = useToast();
   const deleteSong = async (song_id: number) => {
-    const apiUrl = "http://13.51.167.155/api/delete_song";
+    const apiUrl = "http://51.20.128.164/api/delete_song";
     try {
+        console.log(song_id);
       await axios.post(apiUrl, { username: `${auth()?.username}`, song_id: song_id });
       toast({
         title: `Song successfully deleted!`,
@@ -72,7 +73,7 @@ const SongsComponent:React.FC = () => {
 
     useEffect(() => {
       const getSongs = async () => {
-        const apiUrl = "http://13.51.167.155/api/user_songs";
+        const apiUrl = "http://51.20.128.164/api/user_songs";
         try {
           const response = await axios.post(apiUrl, { username: `${auth()?.username}` });
           const data = response.data;
@@ -86,59 +87,38 @@ const SongsComponent:React.FC = () => {
     }, []);
 
   return (
-      <div className="pl-[150px] pr-[150px] pb-5 overflow-y-auto w-auto">
-        <Tabs isFitted variant='enclosed'>
-          <TabList>
-            <Tab backgroundColor={"white"}><GoThumbsup size={20}/>Liked Songs</Tab>
-            <Tab backgroundColor={"white"}><MdOutlineDataset size={20}/>Posted Songs</Tab>
-          </TabList>
-          <TabPanels backgroundColor={"white"}>
-            <TabPanel>
-                <TableContainer>
-                    <Table variant="simple" colorScheme='purple' size="lg">
-                        <Thead>
-                            <Tr>
-                                <Th>Song Name</Th>
-                                <Th>Length</Th>
-                                <Th>Tempo</Th>
-                                <Th>Recording Type</Th>
-                                <Th>Listens</Th>
-                                <Th isNumeric>Release Year</Th>
-                                <Th isNumeric>Post Date</Th>
-                                <Th></Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {Posted.map(song => <SongDisplay key={song.song_id} song={song} />)}
-                        </Tbody>
-                    </Table>
-                </TableContainer>
-            </TabPanel>
-            <TabPanel>
-              <TableContainer>
-                <Table variant="simple" colorScheme='purple' size="lg">
-                  <Thead>
-                    <Tr>
-                      <Th>Song Name</Th>
-                      <Th>Length</Th>
-                      <Th>Tempo</Th>
-                      <Th>Recording Type</Th>
-                      <Th>Listens</Th>
-                      <Th isNumeric>Release Year</Th>
-                      <Th isNumeric>Post Date</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {Posted.map(song => <SongDisplay key={song.song_id} song={song} />)}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+      <div>
+          <div className="relative flex flex-col items-center">
+              <h1 className="text-4xl font-semibold text-white">Songs Added By You</h1>
+          </div>
+          <div className="relative w-full flex flex-col items-center top-10 pb-8">
+              <div className="rounded-xl bg-white">
+                  <TableContainer maxH="500px">
+                      <Table variant="simple" colorScheme='purple' size="lg">
+                          <Thead>
+                              <Tr>
+                                  <Th>Song Name</Th>
+                                  <Th>Length</Th>
+                                  <Th>Tempo</Th>
+                                  <Th>Recording Type</Th>
+                                  <Th>Listens</Th>
+                                  <Th isNumeric>Release Year</Th>
+                                  <Th isNumeric>Post Date</Th>
+                                  <Th></Th>
+                              </Tr>
+                          </Thead>
+                          <Tbody>
+                              {Posted.map(song => <SongDisplay key={song.song_id} song={song}/>)}
+                          </Tbody>
+                      </Table>
+                  </TableContainer>
+              </div>
+          </div>
       </div>
+
   );
 };
 
+
 export default SongsComponent;
+

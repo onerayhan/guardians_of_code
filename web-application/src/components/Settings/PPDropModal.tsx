@@ -57,7 +57,7 @@ const PPDropModal: React.FC = () => {
         files.forEach(file => formData.append('photo', file));
 
         try {
-            const response = await axios.post('http://13.51.167.155/api/upload_photo', formData, {
+            const response = await axios.post('http://51.20.128.164/api/upload_photo', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

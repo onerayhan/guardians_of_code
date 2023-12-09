@@ -25,7 +25,7 @@ const GenreInput = () => {
         <Box className="flex flex-col">
             <Flex>
                 <Input
-                    placeholder="Type genre"
+                    placeholder="Type Genre"
                     value={genre}
                     onChange={handleGenreChange}
                     size="sm"

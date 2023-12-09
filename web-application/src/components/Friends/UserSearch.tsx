@@ -40,7 +40,7 @@ const UsernameSubmit: React.FC = () => {
     const FollowUser = async (user: UserInfo, followerUsername: string) => {
         try {
             await axios.post(
-                "http://13.51.167.155/api/follow",
+                "http://51.20.128.164/api/follow",
                 { follower_username: followerUsername, followed_username: user.username }
             );
 
@@ -79,17 +79,17 @@ const UsernameSubmit: React.FC = () => {
 
         try {
             const userInfoResponse = await axios.post(
-                "http://13.51.167.155/api/user_info",
+                "http://51.20.128.164/api/user_info",
                 { username: user }
             );
             setUserInfo(userInfoResponse.data);
 
-            const ProfilePictureResponse = await axios.post("http://13.51.167.155/api/profile_picture", { username: user }, { responseType: 'blob' });
+            const ProfilePictureResponse = await axios.post("http://51.20.128.164/api/profile_picture", { username: user }, { responseType: 'blob' });
             const data = ProfilePictureResponse.data;
             const url = URL.createObjectURL(data);
             setUserInfo({ ...userInfoResponse.data, profile_picture: url });
 
-            const followedInfo = await axios.post("http://13.51.167.155/api/user_followings", { username: `${auth()?.username}` });
+            const followedInfo = await axios.post("http://51.20.128.164/api/user_followings", { username: `${auth()?.username}` });
             const follow = followedInfo.data[`${auth()?.username} follows`] || [];
             setFollowedUsers(follow);
 

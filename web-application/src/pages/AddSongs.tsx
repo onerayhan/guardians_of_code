@@ -8,12 +8,12 @@ import { useAuthUser } from 'react-auth-kit';
 import axios, {AxiosError} from 'axios';
 import { VStack } from '@chakra-ui/react'
 import { Button } from '@chakra-ui/react'
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import * as Yup from "yup";
 
 interface Song {
     song_name: string;
-    length: number;
+    length: string;
     tempo: number;
     recording_type: string;
     listens: number;
@@ -48,6 +48,7 @@ const AddSongs = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const toast = useToast();
+    const [spoti_auth, setSpotiAuth] = useState(false);
     const [isModalOpen, setModalOpen] = useState(false);
     const recordingTypes = ['LIVE', 'STUDIO', 'RADIO'];
     const handleOpenModal = () => setModalOpen(true);
@@ -63,7 +64,7 @@ const AddSongs = () => {
 
         try {
             await axios.post(
-                "http://13.51.167.155/api/add_song",
+                "http://51.20.128.164/api/add_song",
                 { username: `${auth()?.username}`, song_name: song.song_name, length: song.length, tempo: song.tempo, listens: song.listens, recording_type: song.recording_type, release_year: song.release_year, added_timestamp: addedTimestamp },
             );
 
@@ -74,6 +75,21 @@ const AddSongs = () => {
 
             console.log("Error: ", err);
         }}
+
+    useEffect(() => {
+        const fetch_spoti_status = async () => {
+            const apiUrl = `http://51.20.128.164/api/check_spoti_connection/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const data = response.data.check;
+                setSpotiAuth(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        fetch_spoti_status();
+    }, []);
     return (
         <body className="bg-[#081730]">
             <Header />
@@ -84,7 +100,7 @@ const AddSongs = () => {
                 {/* Left Column */}
                 <div className="w-1/2 text-center flex flex-col items-center justify-center pr-32">
                     <h1 className="text-white font-lalezar my-5 text-2xl">Option 1: Import Songs from Spotify</h1>
-                    {false ?
+                    {spoti_auth ?
                         <div>
                             <Button leftIcon={<FaSpotify />} textColor="black" colorScheme='green' variant='solid'>Add Songs From Spotify</Button>
                         </div>

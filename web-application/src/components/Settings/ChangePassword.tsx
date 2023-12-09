@@ -125,7 +125,7 @@ const ChangePassword = () =>
 
         try {
             await axios.post(
-                "http://13.51.167.155/api/change_password",
+                "http://51.20.128.164/api/change_password",
                 { username: values.username, old_password: values.old_password, new_password: values.new_password }
             );
             navigate("/");

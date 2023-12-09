@@ -27,7 +27,7 @@ const DeleteUserButton: React.FC = () => {
 
         try {
             await axios.post(
-                "http://13.51.167.155/api/user_delete",
+                "http://51.20.128.164/api/user_delete",
                 {username: auth()?.username}
             );
             handleSignOut();

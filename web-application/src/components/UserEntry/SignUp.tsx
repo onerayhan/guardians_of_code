@@ -168,12 +168,12 @@ const SignUp = () => {
 
         try {
             await axios.post(
-                "http://13.51.167.155/api/register",
+                "http://51.20.128.164/api/register",
                 { username: values.username, password: values.password, email: values.email, birthday: values.birthday }
             );
 
             const response_login = await axios.post(
-                "http://13.51.167.155/api/login",
+                "http://51.20.128.164/api/login",
                 { username: values.username, password: values.password }
             );
 

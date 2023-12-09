@@ -36,7 +36,7 @@ const MyDropzone: React.FC<{ onFileAccepted: (files: FileWithPreview[]) => void 
     return (
         <div {...getRootProps()} style={{ padding: 20, border: '2px dashed gray', textAlign: 'center' }}>
             <input {...getInputProps()} />
-            {isDragActive ? <p>Drop the files here ...</p> : <p>Accepted Formats Are: .txt, .json</p>}
+            {isDragActive ? <p>Drop the files here ...</p> : <p>Accepted Formats Are: .json</p>}
         </div>
     );
 };
@@ -56,7 +56,7 @@ const SongFileUpload: React.FC<SongFileUploadProps> = ({ isOpen, onClose }) => {
         files.forEach(file => formData.append('file', file));
 
         try {
-            const response = await axios.post('http://13.51.167.155/api/upload_song', formData, {
+            const response = await axios.post('http://51.20.128.164/api/upload_song', formData, {
 
             });
             setUploadStatus('success');

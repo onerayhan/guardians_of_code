@@ -54,7 +54,7 @@ const UserProfile = () => {
 
     useEffect(() => {
         const fetch_photo = async () => {
-            const apiUrl = "http://13.51.167.155/api/profile_picture";
+            const apiUrl = "http://51.20.128.164/api/profile_picture";
             try {
                 const response = await axios.post(apiUrl, { username: `${userId}` }, { responseType: 'blob' });
                 const data = response.data;
@@ -67,7 +67,7 @@ const UserProfile = () => {
         };
 
         const fetchMainUserFollows = async () => {
-            const apiUrl = "http://13.51.167.155/api/user_followings";
+            const apiUrl = "http://51.20.128.164/api/user_followings";
             try {
                 const response = await axios.post(apiUrl, { username: `${auth()?.username}` });
                 const data = response.data;
@@ -90,7 +90,7 @@ const UserProfile = () => {
         }
 
         const fetchUsers = async () => {
-            const apiUrl = "http://13.51.167.155/api/user_followings";
+            const apiUrl = "http://51.20.128.164/api/user_followings";
             try {
                 const response = await axios.post(apiUrl, { username: `${userId}` });
                 const data = response.data;
@@ -105,7 +105,7 @@ const UserProfile = () => {
         };
 
         const fetchGroups = async () => {
-            const apiUrl = "http://13.51.167.155/api/user_groups";
+            const apiUrl = "http://51.20.128.164/api/user_groups";
             try {
                 const response = await axios.post(apiUrl, {username: `${userId}`});
                 const data = response.data;
@@ -118,7 +118,7 @@ const UserProfile = () => {
         };
 
         const getSongs = async () => {
-            const apiUrl = "http://13.51.167.155/api/user_songs";
+            const apiUrl = "http://51.20.128.164/api/user_songs";
             try {
                 const response = await axios.post(apiUrl, { username: `${userId}` });
                 const data = response.data;
@@ -145,7 +145,7 @@ const UserProfile = () => {
     const FollowUser = async (user: string, followerUsername: string) => {
         try {
             await axios.post(
-                "http://13.51.167.155/api/follow",
+                "http://51.20.128.164/api/follow",
                 { follower_username: followerUsername, followed_username: user}
             );
 
@@ -196,7 +196,7 @@ const UserProfile = () => {
             useEffect(() => {
                 const fetch_photo = async () => {
                     const username = user;
-                    const apiUrl = "http://13.51.167.155/api/profile_picture";
+                    const apiUrl = "http://51.20.128.164/api/profile_picture";
                     try {
                         const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
                         const data = response.data;
@@ -231,7 +231,7 @@ const UserProfile = () => {
             useEffect(() => {
                 const fetch_photo = async () => {
                     const username = user;
-                    const apiUrl = "http://13.51.167.155/api/profile_picture";
+                    const apiUrl = "http://51.20.128.164/api/profile_picture";
                     try {
                         const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
                         const data = response.data;

@@ -3,7 +3,7 @@ import { BsSpotify } from "react-icons/bs";
 
 const Spotify_Entry_Handler: React.FC = () => {
     const handleAuthWindowOpen = (): void => {
-        const authUrl: string = 'http://13.51.167.155/spoti_login';
+        const authUrl: string = 'http://51.20.128.164/spoti_login';
         window.open(authUrl, "_blank")
     };
 

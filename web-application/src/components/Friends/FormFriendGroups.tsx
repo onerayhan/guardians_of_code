@@ -21,11 +21,6 @@ interface TagInputProps {
     // Define props here if needed
 }
 
-interface GroupInfo {
-    groupName: string;
-    tags: string[];
-}
-
 const FormFriendGroups: React.FC<TagInputProps> = () => {
     const [followers, setFollowers] = useState<string[]>([]);
     const [following, setFollowing] = useState<string[]>([]);
@@ -34,7 +29,7 @@ const FormFriendGroups: React.FC<TagInputProps> = () => {
 
     useEffect(() => {
         const fetchUsers = async () => {
-            const apiUrl = "http://13.51.167.155/api/user_followings";
+            const apiUrl = "http://51.20.128.164/api/user_followings";
             try {
                 const response = await axios.post(apiUrl, { username: `${auth()?.username}` });
                 const data = response.data;
@@ -64,17 +59,12 @@ const FormFriendGroups: React.FC<TagInputProps> = () => {
         setSelectedTags(selectedTags.filter(t => t !== tag));
     };
 
-    const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault();
-
-        const groupInfo: GroupInfo = {
-            groupName,
-            tags: selectedTags
-        };
+    const handleSubmit = async () => {
 
         try {
-            const url = '';
-            const response = await axios.post(url, groupInfo);
+            const tagsWithUsername = [...selectedTags, `${auth()?.username}`];
+            const url = 'http://51.20.128.164/api/form_groups';
+            const response = await axios.post(url, {user_arr: tagsWithUsername, group_name: groupName});
 
             console.log('Success:', response.data);
 
@@ -130,7 +120,7 @@ const FormFriendGroups: React.FC<TagInputProps> = () => {
                     ))}
                 </Stack>
 
-                <Button type="submit" colorScheme="orange" mt={4}><AiOutlineUsergroupAdd size={25}/>Form Friend Group</Button>
+                <Button colorScheme="orange" mt={4}><AiOutlineUsergroupAdd size={25}/>Form Friend Group</Button>
             </Box>
             </div>
         </div>
