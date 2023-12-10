@@ -56,13 +56,12 @@ Checkes whether the given user has established connection with spotify.
 **Request**
 
 - **Url** `/api/add_mobile_token/<username>`
-- **Method** `GET`
+- **Method** `POST`
 
 **Parameters**
 
 - `username`: The username of the user.
-- `access_token`: Token used to access the user's spotify account.
-- `refresh_token`: Token used to refresh the access_token.
+- `token_data`: Self evident.
 
 **Description**
 
@@ -314,7 +313,7 @@ Adds a new song to the database.
 
 **Song Object Parameters (only song_name is mandatory; others are optional)**
 
-- Same as add_song without the username parameter.
+- Same as add_song.
 
 **Example JSON Input**
 
@@ -329,7 +328,6 @@ Adds a new song to the database.
       "recording_type": "Studio",
       "listens": 5000,
       "release_year": "1971",
-      "added_timestamp": "2023-01-15T12:30:00",
       "album_name": "Imagine",
       "performer_name": "John Lennon",
       "genre": "Rock",

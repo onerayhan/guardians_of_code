@@ -137,14 +137,11 @@ class External_Service(db.Model):
     def get_refresh_token(self):        
         if self.token_data:
             token_data_dict = json.loads(self.token_data)
-            return token_data_dict.get('refresh_token')  
-
-        
+            return token_data_dict.get('refresh_token')       
 
 class Imported_Song(db.Model):
     __tablename__ = 'imported_song'
-    import_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'))
+    import_id = db.Column(db.Integer, primary_key=True, autoincrement=True)    
     service_id = db.Column(db.Integer, db.ForeignKey('external_service.service_id', ondelete='CASCADE'))
     external_song_id = db.Column(db.String(255))
     import_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())
