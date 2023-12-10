@@ -1,6 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from app import db
 
 class users(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)

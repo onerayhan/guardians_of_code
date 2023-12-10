@@ -2,21 +2,29 @@ from flask import Flask, jsonify, request, redirect, session, send_file, render_
 from flask_cors import CORS
 from urllib.parse import urlencode
 from config import Config
-from models import *
-from song_models import *
-from utils import *
 import base64
+import requests
 from datetime import datetime, timedelta
 import jwt
 from PIL import Image
 from io import BytesIO
 import spotipy
 import json
+from flask_sqlalchemy import SQLAlchemy
+import time
 
 app = Flask(__name__)
 CORS(app)
 app.config.from_object(Config)
+db = SQLAlchemy()
 db.init_app(app)
+
+
+time.sleep(1)
+
+from models import *
+from song_models import *
+from utils import *
 
 #Config.py hidden due to security reasons (same with ip4 address for ec2 instance)
 
@@ -99,9 +107,9 @@ def callback():
         return "Fail in callback // Hamzaya sor", 500    
 
 
-@app.route('/spoti/get_curr_user_tracks')
+@app.route('/spoti/get_curr_user_tracks/<username>')
 def get_curr_user_tracks():     
-    username = session['username']
+    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -125,9 +133,8 @@ def get_curr_user_tracks():
     
     return jsonify(results)
 
-@app.route('/spoti/get_user_top_tracks')
-def get__user_top_tracks():
-    username = session['username']
+@app.route('/spoti/get_user_top_tracks/<username>')
+def get__user_top_tracks(username):    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -151,9 +158,8 @@ def get__user_top_tracks():
     
     return jsonify(results)
 
-@app.route('/spoti/get_tracks_info/<track_id_arr>')
-def get_tracks_info(track_id_arr):
-    username = session['username']
+@app.route('/spoti/get_tracks_info/<username>/<track_id_arr>')
+def get_tracks_info(username, track_id_arr):    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -176,9 +182,9 @@ def get_tracks_info(track_id_arr):
         
     return jsonify(results)
 
-@app.route('/spoti/get_albums_info/<album_id_arr>')
-def get_albums_info(album_id_arr):
-    username = session['username']
+@app.route('/spoti/get_albums_info/<username>/<album_id_arr>')
+def get_albums_info(username, album_id_arr):
+    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -196,9 +202,9 @@ def get_albums_info(album_id_arr):
         
     return jsonify(results)
 
-@app.route('/spoti/get_artists_info/<artist_id_arr>')
-def get_artists_info(artist_id_arr):
-    username = session['username']
+@app.route('/spoti/get_artists_info/<username>/<artist_id_arr>')
+def get_artists_info(username, artist_id_arr):
+    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -215,9 +221,8 @@ def get_artists_info(artist_id_arr):
         
     return jsonify(results)
 
-@app.route('/spoti/get_artist_albums/<artist_id_arr>')
-def get_artist_album(artist_id_arr):
-    username = session['username']
+@app.route('/spoti/get_artist_albums/<username>/<artist_id_arr>')
+def get_artist_album(username, artist_id_arr):    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -235,9 +240,8 @@ def get_artist_album(artist_id_arr):
         
     return jsonify(results)
 
-@app.route('/spoti/get_artist_top_tracks/<artist_id_arr>')
-def get_artist_top_track(artist_id_arr):
-    username = session['username']
+@app.route('/spoti/get_artist_top_tracks/<username>/<artist_id_arr>')
+def get_artist_top_track(username, artist_id_arr):    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -260,9 +264,8 @@ def get_artist_top_track(artist_id_arr):
         
     return jsonify(results)
 
-@app.route('/spoti/get_recommendations', methods=['POST'])
-def get_recommendations():
-    username = session['username']
+@app.route('/spoti/get_recommendations/<username>', methods=['POST'])
+def get_recommendations():    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -298,9 +301,8 @@ def get_recommendations():
         
     return jsonify(results)    
   
-@app.route('/spoti/search', methods=['POST'])
-def spoti_search():
-    username = session['username']
+@app.route('/spoti/search/<username>', methods=['POST'])
+def spoti_search():    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -322,24 +324,23 @@ def check_spoti_connection(username):
     else:
         return jsonify({'check': 'false'})
 
-@app.route('/api/add_mobile_token', methods=['POST'])
+@app.route('/api/add_mobile_token/<username>', methods=['POST'])
 def add_mobile_token():
     data = request.get_json()
-    username = data.get('username')    
+        
     token_data = json.dumps(data.get('token_data'))
     
     external_service = External_Service.query.filter_by(username=username).first()
     if external_service:
-        external_service.access_token = token_data['access_token']
-        return "User already in database, refresh_token changed"
+        external_service.token_data = token_data
+        return "User connection already in database, taken data refreshed"
             
     else:
         db.session.add(External_Service(username=username,
                                         service_name='Spotify',                                        
                                         token_data=token_data))
         db.session.commit()
-        return "User added to the database."
-    
+        return "User connection added to the database."    
     
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -496,8 +497,8 @@ def add_song():
     if not song_name or not username:
         return jsonify({'error': 'A song name & username has to be given'}), 400
 
-    if is_duplicate(data):
-        return jsonify({'error': 'Song already exists!'}), 403
+    if is_duplicate(data) != False:
+        return jsonify({'error': 'Song already exists!', 'song_id of original': is_duplicate(data)}), 403
 
     new_song = Song(        
         song_name=data.get('song_name'),
@@ -556,9 +557,16 @@ def add_song():
             db.session.add(song_instrument)  
             db.session.commit()   
     
-        new_song.add_instrument(song_instrument)    
+        new_song.add_instrument(song_instrument)
+        
+    if data.get('external_service_id'):
+        external_service_id = data.get('external_service_id')
+        if is_duplicate_imported(external_service_id):
+            return jsonify({'error': 'Song already exists!', 'song_id of original': is_duplicate_imported(external_service_id)}), 403
+        else:
+            new_song.add_imported_song(external_service_id)
     
-    return jsonify({'message': f'{song_name} added successfully by {username}'}), 200
+    return jsonify({'message': f'{song_name} added successfully by {username}', 'song_id': new_song.song_id}), 200
 
 @app.route('/api/add_songs_batch', methods=['POST'])
 def add_songs_batch(): 
@@ -580,9 +588,8 @@ def add_songs_batch():
         if not song_name:
             return jsonify({'error': f'A song name has to be given at the song number: {index}'}), 400            
 
-        if is_duplicate(song):
-            #return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!'}), 403
-            continue            
+        if is_duplicate(song) != False:
+            return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!', 'song_id of original': is_duplicate(song).song_id}), 403                        
 
         new_song = Song(
             song_name=song.get('song_name'),
@@ -641,7 +648,14 @@ def add_songs_batch():
                 db.session.add(song_instrument) 
                 db.session.commit()       
             
-            new_song.add_instrument(song_instrument)          
+            new_song.add_instrument(song_instrument)
+            
+        if data.get('external_service_id'):
+            external_service_id = data.get('external_service_id')
+            if is_duplicate_imported(external_service_id):
+                return jsonify({'error': 'Song already exists!', 'song_id of original': is_duplicate_imported(external_service_id)}), 403
+            else:
+                new_song.add_imported_song(external_service_id)          
 
         response_data.append({'message': f'{song_name} added successfully by {username}'})
 
@@ -870,7 +884,7 @@ def all_song_ratings():
     return jsonify(ratings_data)
 
 @app.route('/api/all_album_ratings')
-def get_follower_album_ratings():
+def all_album_ratings():
     every_song_ratings = User_Album_Rating.query.all()
     if not every_song_ratings:
         every_song_ratings = []
@@ -883,7 +897,7 @@ def get_follower_album_ratings():
     return jsonify(ratings_data)
 
 @app.route('/api/all_performer_ratings')
-def get_follower_album_ratings():
+def all_performer_ratings():
     every_song_ratings = User_Performer_Rating.query.all()
     if not every_song_ratings:
         every_song_ratings = []
@@ -939,7 +953,7 @@ def get_follower_performer_ratings(username):
     return jsonify(ratings_data)
 
 @app.route('/api/group_song_ratings/<username>/<group_id>')
-def get_group_song_ratings(group_id):
+def get_group_song_ratings(username, group_id):
     data = request.get_json()
     username = data.get('username')
     if not username:
@@ -1318,7 +1332,7 @@ def get_all_song_info():
         
      
         
-@app.route('api/group_get_all_songs/<group_id>')
+@app.route('/api/group_get_all_songs/<group_id>')
 def group_get_all_songs(group_id):
     group_members_names = get_group_members(group_id)
     results = []

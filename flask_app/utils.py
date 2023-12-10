@@ -1,8 +1,8 @@
 import uuid
 import secrets
-from models import db, users, FollowSystem, Group, GroupUser
+from app import db
+from models import *
 from song_models import *
-import requests
 from config import Config
 from spotify_cred import *
 from spotipy.oauth2 import SpotifyOAuth
@@ -72,6 +72,8 @@ def song_name_to_performer_name(song_name):
 
 def song_name_to_genre_name(song_name):
     song_id = song_name_to_song(song_name).song_id
+    
+    
     song_genre = Song_Genre.query.filter_by(song_id=song_id).first()
     if song_genre:
         genre = Genre.query.filter_by(genre_id=song_genre.genre_id).first()
@@ -99,9 +101,12 @@ def song_name_to_instrument_name(song_name):
 
 def get_user_songs(user):
     songs = Song.query.filter_by(username = user.username).all()
+    if not songs:
+        return []
+        
     results = []
     
-    for song in songs:
+    for song in songs:        
         val = {'username': user.username,
                'songs_name': song.song_name,
                'song_id': song.song_id,
@@ -109,7 +114,8 @@ def get_user_songs(user):
                'album': song_name_to_album_name(song.song_name),
                'performer': song_name_to_performer_name(song.song_name),
                'mood': song_name_to_mood_name(song.song_name),
-               'instrument': song_name_to_instrument_name(song.song_name)}
+               'instrument': song_name_to_instrument_name(song.song_name)
+               }
         results.append(val)
         
     return results
@@ -158,18 +164,26 @@ def get_token(username):
     token_valid = True
     return access_token, token_valid
 
+def is_duplicate_imported(external_service_id):
+    imported_song = Imported_Song.query.filter_by(external_service_id=external_service_id).first()
+    if imported_song:
+        return imported_song.external_service_id
+    else:
+        return False
+
 def is_duplicate(song_data):
     existing_song = Song.query.filter_by(
         song_name=song_data.get('song_name'),
         length=song_data.get('length'),
         listens=song_data.get('listens'),
-        tempo=song_data.get('tempo')
-    ).first()
+        tempo=song_data.get('tempo')).first()   
+    
 
     if existing_song:
-        return True
+        return existing_song.song_id
     else:
-        return False 
+        return False
+             
     
 def form_group(group_name, username_arr):
     
@@ -195,6 +209,16 @@ def get_group_members(group_id):
         results.append(member.username)
         
     return results
+
+def get_external_songs(username):
+    imported_songs = Imported_Song.query.filter_by(username=username).all()
+    results = []
+    if imported_songs:
+        for song in imported_songs:
+            val = {'external_service_id': song.external_service_id}
+            results.append(val)    
+    
+    return val        
 
 def group_song_ratings(group_id):
     members = GroupUser.query.filter_by(group_id=group_id).all()
