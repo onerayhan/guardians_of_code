@@ -36,13 +36,6 @@ class TableModule extends React.Component<TableModuleProps, TableModuleState> {
     render() {
         return (
             <div className="py-20 text-center">
-                <h1 className="text-6xl font-bold">Create Your Own Tables!</h1>
-                <div className="py-2"></div>
-                <p className="text-xl font-bold">Drag and drop the attributes you want to see in your table.</p>
-                <p className="text-xl font-bold">You can also change the table to a graph by clicking on the graph button.</p>
-                <p className="text-xl font-bold">You can also change the graph type by clicking on the graph type button.</p>
-                <div className="py-8"></div>
-
                 <div className="flex justify-center">
                     <PivotTableUI
                     {...this.state.pivotState}

@@ -120,7 +120,7 @@ const FormFriendGroups: React.FC<TagInputProps> = () => {
                     ))}
                 </Stack>
 
-                <Button colorScheme="orange" mt={4}><AiOutlineUsergroupAdd size={25}/>Form Friend Group</Button>
+                <Button onClick={handleSubmit} colorScheme="orange" mt={4}><AiOutlineUsergroupAdd size={25}/>Form Friend Group</Button>
             </Box>
             </div>
         </div>

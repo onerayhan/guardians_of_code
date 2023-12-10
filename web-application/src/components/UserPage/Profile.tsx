@@ -11,7 +11,13 @@ import axios from "axios";
 import { IoPersonRemove } from "react-icons/io5";
 import { MdOutlineBlock } from "react-icons/md";
 import {useSpotify} from "../../contexts/SpotifyContext.tsx";
+import TweetButton from "../../APIClasses/TweetButton.tsx";
 
+interface groupProps {
+    groupName: string;
+    group_members: string[];
+    groupID: number;
+}
 
 function Profile() {
     const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
@@ -20,7 +26,7 @@ function Profile() {
     const [showGroupsModal, setShowGroupsModal] = useState(false);
     const [followers, setFollowers] = useState<string[]>([]);
     const [following, setFollowing] = useState<string[]>([]);
-    const [groups, setGroups] = useState<string[]>([]);
+    const [groups, setGroups] = useState<groupProps[]>([]);
     const [spoti_auth, setSpotiAuth] = useState(false);
     const auth = useAuthUser();
     const username = auth()?.username;
@@ -58,17 +64,22 @@ function Profile() {
         };
 
         const fetchGroups = async () => {
-            const apiUrl = `http://51.20.128.164/api/display/display_user_group/${auth()?.username}`;
+            const apiUrl = `http://51.20.128.164/api/display_user_group/${auth()?.username}`;
             try {
                 const response = await axios.get(apiUrl);
                 const data = response.data;
-                const groupNames = data[`Groups of ${auth()?.username}`] || [];
 
-                setGroups(groupNames);
-                } catch (error) {
-                    console.log(error);
-                }
-            };
+                const groups: groupProps[] = data.map((group: any) => ({
+                    groupName: group.group_name,
+                    groupMembers: group.group_members,
+                    groupID: group.group_id
+                }));
+
+                setGroups(groups);
+            } catch (error) {
+                console.log(error);
+            }
+        };
 
         const fetch_spoti_status = async () => {
             const apiUrl = `http://51.20.128.164/api/check_spoti_connection/${username}`;
@@ -208,12 +219,25 @@ function Profile() {
             );
         };
 
-        const GroupsDisplay = ({ group }: { group: string }) => {
+        const GroupsDisplay = ({ group }: { group: groupProps }) => {
 
+            const apiUrl = "http://51.20.128.164/remove_user_from_group";
+            const handleLeaveGroup = async () => {
+                try {
+                    const response = await axios.post(apiUrl, { username: `${auth()?.username}`, group_id: `${group.groupID}` });
+                    const data = response.data;
+                    console.log(data);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
             return(
                 <Box p={4} display="flex" alignItems="center" justifyContent="space-between" bg="gray.100" borderRadius="md">
-                    <span>{group}</span>
-                    <Button colorScheme="red" onClick={() => navigate(`/group/${group}`)}><AiOutlineUsergroupDelete />Leave Group</Button>
+                    <Button onClick={() => navigate(`/group/${group.groupName}`, { state: { groupMembers: group.group_members } })}>
+                        {group.groupName}
+                    </Button>
+                    <Button colorScheme="red" onClick={handleLeaveGroup}><AiOutlineUsergroupDelete />Leave Group</Button>
                 </Box>
             );
         }
@@ -261,7 +285,7 @@ function Profile() {
                     <Modal.Body>
                         <Stack spacing={4}>
                             {groups.map(groups => (
-                                <GroupsDisplay key={groups} group={groups} />
+                                <GroupsDisplay key={groups.groupID} group={groups} />
                             ))}
                         </Stack>
                     </Modal.Body>
@@ -278,20 +302,22 @@ function Profile() {
           <div className="flex justify-center items-center mx-0 my-2.5">
               <UserList />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Button onClick={handleClick} leftIcon={<MdBuild />} colorScheme='orange' variant='solid'>
+          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <Button onClick={handleClick} leftIcon={<MdBuild/>} colorScheme='orange' variant='solid'>
                   Settings
               </Button>
               {spoti_auth ?
                   <Button isDisabled={true}>Spotify Connected</Button> :
-                  <Button onClick={handleSpotifyIntegration} textColor="black" leftIcon={<FaSpotify />} colorScheme='green' variant='solid'>
+                  <Button onClick={handleSpotifyIntegration} textColor="black" leftIcon={<FaSpotify/>}
+                          colorScheme='green' variant='solid'>
                       Connect to Spotify
                   </Button>
               }
+              <TweetButton shareType=""/>
           </div>
       </div>
-      <div className="py-5">
-      </div>
+        <div className="py-5">
+        </div>
     </div>
   );
 }

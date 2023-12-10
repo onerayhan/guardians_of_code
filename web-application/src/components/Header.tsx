@@ -10,6 +10,7 @@ import { useSignOut } from 'react-auth-kit';
 import { useState } from 'react';
 import { Avatar } from 'flowbite-react';
 import axios from "axios";
+import { FaShare } from "react-icons/fa6";
 
 const Header: React.FC = () => {
   const buttonStyle = 
@@ -129,10 +130,18 @@ const Header: React.FC = () => {
     }
   };
 
-  const handleSignOut = () => {
+  const navigateToShare = () => {
+    const username = auth()?.username;
+    if (username) {
+      navigate(`/${username}/share`);
+    }
+  };
+
+  const handleSignOut = async () => {
     if (isAuthenticated()) {
       navigate("/");
       signOut();
+      await axios.get("http://51.20.128.164/api/logout");
     }
   };
 
@@ -254,21 +263,38 @@ const Header: React.FC = () => {
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
               </svg>
             </button>
-            <div id="dropdownDivider" ref={dropdownRef} style={{ width: dropdownToggleRef.current?.offsetWidth }} className={`absolute z-10 ${dropdownOpen && scrollDirection !== "down" ? '' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg mt-[220px] shadow dark:bg-gray-700 dark:divide-gray-600`}>
+            <div id="dropdownDivider" ref={dropdownRef} style={{ width: dropdownToggleRef.current?.offsetWidth }} className={`absolute z-10 ${dropdownOpen && scrollDirection !== "down" ? '' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg mt-[260px] shadow dark:bg-gray-700 dark:divide-gray-600`}>
               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDividerButton">
                 <li>
-                  <a onClick={navigateToUserPage} className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'><FiUser size={15}/></div>My Profile</a>
+                  <a onClick={navigateToUserPage}
+                     className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white">
+                    <div className='pr-[8px]'><FiUser size={15}/></div>
+                    My Profile</a>
                 </li>
                 <li>
-                  <a onClick={navigateToSongAdd} className="flex items-center justify-start  px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'>
-                    <LuMusic4 size={15}/></div>Add Songs</a>
+                  <a onClick={navigateToSongAdd}
+                     className="flex items-center justify-start  px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white">
+                    <div className='pr-[8px]'>
+                      <LuMusic4 size={15}/></div>
+                    Add Songs</a>
                 </li>
                 <li>
-                  <a onClick={navigateToSettings} className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white"><div className='pr-[8px]'><FiSettings size={15}/></div>Settings</a>
+                  <a onClick={navigateToSettings}
+                     className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white">
+                    <div className='pr-[8px]'><FiSettings size={15}/></div>
+                    Settings</a>
+                </li>
+                <li>
+                  <a onClick={navigateToShare}
+                     className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white">
+                    <div className='pr-[8px]'><FaShare size={15}/></div>
+                    Share</a>
                 </li>
               </ul>
               <div className="py-2">
-                <a onClick={handleSignOut} className="flex items-center justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"><div className='pr-[8px]'><BiLogOut size={15}/></div>Log Out</a>
+                <a onClick={handleSignOut}
+                   className="flex items-center justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                  <div className='pr-[8px]'><BiLogOut size={15}/></div>Log Out</a>
               </div>
             </div>
           </div>

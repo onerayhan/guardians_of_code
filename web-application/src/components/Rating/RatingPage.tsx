@@ -16,7 +16,7 @@ import {
     useCheckbox,
     chakra,
     Icon,
-    UseCheckboxProps, useCheckboxGroup, HStack, VStack
+    UseCheckboxProps, useCheckboxGroup, HStack, VStack, Radio, RadioGroup
 } from '@chakra-ui/react'
 import React, { useEffect, useState} from 'react';
 import {useAuthUser} from "react-auth-kit";
@@ -63,12 +63,28 @@ function RatingPage() {
     const auth = useAuthUser();
     const toast = useToast();
     const navigate = useNavigate();
-    const [rateType, setRateType] = useState<string>('');
     const [genre, setGenre] = useState<string>('');
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
     const [selectedSongs, setSelectedSongs] = useState<{ [songId: number]: boolean }>({});
     const [ratings, setRatings] = useState<{ [songId: number]: number }>({});
+    const [rateType, setRateType] = React.useState('1');
+    const [spotiStatus, setSpotiAuth] = useState<boolean>(false);
+
+    useEffect(() => {
+        const fetch_spoti_status = async () => {
+            const apiUrl = `http://51.20.128.164/api/check_spoti_connection/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const data = response.data.check;
+                setSpotiAuth(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        fetch_spoti_status();
+    }, []);
 
     const toggleSongSelection = (songId: number, isSelected: boolean) => {
         setSelectedSongs(prevSelections => ({
@@ -116,7 +132,6 @@ function RatingPage() {
         );
 
     };
-
 
     const addGenre = () => {
         if (genre && !selectedGenres.includes(genre)) {
@@ -365,7 +380,22 @@ function RatingPage() {
                             ))}
                         </Stack>
 
-                        <div className="px-20"></div>
+                        <div className="px-5"></div>
+
+                        <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
+                            <Box bg="white" maxW='sm' borderWidth='1px' borderRadius='lg' p={1} overflow='hidden'>
+                                <div className="px-1"></div>
+                                <RadioGroup onChange={setRateType} value={rateType}>
+                                    <Stack direction='row'>
+                                        <Radio value='1' className="text-white">Armonify</Radio>
+                                        <Radio value='2' className="text-white" isDisabled={!spotiStatus}>Spotify</Radio>
+                                    </Stack>
+                                </RadioGroup>
+                            </Box>
+                        </Stack>
+
+
+                        <div className="px-5"></div>
 
                         <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
                             <Button colorScheme="facebook">

@@ -6,6 +6,16 @@ import {
     Box, Flex, Heading
 } from '@chakra-ui/react';
 import {MemoizationModule} from "../../contexts/chartMemo.tsx";
+import SongRatingTrendsOverTimeChart from './ChartRenderers/SongRatingTrendsOverTimeChart';
+import AlbumRatingDistributionChart from './chartRenderers/AlbumRatingDistributionChart';
+import PerformerRatingComparisonChart from './chartRenderers/PerformerRatingComparisonChart';
+import UserGenrePreferencesChart from './chartRenderers/UserGenrePreferencesChart';
+import UserAlbumPreferencesChart from './chartRenderers/UserAlbumPreferencesChart';
+import UserPerformerPreferencesChart from './chartRenderers/UserPerformerPreferencesChart';
+import FollowingsGenrePreferencesChart from './chartRenderers/FollowingsGenrePreferencesChart';
+import FollowingsAlbumPreferencesChart from './chartRenderers/FollowingsAlbumPreferencesChart';
+import FollowingsPerformerPreferencesChart from './chartRenderers/FollowingsPerformerPreferencesChart';
+
 
 interface SongRating {
     song_id: string;
@@ -212,7 +222,9 @@ const ChartModule = () => {
                 </Select>
             </Flex>
             <Box mt={10}>
-                {renderChart()}
+                <div className="relative flex flex-col items-center">
+                    {renderChart()}
+                </div>
             </Box>
         </div>
     );

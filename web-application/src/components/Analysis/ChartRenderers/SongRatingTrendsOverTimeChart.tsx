@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 interface SongRating {
     song_id: string;
     rating: number;
-    rating_timestamp: string; // Ensure this is in ISO format or similar for ease of parsing
+    rating_timestamp: string; // This should be in ISO format or similar for ease of parsing
 }
 
 interface SongRatingTrendsOverTimeChartProps {
@@ -33,24 +33,30 @@ const SongRatingTrendsOverTimeChart: React.FC<SongRatingTrendsOverTimeChartProps
         const x = d3.scaleTime().range([0, width]);
         const y = d3.scaleLinear().range([height, 0]);
 
-        // Define the line
+
         const valueline = d3.line<SongRating>()
-            .defined(d => parseTime(d.rating_timestamp) !== null)
-            .x(d => x(parseTime(d.rating_timestamp)!))
+            // Define the line
+            // @ts-ignore
+            .x(d => x(parseTime(d.rating_timestamp)))
             .y(d => y(d.rating));
 
-        // Append the svg object to the chart container
+        // Append the svg object to the body of the page
         const chartSvg = svg.append("g")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Calculate extent and set the domain for the x-scale
-        const timeExtent = d3.extent(data, d => parseTime(d.rating_timestamp));
-        x.domain(timeExtent as [Date, Date]);
+        // Scale the range of the data
+
+        // @ts-ignore
+        x.domain(d3.extent(data, d => parseTime(d.rating_timestamp)));
+
+        // @ts-ignore
         y.domain([0, d3.max(data, d => d.rating)]);
 
-        // Add the valueline path
+        // Add the valueline path.
         chartSvg.append("path")
-            .datum(data)
+            .data([data])
             .attr("class", "line")
             .attr("d", valueline);
 

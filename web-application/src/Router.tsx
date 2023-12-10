@@ -15,6 +15,8 @@ import { RequireAuth } from 'react-auth-kit'
 import { useIsAuthenticated } from 'react-auth-kit'
 import { useAuthUser } from 'react-auth-kit'
 import UserProfile from './pages/UserProfile';
+import GroupPage from "./pages/GroupPage.tsx";
+import SharePage from "./pages/ShareContent.tsx";
 
 const AppRouter = () => {
 
@@ -36,6 +38,14 @@ const AppRouter = () => {
             </RequireAuth>
           } 
         />
+          <Route
+              path="/:username/share"
+              element={
+                  <RequireAuth loginPath="/signin">
+                      <SharePage />
+                  </RequireAuth>
+              }
+          />
           <Route path="/user/:userId" element={<UserProfile />} />
         <Route 
           path="/:username/analysis"
@@ -45,6 +55,14 @@ const AppRouter = () => {
             </RequireAuth>
           } 
         />
+          <Route
+              path="/group/:groupName"
+              element={
+                  <RequireAuth loginPath="/signin">
+                      <GroupPage  />
+                  </RequireAuth>
+              }
+          />
         <Route 
           path="/:username/friends"
           element={
