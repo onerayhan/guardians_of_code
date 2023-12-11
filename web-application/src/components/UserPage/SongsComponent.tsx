@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Tabs, TabList, TabPanels, Tab, TabPanel, Thead, Th, Td, Flex} from '@chakra-ui/react'
+import {Tabs, TabList, TabPanels, Tab, TabPanel, Thead, Th, Td, Flex, Spacer} from '@chakra-ui/react'
 import {GoThumbsup} from "react-icons/go";
 import {MdOutlineDataset} from "react-icons/md";
 import { useAuthUser } from "react-auth-kit";
@@ -82,32 +82,14 @@ const SongsComponent:React.FC = () => {
         }
     };
 
-    const rateSong = async (song_id: number) => {
-        const apiUrl = "http://51.20.128.164/api/delete_song";
-        try {
-            console.log(song_id);
-            await axios.post(apiUrl, { username: `${auth()?.username}`, song_id: song_id });
-            toast({
-                title: `Song successfully re-rated!`,
-                status: "success",
-            })
-
-        } catch (error) {
-            console.error("Error rating song:", error);
-            toast({
-                title: `Something went wrong while deleting the song. Please try again.`,
-                status: "error",
-            })
-        }
-    };
-
   //const [Liked, setLiked] = useState<SongsArray[]>([]);
   const [Posted, setPosted] = useState<SongsArray[]>([]);
   const [Rated, setRated] = useState<RatedArray[]>([]);
   const [ratings, setRatings] = useState<{ [songId: number]: number }>({});
   const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
+  const [tabIndex, setTabIndex] = useState(0);
 
-    const auth = useAuthUser();
+  const auth = useAuthUser();
 
   const SongDisplay = ({ song }: { song: SongsArray }) => {
 
@@ -193,7 +175,7 @@ const SongsComponent:React.FC = () => {
         getSongs();
     }, []);
 
-    const sendRatings = () => {
+    const sendRatings = async () => {
 
         for (const songId in ratings) {
             if (ratings.hasOwnProperty(songId)) {
@@ -203,17 +185,19 @@ const SongsComponent:React.FC = () => {
     };
 
   return (
-      <div className="relative flex flex-col items-center bg-[#F3F0F7] rounded-xl mx-60 p-8">
-          <Tabs variant='soft-rounded' colorScheme='blue'>
-              <Flex justifyContent="space-between" alignItems="center" mb={4}>
-                  <Tabs variant='soft-rounded' colorScheme='blue'>
+      <div className="relative flex flex-col items-center bg-[#F3F0F7] rounded-xl mx-60 p-8 overflow-x-auto">
+          <Flex justifyContent="space-between" alignItems="flex-start" w="full">
+              <Tabs variant='soft-rounded' colorScheme='blue' onChange={(index) => setTabIndex(index)}>
+                  <Flex alignItems="center" mb={4}>
                       <TabList>
                           <Tab><FaStar size={20}/>Rated Songs</Tab>
                           <Tab><FaDatabase size={20}/>Added Songs</Tab>
                       </TabList>
-                  </Tabs>
-                  <Button colorScheme="green" onClick={sendRatings}><IoIosRefreshCircle size={20}/>Complete Re-rating</Button>
-              </Flex>
+                      <div className="px-80"></div>
+                      {tabIndex === 0 && (
+                          <Button colorScheme="green" onClick={sendRatings}><IoIosRefreshCircle size={20}/>Complete re-rating</Button>
+                      )}
+                  </Flex>
               <TabPanels>
                   <TabPanel>
                       <div className="relative w-full flex flex-col items-center top-10 pb-8">
@@ -267,10 +251,10 @@ const SongsComponent:React.FC = () => {
                   </TabPanel>
               </TabPanels>
           </Tabs>
-
+          </Flex>
       </div>
-
-  );
+)
+    ;
 };
 
 

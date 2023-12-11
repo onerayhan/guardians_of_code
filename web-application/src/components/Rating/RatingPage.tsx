@@ -16,7 +16,7 @@ import {
     useCheckbox,
     chakra,
     Icon,
-    UseCheckboxProps, useCheckboxGroup, HStack, VStack, Radio, RadioGroup
+    UseCheckboxProps, useCheckboxGroup, HStack, VStack, Radio, RadioGroup, Input
 } from '@chakra-ui/react'
 import React, { useEffect, useState} from 'react';
 import {useAuthUser} from "react-auth-kit";
@@ -28,7 +28,7 @@ import {useNavigate} from "react-router-dom";
 import GenreInput from "./GenreInput.tsx";
 import AlbumInput from "./AlbumInput.tsx";
 import ArtistInput from "./ArtistInput.tsx";
-import {FaMusic, FaCalendarAlt, FaClock, FaStar} from 'react-icons/fa';
+import {FaMusic, FaCalendarAlt, FaClock, FaStar, FaDatabase} from 'react-icons/fa';
 import { MdAlbum } from 'react-icons/md';
 import { IoMdMicrophone } from "react-icons/io";
 import {IoRefreshCircleSharp} from "react-icons/io5";
@@ -59,14 +59,18 @@ interface RatingStarsProps {
 
 
 function RatingPage() {
-    const [RatingSongs, setRatingSongs] = useState<Song[]>([]);
+    const [RatingSongsSpoti, setRatingSongsSpoti] = useState<Song[]>([]);
+    const [RatingSongsArmoni, setRatingSongsArmoni] = useState<Song[]>([]);
     const auth = useAuthUser();
     const toast = useToast();
     const navigate = useNavigate();
     const [genre, setGenre] = useState<string>('');
+    const [artist, setArtist] = useState<string>('');
+    const [album, setAlbum] = useState<string>('');
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+    const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
+    const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
     const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
-    const [selectedSongs, setSelectedSongs] = useState<{ [songId: number]: boolean }>({});
     const [ratings, setRatings] = useState<{ [songId: number]: number }>({});
     const [rateType, setRateType] = React.useState('1');
     const [spotiStatus, setSpotiAuth] = useState<boolean>(false);
@@ -86,12 +90,39 @@ function RatingPage() {
         fetch_spoti_status();
     }, []);
 
-    const toggleSongSelection = (songId: number, isSelected: boolean) => {
-        setSelectedSongs(prevSelections => ({
-            ...prevSelections,
-            [songId]: isSelected,
+    const fetch_recom_songs = async () => {
+        const apiUrl = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`;
+        const response = await axios.post(apiUrl, { seed_genres: selectedGenres, seed_artists: selectedArtists, seed_albums: selectedAlbums });
+        const fetchedSongs = response.data.map((song: any) => ({
+            song_photo: song.song_photo,
+            song_name: song.song_name,
+            artist_name: song.artist_name,
+            album_name: song.album_name,
+            genre: song.genre,
+            duration: song.duration,
+            year: song.year,
         }));
-    };
+        setRatingSongsSpoti(fetchedSongs);
+    }
+
+    const getRecommendations = async () => {
+        const apiUrl = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`;
+        const response = await axios.post(apiUrl, { seed_genres: selectedGenres, seed_artists: selectedArtists, seed_albums: selectedAlbums });
+        const fetchedSongs = response.data.map((song: any) => ({
+            song_photo: song.song_photo,
+            song_name: song.song_name,
+            artist_name: song.artist_name,
+            album_name: song.album_name,
+            genre: song.genre,
+            duration: song.duration,
+            year: song.year,
+        }));
+        setRatingSongsArmoni(fetchedSongs);
+    }
+
+    const getSpotifyRecom = async () => {
+        fetch_recom_songs();
+    }
 
     const updateRating = (songId: number, newRating: number) => {
         setSongRatings(prevRatings => ({
@@ -130,7 +161,10 @@ function RatingPage() {
                 </Button>
             </div>
         );
+    };
 
+    const handleGenreChange = (event) => {
+        setGenre(event.target.value);
     };
 
     const addGenre = () => {
@@ -140,8 +174,38 @@ function RatingPage() {
         }
     };
 
+    const handleArtistChange = (event) => {
+        setArtist(event.target.value);
+    };
+
+    const addArtist = () => {
+        if (genre && !selectedGenres.includes(genre)) {
+            setSelectedGenres([...selectedArtists, artist]);
+            setArtist('');
+        }
+    };
+
+    const handleAlbumChange = (event) => {
+        setAlbum(event.target.value);
+    };
+
+    const addAlbum = () => {
+        if (genre && !selectedGenres.includes(genre)) {
+            setSelectedGenres([...selectedAlbums, album]);
+            setAlbum('');
+        }
+    };
+
     const removeGenre = (genreToRemove: string) => {
         setSelectedGenres(selectedGenres.filter(g => g !== genreToRemove));
+    };
+
+    const removeAlbum = (albumToRemove: string) => {
+        setSelectedAlbums(selectedAlbums.filter(g => g !== albumToRemove));
+    };
+
+    const removeArtist = (artistToRemove: string) => {
+        setSelectedArtists(selectedArtists.filter(g => g !== artistToRemove));
     };
 
     const handleArtistNavigate = (artistName: string) => {
@@ -222,164 +286,150 @@ function RatingPage() {
         );
     };
 
-    useEffect(() => {
-        const mockSongs: Song[] = [
-            {
-                song_photo: "https://i.scdn.co/image/ab67616d0000b273e3b6b8b6b6b6b6b6b6b6b6b6",
-                song_id: 16,
-                song_name: "Mock Song 1",
-                artist_name: "Mock Artist 1",
-                album_name: "Mock Album 1",
-                genre: "Pop",
-                duration: "3:45",
-                year: 2020,
-            },
-            {
-                song_photo: "https://i.scdn.co/image/ab67616d0000b273e3b6b8b6b6b6b6b6b6b6b6b6",
-                song_id: 51,
-                song_name: "Mock Song 223422",
-                artist_name: "Mock Artist 2",
-                album_name: "Mock Album 2",
-                genre: "Rock",
-                duration: "4:05",
-                year: 2019,
-            },            {
-                song_photo: undefined,
-                song_id: 11,
-                song_name: "Mock Song 12",
-                artist_name: "Mock Artist 1",
-                album_name: "Mock Album 1",
-                genre: "Pop",
-                duration: "3:45",
-                year: 2020,
-            },
-            {
-                song_photo: undefined,
-                song_id: 13,
-                song_name: "Mock Song 22",
-                artist_name: "Mock Artist 2",
-                album_name: "Mock Album 2",
-                genre: "Rock",
-                duration: "4:05",
-                year: 2019,
-            },
-            {
-                song_photo: undefined,
-                song_id: 231,
-                song_name: "Mock Song 12231",
-                artist_name: "Mock Artist 1",
-                album_name: "Mock Album 1",
-                genre: "Pop",
-                duration: "3:45",
-                year: 2020,
-            },
-            {
-                song_photo: undefined,
-                song_id: 31,
-                song_name: "Mock Song 2543",
-                artist_name: "Mock Artist 2",
-                album_name: "Mock Album 2",
-                genre: "Rock",
-                duration: "4:05",
-                year: 2019,
-            },
-            {
-                song_photo: undefined,
-                song_id: 1123,
-                song_name: "Mock Song 121",
-                artist_name: "Mock Artist 1",
-                album_name: "Mock Album 1",
-                genre: "Pop",
-                duration: "3:45",
-                year: 2020,
-            },
-            {
-                song_photo: undefined,
-                song_id: 541,
-                song_name: "Mock Song 232",
-                artist_name: "Mock Artist 2",
-                album_name: "Mock Album 2",
-                genre: "Rock",
-                duration: "4:05",
-                year: 2019,
-            },            {
-                song_photo: undefined,
-                song_id: 112,
-                song_name: "Mock Song 231",
-                artist_name: "Mock Artist 1",
-                album_name: "Mock Album 1",
-                genre: "Pop",
-                duration: "3:45",
-                year: 2020,
-            },
-            {
-                song_photo: undefined,
-                song_id: 1642,
-                song_name: "Mock Song 31232",
-                artist_name: "Mock Artist 2",
-                album_name: "Mock Album 2",
-                genre: "Rock",
-                duration: "4:05",
-                year: 2019,
-            },
-        ];
+    const RateDisplaySongSpoti = ({ song }: { song: Song }) => {
 
-        setRatingSongs(mockSongs);
-    }, []);
+        const addSongToDB = async () => {
+            const apiUrl = "http://51.20.128.164/api/add_song";
+            try {
+                const response = await axios.post(apiUrl, { song_name: `${song.song_name}`, artist_name: `${song.artist_name}`, album_name: `${song.album_name}`, genre: `${song.genre}`, duration: `${song.duration}`, year: `${song.year}` });
+                const data = response.data;
+                console.log(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        
+        return (
+            <Card maxW='500px'>
+                <CardBody>
+                    <Stack spacing={3}>
+                        <Avatar size="xl" className="pl-5" img={song.song_photo}/>
+                        <div className="px-2"></div>
+                        <Flex alignItems="center">
+                            <Icon as={FaMusic} w={5} h={5} mr={2}/>
+                            <div className="px-2"></div>
+                            <Text className="font-semibold">{song.song_name}</Text>
+                        </Flex>
+                        <div className="px-2"></div>
+                        <Flex alignItems="center">
+                            <Icon as={IoMdMicrophone} w={5} h={5} mr={2}/>
+                            <Button variant='ghost'
+                                    onClick={() => handleArtistNavigate(song.artist_name)}>{song.artist_name}</Button>
+                        </Flex>
+                        <Flex alignItems="center">
+                            <Icon as={MdAlbum} w={5} h={5} mr={2}/>
+                            <Button variant='ghost'
+                                    onClick={() => handleAlbumNavigate(song.album_name)}>{song.album_name}</Button>
+                        </Flex>
+                        <div className="px-2"></div>
+                        <Flex alignItems="center">
+                            <Icon as={IoMdOptions} w={5} h={5} mr={2}/>
+                            <div className="px-2"></div>
+                            <Text className="font-semibold">{song.genre}</Text>
+                        </Flex>
+                        <div className="px-2"></div>
+                        <Flex alignItems="center">
+                            <Icon as={FaClock} w={5} h={5} mr={2}/>
+                            <div className="px-2"></div>
+                            <Text className="font-semibold">{song.duration}</Text>
+                        </Flex>
+                        <div className="px-2"></div>
+                        <Flex alignItems="center">
+                            <Icon as={FaCalendarAlt} w={5} h={5} mr={2}/>
+                            <div className="px-2"></div>
+                            <Text className="font-semibold">{song.year}</Text>
+                        </Flex>
+                    </Stack>
+                </CardBody>
+                <Divider />
+                <CardFooter>
+                    <VStack className="flex align-center">
+                        <Button leftIcon={FaDatabase} colorScheme="yellow" onClick={addSongToDB}>Add to Database</Button>
+                    </VStack>
+                </CardFooter>
+            </Card>
+        );
+    };
 
     return (
         <div>
             <div className="overflow-y-auto">
                 <div className="relative w-full flex flex-col items-center top-12 py-8">
                     <h1 className="text-6xl font-lalezar text-white">Rate Songs to Get Recommendations.</h1>
-                    <h1 className="text-2xl font-lalezar text-white">Rate Songs Between 1-5, the ones that you did not rate do not count!</h1>
+                    <h1 className="text-2xl font-lalezar text-white">These are also recommendations by Armonify™! </h1>
                 </div>
                 <div>
                     <div className="py-8"></div>
                     <Flex align="center" justify="center">
+
+                        {/* Genre Section */}
                         <Box className="flex flex-col">
-                            <GenreInput/>
+                            <Flex>
+                                <Input
+                                    placeholder="Type Genre..."
+                                    value={genre}
+                                    onChange={handleGenreChange}
+                                    size="sm"
+                                    mr={2}
+                                    className="text-white"
+                                />
+                                <Button onClick={addGenre} size="sm">Add Genre</Button>
+                            </Flex>
+                            <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                {selectedGenres.map((tag, index) => (
+                                    <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
+                                        <TagLabel>{tag}</TagLabel>
+                                        <TagCloseButton onClick={() => removeGenre(tag)}/>
+                                    </Tag>
+                                ))}
+                            </Stack>
                         </Box>
-
-                        <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                            {selectedGenres.map((tag, index) => (
-                                <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                    <TagLabel>{tag}</TagLabel>
-                                    <TagCloseButton onClick={() => removeGenre(tag)}/>
-                                </Tag>
-                            ))}
-                        </Stack>
-
                         <div className="px-5"></div>
-
+                        {/* Artist Section */}
                         <Box className="flex flex-col">
-                            <ArtistInput/>
+                            <Flex>
+                                <Input
+                                    placeholder="Type Artist..."
+                                    value={artist}
+                                    onChange={handleArtistChange}
+                                    size="sm"
+                                    mr={2}
+                                    className="text-white"
+                                />
+                                <Button onClick={addArtist} size="sm">Add Artist</Button>
+                            </Flex>
+                            <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                {selectedArtists.map((tag, index) => (
+                                    <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
+                                        <TagLabel>{tag}</TagLabel>
+                                        <TagCloseButton onClick={() => removeArtist(tag)}/>
+                                    </Tag>
+                                ))}
+                            </Stack>
                         </Box>
-
-                        <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                            {selectedGenres.map((tag, index) => (
-                                <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                    <TagLabel>{tag}</TagLabel>
-                                    <TagCloseButton onClick={() => removeGenre(tag)}/>
-                                </Tag>
-                            ))}
-                        </Stack>
-
                         <div className="px-5"></div>
-
+                        {/* Album Section */}
                         <Box className="flex flex-col">
-                            <AlbumInput/>
+                            <Flex>
+                                <Input
+                                    placeholder="Type Album..."
+                                    value={album}
+                                    onChange={handleAlbumChange}
+                                    size="sm"
+                                    mr={2}
+                                    className="text-white"
+                                />
+                                <Button onClick={addAlbum} size="sm">Add Album</Button>
+                            </Flex>
+                            <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                {selectedAlbums.map((tag, index) => (
+                                    <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
+                                        <TagLabel>{tag}</TagLabel>
+                                        <TagCloseButton onClick={() => removeAlbum(tag)}/>
+                                    </Tag>
+                                ))}
+                            </Stack>
                         </Box>
-
-                        <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                            {selectedGenres.map((tag, index) => (
-                                <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                    <TagLabel>{tag}</TagLabel>
-                                    <TagCloseButton onClick={() => removeGenre(tag)}/>
-                                </Tag>
-                            ))}
-                        </Stack>
-
                         <div className="px-5"></div>
 
                         <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
@@ -393,15 +443,22 @@ function RatingPage() {
                                 </RadioGroup>
                             </Box>
                         </Stack>
-
-
+                        
                         <div className="px-5"></div>
 
-                        <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                            <Button colorScheme="facebook">
-                                Get Songs to Rate
-                            </Button>
-                        </Stack>
+                        {rateType === '1' ? (
+                            <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
+                                <Button colorScheme="facebook" onClick={getRecommendations}>
+                                    Get Songs to Rate
+                                </Button>
+                            </Stack>
+                        ) : (
+                            <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
+                                <Button colorScheme="facebook" onClick={getSpotifyRecom}>
+                                    Get Spotify Songs
+                                </Button>
+                            </Stack>
+                        )}
 
                     </Flex>
                     <SimpleGrid
@@ -411,20 +468,29 @@ function RatingPage() {
                         spacing={4}
                         templateColumns='repeat(5, 1fr)'
                     >
-                        {RatingSongs.slice(0, 15).map((song, index) => (
-                            <RateDisplaySong key={song.song_name} song={song}/>
-                        ))}
+                        {rateType === '1' ? (
+                            RatingSongsArmoni.slice(0, 15).map((song, index) => (
+                                    <RateDisplaySong key={song.song_name} song={song}/>
+                                ))
+                        ) : (
+                            RatingSongsSpoti.slice(0, 15).map((song, index) => (
+                                    <RateDisplaySongSpoti key={song.song_name} song={song}/>
+                                ))
+                        )}
                     </SimpleGrid>
                 </div>
             </div>
             <div className="flex items-center justify-center bg-[#081730]">
-                {/* Left Column */}
-                <div className="w-1/2 text-center flex flex-col items-center justify-center pr-32">
-                    <RefreshButton/>
-                </div>
+                {rateType === '1' ? (
+                    <div className="w-1/2 text-center flex flex-col items-center justify-center pr-32">
+                        <RefreshButton/>
+                    </div>
+                ) : (
+                    <></>
+                    )
+                }
             </div>
         </div>
     );
-}
-
+};
 export default RatingPage;

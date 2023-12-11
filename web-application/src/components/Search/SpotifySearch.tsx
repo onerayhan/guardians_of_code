@@ -37,7 +37,7 @@ interface Song {
 }
 
 const SpotifySearch: React.FC = () => {
-    const [searchType, setSearchType] = useState('song'); // Default search type
+    const [searchType, setSearchType] = useState('tracks'); // Default search type
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<Song[] | Artist[] | Album[]>([]);
 
@@ -63,7 +63,7 @@ const SpotifySearch: React.FC = () => {
 
     const responseParser = (data: any) => {
         switch (searchType) {
-            case 'song':
+            case 'tracks':
                 const songs = data.tracks.items.map((item: any) => ({
                     song_photo: item.album.images[0].url,
                     song_id: item.id,
@@ -111,8 +111,8 @@ const SpotifySearch: React.FC = () => {
                     onChange={handleSearchTypeChange}
                     value={searchType}
                 >
-                    <option value="song">Song</option>
-                    <option value="album">Album</option>
+                    <option value="tracks">Song</option>
+                    <option value="albums">Album</option>
                     <option value="performer">Performer</option>
                 </select>
 

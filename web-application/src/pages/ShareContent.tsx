@@ -5,7 +5,7 @@ import ExportCSV from "../components/Share/ExportCSV";
 const SharePage = () => {
 
     return (
-        <body className="bg-[#081730]">
+        <body className="bg-[#081730] overflow-y-auto">
         <Header/>
         <div className="flex justify-center mt-20">
             <h1 className="text-5xl text-white font-lalezar">Share your Results On Twitter</h1>
