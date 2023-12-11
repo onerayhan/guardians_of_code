@@ -36,6 +36,20 @@ def song_id_to_song(song_id):
     song = Song.query.filter_by(song_id=song_id).first()
     return song
 
+def song_id_to_song_name(song_id):
+    song = Song.query.filter_by(song_id=song_id).first()
+    if song:
+        return song.song_name
+    else:
+        return None
+    
+def song_id_to_imported_song(song_id):
+    imported_song = Imported_Song.query.filter_by(song_id=song_id).first()
+    if imported_song:
+        return imported_song.external_song_id
+    else:
+        return None
+
 def album_id_to_album(album_id):
     album = Album.query.filter_by(album_id=album_id).first()
     return album
@@ -48,12 +62,19 @@ def album_name_to_album(album_name):
     album = Album.query.filter_by(name=album_name).first()
     return album
 
-def performer_name_to_performer(performer_name):
+def performer_name_to_performer(performer_name):    
+    
     performer = Performer.query.filter_by(name=performer_name).first()
     return performer
     
 def song_name_to_album_name(song_name):
-    song_id = song_name_to_song(song_name).song_id
+    
+    if song_name_to_song(song_name):
+        song_id = song_name_to_song(song_name).song_id
+        
+    else:
+        return None
+    
     song_album = Song_Album.query.filter_by(song_id=song_id).first()
     if song_album:
         album = Album.query.filter_by(album_id=song_album.album_id).first()
@@ -62,7 +83,13 @@ def song_name_to_album_name(song_name):
     return None
 
 def song_name_to_performer_name(song_name):
-    song_id = song_name_to_song(song_name).song_id
+    
+    if song_name_to_song(song_name):
+        song_id = song_name_to_song(song_name).song_id
+        
+    else:
+        return None
+    
     song_performer = Song_Performer.query.filter_by(song_id=song_id).first()
     if song_performer:
         performer = Performer.query.filter_by(performer_id=song_performer.performer_id).first()
@@ -70,9 +97,14 @@ def song_name_to_performer_name(song_name):
         
     return None
 
+
 def song_name_to_genre_name(song_name):
-    song_id = song_name_to_song(song_name).song_id
     
+    if song_name_to_song(song_name):
+        song_id = song_name_to_song(song_name).song_id
+    
+    else:
+        return None    
     
     song_genre = Song_Genre.query.filter_by(song_id=song_id).first()
     if song_genre:
@@ -82,7 +114,13 @@ def song_name_to_genre_name(song_name):
     return None
 
 def song_name_to_mood_name(song_name):
-    song_id = song_name_to_song(song_name).song_id
+    
+    if song_name_to_song(song_name):
+        song_id = song_name_to_song(song_name).song_id
+        
+    else:
+        return None
+    
     song_mood = Song_Mood.query.filter_by(song_id=song_id).first()
     if song_mood:
         mood = Mood.query.filter_by(mood_id=song_mood.mood_id).first()
@@ -91,7 +129,13 @@ def song_name_to_mood_name(song_name):
     return None
 
 def song_name_to_instrument_name(song_name):
-    song_id = song_name_to_song(song_name).song_id
+    
+    if song_name_to_song(song_name):
+        song_id = song_name_to_song(song_name).song_id
+        
+    else:
+        return None    
+    
     song_instrument = Song_Instrument.query.filter_by(song_id=song_id).first()
     if song_instrument:
         instrument = Instrument.query.filter_by(instrument_id=song_instrument.instrument_id).first()
@@ -164,10 +208,10 @@ def get_token(username):
     token_valid = True
     return access_token, token_valid
 
-def is_duplicate_imported(external_service_id):
-    imported_song = Imported_Song.query.filter_by(external_service_id=external_service_id).first()
+def is_duplicate_imported(external_song_id):
+    imported_song = Imported_Song.query.filter_by(external_song_id=external_song_id).first()
     if imported_song:
-        return imported_song.external_service_id
+        return imported_song.external_song_id
     else:
         return False
 
@@ -235,7 +279,8 @@ def group_song_ratings(group_id):
                    'album': song_name_to_album_name(song_name),
                    'song': song_name,
                    'song_rating': rated_song.rating,
-                   'rating_timestamp': rated_song.rating_timestamp}
+                   'rating_timestamp': rated_song.rating_timestamp,
+                   'external_service_id' : song_id_to_imported_song(rated_song.rating_id)}
             
             results.append(val)           
         

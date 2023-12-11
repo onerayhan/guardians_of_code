@@ -874,15 +874,14 @@ def all_song_ratings():
         
     ratings_data = [{"username": rating.username,
                      "song_id": rating.song_id,
-                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.rating_id)),
-                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.rating_id)),
-                     "album": song_name_to_album_name(song_id_to_song_name(rating.rating_id)),
-                     "song": song_id_to_song_name(rating.rating_id),
+                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.song_id)),
+                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.song_id)),
+                     "album": song_name_to_album_name(song_id_to_song_name(rating.song_id)),
+                     "song": song_id_to_song_name(rating.song_id),
                      "song_rating": rating.rating,
                      "rating_timestamp": rating.rating_timestamp,
-                     "external_service_id" : song_id_to_imported_song(rating.rating_id)} for rating in every_song_ratings]
-    
-    ratings_data.append(get_external_songs(username))
+                     "external_service_id" : song_id_to_imported_song(rating.song_id)} for rating in every_song_ratings]   
+
     
     return jsonify(ratings_data)
 
@@ -914,27 +913,28 @@ def all_performer_ratings():
 
 @app.route('/api/follower_song_ratings/<username>')
 def get_follower_song_ratings(username):
-    follower_usernames = follower_finder(username)
+    user = username_to_user(username)
+    follower_usernames = follower_finder(user)
     for follower_username in follower_usernames:
         user_ratings = User_Song_Rating.query.filter_by(username=follower_username).all()
     
     ratings_data = [{"username": rating.username,
                      "song_id": rating.song_id,
-                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.rating_id)),
-                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.rating_id)),
-                     "album": song_name_to_album_name(song_id_to_song_name(rating.rating_id)),
-                     "song": song_id_to_song_name(rating.rating_id),
+                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.song_id)),
+                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.song_id)),
+                     "album": song_name_to_album_name(song_id_to_song_name(rating.song_id)),
+                     "song": song_id_to_song_name(rating.song_id),
                      "song_rating": rating.rating,
                      "rating_timestamp": rating.rating_timestamp,
-                     "external_service_id" : song_id_to_imported_song(rating.rating_id)} for rating in user_ratings]
+                     "external_service_id" : song_id_to_imported_song(rating.song_id)} for rating in user_ratings]   
     
-    ratings_data.append(get_external_songs(username))
     
     return jsonify(ratings_data)
 
 @app.route('/api/follower_album_ratings/<username>')
 def get_follower_album_ratings(username):
-    follower_usernames = follower_finder(username)
+    user = username_to_user(username)
+    follower_usernames = follower_finder(user)
     for follower_username in follower_usernames:
         user_ratings = User_Album_Rating.query.filter_by(username=follower_username).all()
     
@@ -947,7 +947,8 @@ def get_follower_album_ratings(username):
 
 @app.route('/api/follower_performer_ratings/<username>')
 def get_follower_performer_ratings(username):
-    follower_usernames = follower_finder(username)
+    user = username_to_user(username)
+    follower_usernames = follower_finder(user)
     for follower_username in follower_usernames:
         user_ratings = User_Performer_Rating.query.filter_by(username=follower_username).all()
     
@@ -1001,13 +1002,13 @@ def get_user_song_ratings(username):
         user_ratings = []
         
     ratings_data = [{"song_id": rating.song_id,
-                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.rating_id)),
-                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.rating_id)),
-                     "album": song_name_to_album_name(song_id_to_song_name(rating.rating_id)),
-                     "song": song_id_to_song_name(rating.rating_id),
+                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.song_id)),
+                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.song_id)),
+                     "album": song_name_to_album_name(song_id_to_song_name(rating.song_id)),
+                     "song": song_id_to_song_name(rating.song_id),
                      "song_rating": rating.rating,                     
                      "rating_timestamp": rating.rating_timestamp,
-                     "external_service_id" : song_id_to_imported_song(rating.rating_id)} for rating in user_ratings]
+                     "external_service_id" : song_id_to_imported_song(rating.song_id)} for rating in user_ratings]
     
    
     
