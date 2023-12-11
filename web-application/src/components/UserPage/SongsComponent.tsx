@@ -231,7 +231,7 @@ const SongsComponent:React.FC = () => {
     };
 
   return (
-      <div className="relative flex flex-col items-center bg-[#F3F0F7] rounded-xl mx-60 p-8 overflow-x-auto">
+      <div className="relative flex flex-col items-center bg-[#F3F0F7] rounded-xl mx-20 p-8 overflow-x-auto">
           <Flex justifyContent="space-between" alignItems="flex-start" w="full">
               <Tabs variant='soft-rounded' colorScheme='blue' onChange={(index) => setTabIndex(index)}>
                   <Flex alignItems="center" mb={4}>

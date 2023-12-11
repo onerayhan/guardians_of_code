@@ -86,7 +86,7 @@ function Profile() {
             try {
                 const response = await axios.get(apiUrl);
                 const data = response.data.check;
-                setSpotiAuth(data);
+                setSpotiAuth(data === "true");
             } catch (error) {
                 console.log(error);
             }
@@ -313,7 +313,6 @@ function Profile() {
                       Connect to Spotify
                   </Button>
               }
-              <TweetButton shareType=""/>
           </div>
       </div>
         <div className="py-5">
