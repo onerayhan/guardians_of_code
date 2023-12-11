@@ -41,14 +41,21 @@ import Ratings from "react-star-ratings";
 import {Avatar} from "flowbite-react";
 
 interface Song {
-    song_photo: string | undefined;
-    song_id: number;
+    song_id: string;
     song_name: string;
-    artist_name: string;
+    song_photo: string | undefined;
+    length: string;
+    tempo: number;
+    recording_type: string;
+    listens: number;
+    release_year: number;
+    added_timestamp: string;
+    username: string;
     album_name: string;
+    performer_name: string;
+    mood: string;
     genre: string;
-    duration: string;
-    year: number;
+    instrument: string;
 }
 
 interface RatingStarsProps {
@@ -58,9 +65,10 @@ interface RatingStarsProps {
 }
 
 
+
 function RatingPage() {
-    const [RatingSongsSpoti, setRatingSongsSpoti] = useState<Song[]>([]);
-    const [RatingSongsArmoni, setRatingSongsArmoni] = useState<Song[]>([]);
+    const [RatingSongsRecom, setRatingSongsRecom] = useState<Song[]>([]);
+    const [RatingSongsOwn, setRatingSongsOwn] = useState<Song[]>([]);
     const auth = useAuthUser();
     const toast = useToast();
     const navigate = useNavigate();
@@ -71,24 +79,8 @@ function RatingPage() {
     const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
     const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
     const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
-    const [ratings, setRatings] = useState<{ [songId: number]: number }>({});
-    const [rateType, setRateType] = React.useState('1');
-    const [spotiStatus, setSpotiAuth] = useState<boolean>(false);
-
-    useEffect(() => {
-        const fetch_spoti_status = async () => {
-            const apiUrl = `http://51.20.128.164/api/check_spoti_connection/${auth()?.username}`;
-            try {
-                const response = await axios.get(apiUrl);
-                const data = response.data.check;
-                setSpotiAuth(data);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-
-        fetch_spoti_status();
-    }, []);
+    const [ratings, setRatings] = useState<Array<{ rating_type: string, song_id: number, rating: number }>>([]);
+    const [rateType, setRateType] = React.useState('2');
 
     const fetch_recom_songs = async () => {
         const apiUrl = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`;
@@ -102,27 +94,23 @@ function RatingPage() {
             duration: song.duration,
             year: song.year,
         }));
-        setRatingSongsSpoti(fetchedSongs);
+        setRatingSongsRecom(fetchedSongs);
     }
 
-    const getRecommendations = async () => {
-        const apiUrl = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`;
-        const response = await axios.post(apiUrl, { seed_genres: selectedGenres, seed_artists: selectedArtists, seed_albums: selectedAlbums });
-        const fetchedSongs = response.data.map((song: any) => ({
-            song_photo: song.song_photo,
-            song_name: song.song_name,
-            artist_name: song.artist_name,
-            album_name: song.album_name,
-            genre: song.genre,
-            duration: song.duration,
-            year: song.year,
-        }));
-        setRatingSongsArmoni(fetchedSongs);
-    }
+    useEffect(() => {
+        const getSongs = async () => {
+            const apiUrl = "http://51.20.128.164/api/user_songs";
+            try {
+                const response = await axios.post(apiUrl, { username: `${auth()?.username}` });
+                const data = response.data;
+                setRatingSongsOwn(data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
 
-    const getSpotifyRecom = async () => {
-        fetch_recom_songs();
-    }
+        getSongs();
+    }, []);
 
     const updateRating = (songId: number, newRating: number) => {
         setSongRatings(prevRatings => ({
@@ -130,20 +118,25 @@ function RatingPage() {
             [songId]: newRating
         }));
 
-        setRatings(prevRatings => ({
+        setRatings(prevRatings => [
             ...prevRatings,
-            [songId]: newRating
-        }));
+            { rating_type: "song_rate", song_id: songId, rating: newRating }
+        ]);
     };
 
     const RefreshButton = () =>
     {
-        const sendRatings = () => {
-
-            for (const songId in ratings) {
-                if (ratings.hasOwnProperty(songId)) {
-                    console.log(`Song ID: ${songId}, Rating: ${ratings[songId]}`);
-                }
+        const sendRatings = async () => {
+            const apiUrl = "http://51.20.128.164/api/add_rate_batch";
+            try {
+                await axios.post(apiUrl, { username: `${auth()?.username}`, ratings: ratings });
+                toast({
+                    title: `Song were successfully rated!`,
+                    status: "success",
+                })
+                window.location.reload();
+            } catch (error) {
+                console.log(error);
             }
         };
 
@@ -238,7 +231,7 @@ function RatingPage() {
                         <Flex alignItems="center">
                             <Icon as={IoMdMicrophone} w={5} h={5} mr={2}/>
                             <Button variant='ghost'
-                                    onClick={() => handleArtistNavigate(song.artist_name)}>{song.artist_name}</Button>
+                                    onClick={() => handleArtistNavigate(song.performer_name)}>{song.performer_name}</Button>
                         </Flex>
                         <Flex alignItems="center">
                             <Icon as={MdAlbum} w={5} h={5} mr={2}/>
@@ -255,13 +248,13 @@ function RatingPage() {
                         <Flex alignItems="center">
                             <Icon as={FaClock} w={5} h={5} mr={2}/>
                             <div className="px-2"></div>
-                            <Text className="font-semibold">{song.duration}</Text>
+                            <Text className="font-semibold">{song.length}</Text>
                         </Flex>
                         <div className="px-2"></div>
                         <Flex alignItems="center">
                             <Icon as={FaCalendarAlt} w={5} h={5} mr={2}/>
                             <div className="px-2"></div>
-                            <Text className="font-semibold">{song.year}</Text>
+                            <Text className="font-semibold">{song.release_year}</Text>
                         </Flex>
                     </Stack>
                 </CardBody>
@@ -438,7 +431,7 @@ function RatingPage() {
                                 <RadioGroup onChange={setRateType} value={rateType}>
                                     <Stack direction='row'>
                                         <Radio value='1' className="text-white">Armonify</Radio>
-                                        <Radio value='2' className="text-white" isDisabled={!spotiStatus}>Spotify</Radio>
+                                        <Radio value='2' className="text-white">My Songs</Radio>
                                     </Stack>
                                 </RadioGroup>
                             </Box>
@@ -448,16 +441,12 @@ function RatingPage() {
 
                         {rateType === '1' ? (
                             <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                                <Button colorScheme="facebook" onClick={getRecommendations}>
+                                <Button colorScheme="facebook" onClick={fetch_recom_songs}>
                                     Get Songs to Rate
                                 </Button>
                             </Stack>
                         ) : (
-                            <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                                <Button colorScheme="facebook" onClick={getSpotifyRecom}>
-                                    Get Spotify Songs
-                                </Button>
-                            </Stack>
+                            <></>
                         )}
 
                     </Flex>
@@ -469,26 +458,21 @@ function RatingPage() {
                         templateColumns='repeat(5, 1fr)'
                     >
                         {rateType === '1' ? (
-                            RatingSongsArmoni.slice(0, 15).map((song, index) => (
+                            RatingSongsRecom.slice(0, 15).map((song, index) => (
                                     <RateDisplaySong key={song.song_name} song={song}/>
                                 ))
                         ) : (
-                            RatingSongsSpoti.slice(0, 15).map((song, index) => (
-                                    <RateDisplaySongSpoti key={song.song_name} song={song}/>
+                            RatingSongsOwn.slice(0, 15).map((song, index) => (
+                                    <RateDisplaySong key={song.song_name} song={song}/>
                                 ))
                         )}
                     </SimpleGrid>
                 </div>
             </div>
             <div className="flex items-center justify-center bg-[#081730]">
-                {rateType === '1' ? (
-                    <div className="w-1/2 text-center flex flex-col items-center justify-center pr-32">
-                        <RefreshButton/>
-                    </div>
-                ) : (
-                    <></>
-                    )
-                }
+                <div className="w-1/2 text-center flex flex-col items-center justify-center pr-32">
+                    <RefreshButton/>
+                </div>
             </div>
         </div>
     );

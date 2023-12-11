@@ -19,17 +19,24 @@ import { FaStar } from "react-icons/fa";
 import { IoIosRemoveCircle } from "react-icons/io";
 import Ratings from "react-star-ratings";
 import { IoIosRefreshCircle } from "react-icons/io";
+import {useNavigate} from "react-router-dom";
 
 interface SongsArray {
-    song_id: number;
+    song_id: string;
     song_name: string;
     length: string;
-    tempo: string;
+    tempo: number;
     recording_type: string;
     listens: number;
     release_year: number;
     added_timestamp: string;
-  }
+    username: string;
+    album_name: string;
+    performer_name: string;
+    mood: string;
+    genre: string;
+    instrument: string;
+}
 
 interface RatedArray {
     song_id: number;
@@ -43,8 +50,10 @@ interface RatedArray {
 
 const SongsComponent:React.FC = () => {
 
+  const navigate = useNavigate();
+
   const toast = useToast();
-  const deleteSong = async (song_id: number) => {
+  const deleteSong = async (song_id: string) => {
     const apiUrl = "http://51.20.128.164/api/delete_song";
     try {
         console.log(song_id);
@@ -63,6 +72,13 @@ const SongsComponent:React.FC = () => {
     }
   };
 
+  const navigateArtist = async (artist_name: string) => {
+    navigate(`/artist/${artist_name}`);
+  }
+
+    const navigateAlbum = async (album_name: string) => {
+    navigate(`/album/${album_name}`);
+    }
     const deleteRate = async (song_id: number) => {
         const apiUrl = "http://51.20.128.164/api/delete_song";
         try {
@@ -76,7 +92,7 @@ const SongsComponent:React.FC = () => {
         } catch (error) {
             console.error("Error deleting song:", error);
             toast({
-                title: `Something went wrong while deleting the song. Please try again.`,
+                title: `Something went wrong while deleting the rates of the song. Please try again.`,
                 status: "error",
             })
         }
@@ -97,10 +113,22 @@ const SongsComponent:React.FC = () => {
         <Tr>
           <Td>{song.song_name}</Td>
           <Td>{song.length}</Td>
-          <Td>{song.tempo}</Td>
-          <Td>{song.recording_type}</Td>
-          <Td isNumeric>{song.listens}</Td>
-          <Td isNumeric>{song.release_year}</Td>
+            <Td>
+                {song.performer_name ? (
+                    <Button onClick={() => navigateArtist(song.performer_name)}>
+                        {song.performer_name}
+                    </Button>
+                ) : null}
+            </Td>
+            <Td>
+                {song.album_name ? (
+                    <Button onClick={() => navigateAlbum(song.album_name)}>
+                        {song.album_name}
+                    </Button>
+                ) : null}
+            </Td>
+          <Td>{song.genre}</Td>
+          <Td>{song.release_year}</Td>
           <Td><Timestamp date={song.added_timestamp} /></Td>
           <Td>
             <Button onClick={() => deleteSong(song.song_id)} colorScheme="red">
@@ -172,7 +200,25 @@ const SongsComponent:React.FC = () => {
         }
       };
 
+      const getRatings = async () => {
+          const apiUrl = `http://51.20.128.164/api/user_song_ratings/${auth()?.username}`;
+          try {
+              const response = await axios.get(apiUrl);
+              const data = response.data;
+              const songObjects = data[`${auth()?.username}_song_ratings`];
+              if (songObjects) {
+                  setRated(songObjects);
+              } else {
+                  console.log("No song ratings found for the user");
+              }
+              setRated(data);
+          } catch (error) {
+              console.log(error);
+          }
+      };
+
         getSongs();
+        getRatings();
     }, []);
 
     const sendRatings = async () => {
@@ -202,7 +248,7 @@ const SongsComponent:React.FC = () => {
                   <TabPanel>
                       <div className="relative w-full flex flex-col items-center top-10 pb-8">
                           <div className="rounded-xl bg-white">
-                              <TableContainer maxH="500px">
+                              <TableContainer>
                                   <Table variant="simple" colorScheme='purple' size="lg">
                                       <Thead>
                                           <Tr>
@@ -227,15 +273,15 @@ const SongsComponent:React.FC = () => {
                   <TabPanel>
                       <div className="relative w-full flex flex-col items-center top-10 pb-8">
                           <div className="rounded-xl bg-white">
-                              <TableContainer maxH="500px">
+                              <TableContainer>
                                   <Table variant="simple" colorScheme='purple' size="lg">
                                       <Thead>
                                           <Tr>
                                               <Th>Song Name</Th>
                                               <Th>Length</Th>
-                                              <Th>Tempo</Th>
-                                              <Th>Recording Type</Th>
-                                              <Th>Listens</Th>
+                                              <Th>Artist(s)</Th>
+                                              <Th>Album</Th>
+                                              <Th>Genre</Th>
                                               <Th isNumeric>Release Year</Th>
                                               <Th isNumeric>Post Date</Th>
                                               <Th></Th>

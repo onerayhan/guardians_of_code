@@ -11,22 +11,35 @@ import ArtistInput from "../Rating/ArtistInput.tsx";
 import AlbumInput from "../Rating/AlbumInput.tsx";
 import {Avatar} from "flowbite-react";
 import {FaDatabase} from "react-icons/fa";
+import {useNavigate} from "react-router-dom";
 
-interface Song {
-  song_id: number;
-  song_photo: string | undefined;
-  song_name: string;
-  artist_name: string;
+interface Track {
+  track_name: string;
   album_name: string;
-  genre: string;
-  duration: string;
-  year: number;
-  basis_of_recommendation: string;
+  artist_names: ArtistName[];
+  popularity: number;
+  track_id: string;
+  track_release_year: string;
+  track_duration_minutes: number;
+  track_photo_urls: PhotoURL[];
+  album_id: string;
+  artist_ids: ArtistID[];
 }
 
+interface ArtistName {
+  artist_name: string;
+}
+
+interface PhotoURL {
+  photo_url: string;
+}
+
+interface ArtistID {
+  artist_id: string;
+}
 function RecommendationsTable() {
-  const [RecomSongsSpoti, setRecomSongsSpoti] = useState<Song[]>([]);
-  const [RecomSongsArmonify, setRecomSongsArmonify] = useState<Song[]>([]);
+  const [RecomSongsSpoti, setRecomSongsSpoti] = useState<Track[]>([]);
+  const [RecomSongsArmonify, setRecomSongsArmonify] = useState<Track[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
   const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
@@ -36,6 +49,7 @@ function RecommendationsTable() {
   const [recomType, setRecomType] = useState('1');
   const [spotiStatus, setSpotiStatus] = useState(false);
   const auth = useAuthUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetch_spoti_status = async () => {
@@ -52,15 +66,7 @@ function RecommendationsTable() {
     const fetch_recom_songs = async () => {
       const apiUrl = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`;
       const response = await axios.post(apiUrl, { seed_genres: selectedGenres, seed_artists: selectedArtists, seed_albums: selectedAlbums });
-      const fetchedSongs = response.data.map((song: any) => ({
-        song_photo: song.song_photo,
-        song_name: song.song_name,
-        artist_name: song.artist_name,
-        album_name: song.album_name,
-        genre: song.genre,
-        duration: song.duration,
-        year: song.year,
-      }));
+      const fetchedSongs = response.data;
       setRecomSongsSpoti(fetchedSongs);
     }
 
@@ -76,7 +82,7 @@ function RecommendationsTable() {
     }
   }, [selectedArtists, selectedAlbums, selectedGenres]);
 
-  const addSongToDB = async ({ song }: { song: Song }) => {
+  const addSongToDB = async ({ song }: { song: Track }) => {
     const apiUrl = "http://51.20.128.164/api/add_song";
     try {
       const response = await axios.post(apiUrl, { username: `${auth()?.username}`, song_name: `${song.song_name}`, artist_name: `${song.artist_name}`, album_name: `${song.album_name}`, genre: `${song.genre}`, duration: `${song.duration}`, year: `${song.year}` });
@@ -85,6 +91,14 @@ function RecommendationsTable() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const navigateAlbum = (albumName: string, albumId: string) => {
+    navigate(`/spoti/album/${albumName}`, { state: { albumId: albumId } });
+  };
+
+  const navigatePerformer = (artistName: string, artistId: string) => {
+    navigate(`/spoti/artist/${artistName}`, { state: { artistId: artistId } });
   };
 
   const handleGenreChange = (event) => {
@@ -221,35 +235,49 @@ function RecommendationsTable() {
               <Table variant="simple" colorScheme='purple' size="lg">
                 <Thead>
                   <Tr>
+                    <Th>Photo</Th>
                     <Th>Song Name</Th>
-                    <Th>Artist Name</Th>
+                    <Th>Artist Names</Th>
                     <Th>Album Name</Th>
-                    <Th>Genre</Th>
+                    <Th>Popularity</Th>
                     <Th>Duration</Th>
                     <Th>Year</Th>
+                    <Th></Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {RecomSongsSpoti.map((song, index) => (
                   <Tr key={index}>
-                    <Td><Avatar img={song.song_photo} size="xl" /></Td>
-                    <Td>{song.song_name}</Td>
-                    <Td>{song.artist_name}</Td>
-                    <Td>{song.album_name}</Td>
-                    <Td>{song.genre}</Td>
-                    <Td>{song.duration}</Td>
-                    <Td>{song.year}</Td>
+                    <Td><Avatar img={song.track_photo_urls[0]?.photo_url} size="xl" /></Td>
+                    <Td>{song.track_name}</Td>
                     <Td>
-                        <Button
-                            variant='solid'
-                            colorScheme='yellow'
-                            leftIcon={FaDatabase}
-                            onClick={() => addSongToDB({song})}
-                        >
-                            <div className="px-1"></div>
-                            Add to Database
-                        </Button>
+                      {
+                        song.artist_names.map((artist, index) => (
+                            <Button
+                                key={index}
+                                onClick={() => navigatePerformer(artist.artist_name, song.artist_ids[index].artist_id)}
+                                variant="link"
+                            >
+                              {artist.artist_name}
+                            </Button>
+                        ))
+                      }
                     </Td>
+                    <Td><Button onClick={() => navigateAlbum(song.album_name, song.album_id)}>{song.album_name}</Button></Td>
+                    <Td>{song.popularity}</Td>
+                    <Td>{song.track_duration_minutes} minutes</Td>
+                    <Td>{song.track_release_year}</Td>
+                    <Td>
+                      <Button
+                          variant='solid'
+                          colorScheme='yellow'
+                          leftIcon={FaDatabase}
+                          onClick={() => addSongToDB({song})}
+                      >
+                        Add to Database
+                      </Button>
+                    </Td>
+
                   </Tr>
                   ))}
                 </Tbody>

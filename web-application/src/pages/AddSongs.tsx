@@ -105,13 +105,19 @@ const AddSongs = () => {
                 <Formik
                     initialValues={
                         {
+                            song_id: '',
                             song_name: '',
                             length: '',
                             tempo: '',
                             recording_type: '',
-                            release_year: '',
                             listens: '',
-                            added_timestamp: ''
+                            release_year: '',
+                            added_timestamp: '',
+                            album_name: '',
+                            performer_name: '',
+                            mood: '',
+                            genre: '',
+                            instrument: ''
                         }
                     }
                     validationSchema={validationSchema}
@@ -195,6 +201,51 @@ const AddSongs = () => {
                                 {errors.release_year && touched.release_year ? (
                                     <p className="text-red-500 font">{errors.release_year}</p>
                                 ) : null}
+                            </div>
+                            <div className="relative">
+                                <div>
+                                    <Field
+                                        name="album_name"
+                                        className="w-[400px] h-12 text-center font-semibold text-black text-opacity-80 rounded-xl"
+                                        placeholder="Album Name"
+                                    />
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <div>
+                                    <Field
+                                        name="performer_name"
+                                        className="w-[400px] h-12 text-center font-semibold text-black text-opacity-80 rounded-xl"
+                                        placeholder="Performer Name"
+                                    />
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <div>
+                                    <Field
+                                        name="mood"
+                                        className="w-[400px] h-12 text-center font-semibold text-black text-opacity-80 rounded-xl"
+                                        placeholder="Mood of the Song"
+                                    />
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <div>
+                                    <Field
+                                        name="genre"
+                                        className="w-[400px] h-12 text-center font-semibold text-black text-opacity-80 rounded-xl"
+                                        placeholder="Genre"
+                                    />
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <div>
+                                    <Field
+                                        name="instrument"
+                                        className="w-[400px] h-12 text-center font-semibold text-black text-opacity-80 rounded-xl"
+                                        placeholder="Instrument"
+                                    />
+                                </div>
                             </div>
                             <button type="submit" disabled={!isValid || isSubmitting}
                                     className="w-[400px] h-12 rounded-xl bg-secondary-color text-black text-opacity-80 text-center font-semibold opacity-80 hover:opacity-100">Submit
