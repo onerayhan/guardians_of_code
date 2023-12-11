@@ -30,7 +30,6 @@ interface SongsArray {
     listens: number;
     release_year: number;
     added_timestamp: string;
-    username: string;
     album_name: string;
     performer_name: string;
     mood: string;
@@ -200,22 +199,23 @@ const SongsComponent:React.FC = () => {
         }
       };
 
-      const getRatings = async () => {
-          const apiUrl = `http://51.20.128.164/api/user_song_ratings/${auth()?.username}`;
-          try {
-              const response = await axios.get(apiUrl);
-              const data = response.data;
-              const songObjects = data[`${auth()?.username}_song_ratings`];
-              if (songObjects) {
-                  setRated(songObjects);
-              } else {
-                  console.log("No song ratings found for the user");
-              }
-              setRated(data);
-          } catch (error) {
-              console.log(error);
-          }
-      };
+        const getRatings = async () => {
+            const apiUrl = `http://51.20.128.164/api/user_song_ratings/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const data = response.data;
+                const songObjects = data[`${auth()?.username}_song_ratings`];
+                if (Array.isArray(songObjects)) {
+                    setRated(songObjects);
+                } else {
+                    console.log("No song ratings found for the user, or the data is not in the expected format:", songObjects);
+                    // Optionally, set Rated to an empty array if no ratings are found
+                    // setRated([]);
+                }
+            } catch (error) {
+                console.error("Error fetching ratings:", error);
+            }
+        };
 
         getSongs();
         getRatings();
