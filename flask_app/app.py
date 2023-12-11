@@ -265,7 +265,7 @@ def get_artist_top_track(username, artist_id_arr):
     return jsonify(results)
 
 @app.route('/spoti/get_recommendations/<username>', methods=['POST'])
-def get_recommendations():    
+def get_recommendations(username):    
     access_token, authorized = get_token(username)    
     if not authorized:
         return "Unauthorized access"
@@ -407,7 +407,7 @@ def logout():
     for key in list(session.keys()):
         session.pop(key)
         
-    return None
+    return jsonify({'message': "Successful logout."})
 
 @app.route('/api/upload_photo', methods=['POST'])
 def upload_photo():
@@ -559,12 +559,12 @@ def add_song():
     
         new_song.add_instrument(song_instrument)
         
-    if data.get('external_service_id'):
-        external_service_id = data.get('external_service_id')
-        if is_duplicate_imported(external_service_id):
-            return jsonify({'error': 'Song already exists!', 'song_id of original': is_duplicate_imported(external_service_id)}), 403
+    if data.get('external_song_id'):
+        external_song_id = data.get('external_song_id')
+        if is_duplicate_imported(external_song_id) != False:
+            return jsonify({'error': 'Song already exists!', 'song_id of original': is_duplicate_imported(external_song_id)}), 403            
         else:
-            new_song.add_imported_song(external_service_id)
+            new_song.add_imported_song(external_song_id)
     
     return jsonify({'message': f'{song_name} added successfully by {username}', 'song_id': new_song.song_id}), 200
 
@@ -650,14 +650,14 @@ def add_songs_batch():
             
             new_song.add_instrument(song_instrument)
             
-        if data.get('external_service_id'):
-            external_service_id = data.get('external_service_id')
-            if is_duplicate_imported(external_service_id):
-                return jsonify({'error': 'Song already exists!', 'song_id of original': is_duplicate_imported(external_service_id)}), 403
+        if data.get('external_song_id'):
+            external_song_id = data.get('external_song_id')
+            if is_duplicate_imported(external_song_id):
+                return jsonify({'error': 'Song already exists!', 'song_id of original': is_duplicate_imported(external_song_id)}), 403
             else:
-                new_song.add_imported_song(external_service_id)          
+                new_song.add_imported_song(external_song_id)          
 
-        response_data.append({'message': f'{song_name} added successfully by {username}'})
+        response_data.append({'message': f'{song_name} added successfully by {username}',  'song_id': new_song.song_id})
 
     return jsonify({'results': response_data}), 200
 
@@ -873,13 +873,16 @@ def all_song_ratings():
         every_song_ratings = []
         
     ratings_data = [{"username": rating.username,
-                     "song_id": rating.name,
-                     "genre": song_name_to_genre_name(song_id_to_song(rating.rating_id).song_name),
-                     "artist": song_name_to_performer_name(song_id_to_song(rating.rating_id).song_name),
-                     "album": song_name_to_album_name(song_id_to_song(rating.rating_id).song_name),
-                     "song": song_id_to_song(rating.rating_id).song_name,
+                     "song_id": rating.song_id,
+                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.rating_id)),
+                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.rating_id)),
+                     "album": song_name_to_album_name(song_id_to_song_name(rating.rating_id)),
+                     "song": song_id_to_song_name(rating.rating_id),
                      "song_rating": rating.rating,
-                     "rating_timestamp": rating.rating_timestamp} for rating in every_song_ratings]
+                     "rating_timestamp": rating.rating_timestamp,
+                     "external_service_id" : song_id_to_imported_song(rating.rating_id)} for rating in every_song_ratings]
+    
+    ratings_data.append(get_external_songs(username))
     
     return jsonify(ratings_data)
 
@@ -916,13 +919,16 @@ def get_follower_song_ratings(username):
         user_ratings = User_Song_Rating.query.filter_by(username=follower_username).all()
     
     ratings_data = [{"username": rating.username,
-                     "song_id": rating.name,
-                     "genre": song_name_to_genre_name(song_id_to_song(rating.rating_id).song_name),
-                     "artist": song_name_to_performer_name(song_id_to_song(rating.rating_id).song_name),
-                     "album": song_name_to_album_name(song_id_to_song(rating.rating_id).song_name),
-                     "song": song_id_to_song(rating.rating_id).song_name,
+                     "song_id": rating.song_id,
+                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.rating_id)),
+                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.rating_id)),
+                     "album": song_name_to_album_name(song_id_to_song_name(rating.rating_id)),
+                     "song": song_id_to_song_name(rating.rating_id),
                      "song_rating": rating.rating,
-                     "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
+                     "rating_timestamp": rating.rating_timestamp,
+                     "external_service_id" : song_id_to_imported_song(rating.rating_id)} for rating in user_ratings]
+    
+    ratings_data.append(get_external_songs(username))
     
     return jsonify(ratings_data)
 
@@ -953,22 +959,19 @@ def get_follower_performer_ratings(username):
     return jsonify(ratings_data)
 
 @app.route('/api/group_song_ratings/<username>/<group_id>')
-def get_group_song_ratings(username, group_id):
-    data = request.get_json()
-    username = data.get('username')
+def get_group_song_ratings(username, group_id):    
     if not username:
         return jsonify({'error': 'A username has to be given'}), 400
     
     results = group_song_ratings(group_id)
     if not results:
-        results = []
+        results = []       
+    
     
     return jsonify(results)
 
 @app.route('/api/group_album_ratings/<username>/<group_id>')
-def get_group_album_ratings(group_id):
-    data = request.get_json()
-    username = data.get('username')
+def get_group_album_ratings(group_id):    
     if not username:
         return jsonify({'error': 'A username has to be given'}), 400
     
@@ -979,9 +982,7 @@ def get_group_album_ratings(group_id):
     return jsonify(results)
 
 @app.route('/api/group_performer_ratings/<username>/<group_id>')
-def get_group_performer_ratings(group_id):
-    data = request.get_json()
-    username = data.get('username')
+def get_group_performer_ratings(group_id):    
     if not username:
         return jsonify({'error': 'A username has to be given'}), 400
     
@@ -992,23 +993,23 @@ def get_group_performer_ratings(group_id):
     return jsonify(results)
 
 @app.route('/api/user_song_ratings/<username>')
-def get_user_song_ratings(username):
-    data = request.get_json()
-    username = data.get('username')
+def get_user_song_ratings(username):    
     if not username:
-        return jsonify({'error': 'A username has to be given'}), 400
-    
+        return jsonify({'error': 'A username has to be given'}), 400    
     user_ratings = User_Song_Rating.query.filter_by(username=username).all()
     if not user_ratings:
         user_ratings = []
         
-    ratings_data = [{"song_id": rating.name,
-                     "genre": song_name_to_genre_name(song_id_to_song(rating.rating_id).song_name),
-                     "artist": song_name_to_performer_name(song_id_to_song(rating.rating_id).song_name),
-                     "album": song_name_to_album_name(song_id_to_song(rating.rating_id).song_name),
-                     "song": song_id_to_song(rating.rating_id).song_name,
-                     "song_rating": rating.rating,
-                     "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
+    ratings_data = [{"song_id": rating.song_id,
+                     "genre": song_name_to_genre_name(song_id_to_song_name(rating.rating_id)),
+                     "artist": song_name_to_performer_name(song_id_to_song_name(rating.rating_id)),
+                     "album": song_name_to_album_name(song_id_to_song_name(rating.rating_id)),
+                     "song": song_id_to_song_name(rating.rating_id),
+                     "song_rating": rating.rating,                     
+                     "rating_timestamp": rating.rating_timestamp,
+                     "external_service_id" : song_id_to_imported_song(rating.rating_id)} for rating in user_ratings]
+    
+   
     
     return jsonify({f"{username}_song_ratings": ratings_data})
 
@@ -1099,14 +1100,14 @@ def user_followings_genre():
         return jsonify({'error': 'A username has to be given'}), 400
     
     user = username_to_user(username)
-    followed_users = followed_finder(user)
+    followed_usernames = followed_finder(user)
     
-    if not followed_users:
+    if not followed_usernames:
         return {'message': 'User does not follow anyone'}, 200
     
     genres = []
-    for followed_user in followed_users:
-        song_list = Song.query.filter_by(username=followed_user.username).all()
+    for followed_username in followed_usernames:
+        song_list = Song.query.filter_by(username=followed_username).all()
         for song in song_list:
             genres.append(song_name_to_genre_name(song.username))
 
@@ -1129,14 +1130,14 @@ def user_followings_album():
         return jsonify({'error': 'A username has to be given'}), 400
     
     user = username_to_user(username)
-    followed_users = followed_finder(user)
+    followed_usernames = followed_finder(user)
     
-    if not followed_users:
+    if not followed_usernames:
         return {'message': 'User does not follow anyone'}, 200
     
     albums = []
-    for followed_user in followed_users:
-        song_list = Song.query.filter_by(username=followed_user.username).all()
+    for followed_username in followed_usernames:
+        song_list = Song.query.filter_by(username=followed_username).all()
         for song in song_list:
             albums.append(song_name_to_album_name(song.username))
 
@@ -1159,14 +1160,14 @@ def user_followings_performer():
         return jsonify({'error': 'A username has to be given'}), 400
     
     user = username_to_user(username)
-    followed_users = followed_finder(user)
+    followed_usernames = followed_finder(user)
     
-    if not followed_users:
+    if not followed_usernames:
         return {'message': 'User does not follow anyone'}, 200
     
     performers = []
-    for followed_user in followed_users:
-        song_list = Song.query.filter_by(username=followed_user.username).all()
+    for followed_username in followed_usernames:
+        song_list = Song.query.filter_by(username=followed_username).all()
         for song in song_list:
             performers.append(song_name_to_performer_name(song.username))
 
