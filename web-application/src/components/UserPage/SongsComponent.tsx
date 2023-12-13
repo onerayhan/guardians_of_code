@@ -38,13 +38,13 @@ interface SongsArray {
 }
 
 interface RatedArray {
-    song_id: number;
-    song_name: string;
-    length: string;
+    song_id: string;
     genre: string;
-    release_year: number;
-    last_rating: number;
-    last_rating_timestamp: string;
+    artist: string;
+    album: string;
+    song: string;
+    song_rating: number;
+    rating_timestamp: string;
 }
 
 const SongsComponent:React.FC = () => {
@@ -78,11 +78,12 @@ const SongsComponent:React.FC = () => {
     const navigateAlbum = async (album_name: string) => {
     navigate(`/album/${album_name}`);
     }
-    const deleteRate = async (song_id: number) => {
+    const deleteRate = async (song_id: string) => {
         const apiUrl = "http://51.20.128.164/api/delete_song";
+        let idNum = Number(song_id)
         try {
             console.log(song_id);
-            await axios.post(apiUrl, { username: `${auth()?.username}`, song_id: song_id });
+            await axios.post(apiUrl, { username: `${auth()?.username}`, song_id: idNum });
             toast({
                 title: `Song successfully deleted!`,
                 status: "success",
@@ -100,7 +101,7 @@ const SongsComponent:React.FC = () => {
   //const [Liked, setLiked] = useState<SongsArray[]>([]);
   const [Posted, setPosted] = useState<SongsArray[]>([]);
   const [Rated, setRated] = useState<RatedArray[]>([]);
-  const [ratings, setRatings] = useState<{ [songId: number]: number }>({});
+  const [ratings, setRatings] = useState<Array<{ rating_type: string, song_id: number, rating: number }>>([]);
   const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -143,27 +144,28 @@ const SongsComponent:React.FC = () => {
             [songId]: newRating
         }));
 
-        setRatings(prevRatings => ({
+        setRatings(prevRatings => [
             ...prevRatings,
-            [songId]: newRating
-        }));
+            { rating_type: "song_rate", song_id: songId, rating: newRating }
+        ]);
     };
 
     const RateDisplay = ({ rated }: { rated: RatedArray }) => {
         const currentRating = songRatings[rated.song_id] || 0;
 
         const changeRating = (newRating: number) => {
-            updateRating(rated.song_id, newRating);
+            let idNum = Number(rated.song_id)
+            updateRating(idNum, newRating);
         };
 
         return (
             <Tr>
-                <Td>{rated.song_name}</Td>
-                <Td>{rated.length}</Td>
+                <Td>{rated.song}</Td>
                 <Td>{rated.genre}</Td>
-                <Td>{rated.release_year}</Td>
-                <Td><Timestamp date={rated.last_rating_timestamp} /></Td>
-                <Td>{rated.last_rating}/5</Td>
+                <Td>{rated.album}</Td>
+                <Td>{rated.artist}</Td>
+                <Td><Timestamp date={rated.rating_timestamp} /></Td>
+                <Td>{rated.song_rating}/5</Td>
                 <Td>
                     <Ratings
                         rating={currentRating}
@@ -222,11 +224,16 @@ const SongsComponent:React.FC = () => {
     }, []);
 
     const sendRatings = async () => {
-
-        for (const songId in ratings) {
-            if (ratings.hasOwnProperty(songId)) {
-                console.log(`Song ID: ${songId}, Rating: ${ratings[songId]}`);
-            }
+        const apiUrl = "http://51.20.128.164/api/add_rate_batch";
+        try {
+            await axios.post(apiUrl, { username: `${auth()?.username}`, ratings: ratings });
+            toast({
+                title: `Song were successfully rated!`,
+                status: "success",
+            })
+            window.location.reload();
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -253,9 +260,9 @@ const SongsComponent:React.FC = () => {
                                       <Thead>
                                           <Tr>
                                               <Th>Song Name</Th>
-                                              <Th>Length</Th>
                                               <Th>Genre</Th>
-                                              <Th>Release Year</Th>
+                                              <Th>Album</Th>
+                                              <Th>Artist</Th>
                                               <Th>Last Rating</Th>
                                               <Th isNumeric>Last Rating Date</Th>
                                               <Th>Re-rate Song</Th>

@@ -13,13 +13,19 @@ import TweetButton from "../APIClasses/TweetButton";
 import * as Yup from "yup";
 
 interface Song {
+    song_id: string;
     song_name: string;
     length: string;
-    tempo: number;
+    tempo: string;
     recording_type: string;
-    listens: number;
-    release_year: number;
+    listens: string;
+    release_year: string;
     added_timestamp: string;
+    album_name: string;
+    performer_name: string;
+    mood: string;
+    genre: string;
+    instrument: string;
 }
 
 const getCurrentTimestamp = () => {
@@ -61,12 +67,24 @@ const AddSongs = () => {
     const onSubmitRequest = async (song: any) => {
         console.log("Song: ", song);
         setError("");
-        const addedTimestamp = getCurrentTimestamp();
-
         try {
             await axios.post(
                 "http://51.20.128.164/api/add_song",
-                { username: `${auth()?.username}`, song_name: song.song_name, length: song.length, tempo: song.tempo, listens: song.listens, recording_type: song.recording_type, release_year: song.release_year, added_timestamp: addedTimestamp },
+                {
+                    username: auth()?.username, // Include username
+                    song_id: song.song_id, // Replace 'song' with your song object
+                    song_name: song.song_name,
+                    length: song.length,
+                    tempo: song.tempo,
+                    recording_type: song.recording_type,
+                    listens: song.listens,
+                    release_year: song.release_year,
+                    album_name: song.album_name,
+                    performer_name: song.performer_name,
+                    mood: song.mood,
+                    genre: song.genre,
+                    instrument: song.instrument
+                }
             );
 
         } catch(err) {

@@ -13,14 +13,37 @@ interface GroupProps {
     groupID: number;
 }
 
+interface Song {
+    username: string;
+    song_id: string;
+    genre: string;
+    artist: string;
+    album: string;
+    song: string;
+    song_rating: string;
+    rating_timestamp: string;
+}
+
+interface RatedArray {
+    genre: string;
+    artist: string;
+    album: string;
+    song: string;
+    song_rating: number; // Assuming rating is a numerical value
+    rating_timestamp: string; // Assuming timestamp is a string, can be Date as well
+}
+
 const Analysis = () => {
     const [selected, setSelected] = useState<string>("all-db");
     const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
     const [groups, setGroups] = useState<GroupProps[]>([]);
     const auth = useAuthUser();
     const baseURL = "http://51.20.128.164/api"; // Replace with your actual base URL
-    const [fetchUrl, setFetchUrl] = useState<string>(`${baseURL}/all_song_ratings`);
-    const data = useMemoizedFetch(fetchUrl);
+    const [data, setData] = useState<RatedArray[]>([]);
+    const [userSongs, setUserSongs] = useState<RatedArray[]>([]);
+    const [friendsSongs, setFriendsSongs] = useState<RatedArray[]>([]);
+    const [allSongs, setAllSongs] = useState<RatedArray[]>([]);
+    const [friendGroupsSongs, setFriendGroupsSongs] = useState<RatedArray[]>([]);
 
     useEffect(() => {
         if (selected === "friend_groups") {
@@ -37,25 +60,75 @@ const Analysis = () => {
     }, [selected, auth]);
 
     useEffect(() => {
+
+        const fetchFriendGroupsSongs = async () => {
+            try {
+                const response = await axios.get(`${baseURL}/group_song_ratings/${auth()?.username}/${selectedGroup}`);
+                // Assuming the array is under 'ratings_data' in the response
+                setFriendGroupsSongs(response.data.ratings_data);
+            } catch (error) {
+                console.error('Error fetching friend groups songs', error);
+            }
+        };
+
+        const fetchUserSongs = async () => {
+            const apiUrl = `http://51.20.128.164/api/user_song_ratings/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const data = response.data;
+                const songObjects = data[`${auth()?.username}_song_ratings`];
+                if (Array.isArray(songObjects)) {
+                    setUserSongs(songObjects);
+                } else {
+                    console.log("No song ratings found for the user, or the data is not in the expected format:", songObjects);
+                }
+            } catch (error) {
+                console.error("Error fetching ratings:", error);
+            }
+        };
+
+        const fetchFriendsSongs = async () => {
+            try {
+                const response = await axios.get(`${baseURL}/follower_song_ratings/${auth()?.username}`);
+                // Assuming the array is under 'ratings_data' in the response
+                setFriendsSongs(response.data.ratings_data);
+            } catch (error) {
+                console.error('Error fetching friends songs', error);
+            }
+        };
+
+        const fetchAllSongs = async () => {
+            try {
+                const response = await axios.get(`${baseURL}/all_song_ratings`);
+                // Adjust this based on the actual response structure
+                setAllSongs(response.data.flatMap(user => user.ratings_data));
+            } catch (error) {
+                console.error('Error fetching all songs', error);
+            }
+        };
+
+        fetchFriendGroupsSongs();
+        fetchAllSongs();
+        fetchFriendsSongs();
+        fetchUserSongs();
+
         switch (selected) {
             case "all-db":
-                setFetchUrl(`${baseURL}/all_song_ratings`);
+                setData(allSongs);
                 break;
             case "friends":
-                setFetchUrl(`${baseURL}/follower_song_ratings/${auth()?.username}`);
+                setData(friendsSongs);
                 break;
             case "user":
-                setFetchUrl(`${baseURL}/user_song_ratings/${auth()?.username}`);
+                setData(userSongs);
                 break;
             case "friend_groups":
-                if (selectedGroup) {
-                    setFetchUrl(`${baseURL}/group_song_ratings/${auth()?.username}/${selectedGroup}`);
-                }
+                setData(friendGroupsSongs);
                 break;
             default:
-                setFetchUrl(`${baseURL}/all_song_ratings`);
                 break;
         }
+
     }, [selected, selectedGroup]);
 
     const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -89,7 +162,6 @@ const Analysis = () => {
                 </VStack>
             </div>
             <TableModule data={data || []}/>
-            <ChartModule/>
         </main>
     );
 };

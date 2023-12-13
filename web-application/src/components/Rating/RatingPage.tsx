@@ -213,7 +213,8 @@ function RatingPage() {
         const currentRating = songRatings[song.song_id] || 0;
 
         const changeRating = (newRating: number) => {
-            updateRating(song.song_id, newRating);
+            let idx = Number(song.song_id);
+            updateRating(idx, newRating);
         };
 
         return (
@@ -307,7 +308,7 @@ function RatingPage() {
                         <Flex alignItems="center">
                             <Icon as={IoMdMicrophone} w={5} h={5} mr={2}/>
                             <Button variant='ghost'
-                                    onClick={() => handleArtistNavigate(song.artist_name)}>{song.artist_name}</Button>
+                                    onClick={() => handleArtistNavigate(song.performer_name)}>{song.performer_name}</Button>
                         </Flex>
                         <Flex alignItems="center">
                             <Icon as={MdAlbum} w={5} h={5} mr={2}/>
@@ -324,13 +325,13 @@ function RatingPage() {
                         <Flex alignItems="center">
                             <Icon as={FaClock} w={5} h={5} mr={2}/>
                             <div className="px-2"></div>
-                            <Text className="font-semibold">{song.duration}</Text>
+                            <Text className="font-semibold">{song.length}</Text>
                         </Flex>
                         <div className="px-2"></div>
                         <Flex alignItems="center">
                             <Icon as={FaCalendarAlt} w={5} h={5} mr={2}/>
                             <div className="px-2"></div>
-                            <Text className="font-semibold">{song.year}</Text>
+                            <Text className="font-semibold">{song.release_year}</Text>
                         </Flex>
                     </Stack>
                 </CardBody>

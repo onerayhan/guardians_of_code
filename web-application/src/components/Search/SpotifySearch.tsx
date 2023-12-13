@@ -5,6 +5,7 @@ import ArtistSearch from "./ArtistSearch";
 import SongSearch from "./SongSearch";
 import axios from "axios";
 import {TableContainer} from "@chakra-ui/react";
+import {useAuthUser} from "react-auth-kit";
 
 interface Artist {
     artist_photo: string | undefined;
@@ -40,6 +41,7 @@ const SpotifySearch: React.FC = () => {
     const [searchType, setSearchType] = useState('tracks'); // Default search type
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<Song[] | Artist[] | Album[]>([]);
+    const auth = useAuthUser();
 
     // Listen to the
     useEffect(() => {
@@ -49,7 +51,7 @@ const SpotifySearch: React.FC = () => {
     }, [searchType, searchTerm]);
 
     async function fetchSearchResults(type: string, term: string) {
-        const response = await axios.post("http://51.20.128.164/spoti/search", { type: type, query: term });
+        const response = await axios.post(`http://51.20.128.164/api/display_user_group/${auth()?.username}`, { type: type, query: term });
         responseParser(response.data);
     }
 

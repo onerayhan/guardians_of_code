@@ -9,7 +9,7 @@ import createPlotlyRenderers from 'react-pivottable/PlotlyRenderers';
 const PlotlyRenderers = createPlotlyRenderers(Plot);
 
 interface TableModuleProps {
-    data: any[]; // Replace 'any' with your specific data type
+    data: RatedArray[]; // Replace 'any' with your specific data type
 }
 
 interface TableModuleState {
