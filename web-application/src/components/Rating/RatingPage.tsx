@@ -118,10 +118,11 @@ function RatingPage() {
             [songId]: newRating
         }));
 
-        setRatings(prevRatings => [
-            ...prevRatings,
-            { rating_type: "song_rate", song_id: songId, rating: newRating }
-        ]);
+        // Update the ratings array to include only the latest rating for each song
+        setRatings(prevRatings => {
+            const updatedRatings = prevRatings.filter(rating => rating.song_id !== songId);
+            return [...updatedRatings, { rating_type: "song_rate", song_id: songId, rating: newRating }];
+        });
     };
 
     const RefreshButton = () =>

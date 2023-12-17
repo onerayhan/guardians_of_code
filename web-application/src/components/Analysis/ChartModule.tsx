@@ -123,7 +123,7 @@ const ChartModule = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const username = "exampleUser"; // Replace with actual username
+            const username = "homelander"; // Replace with actual username
 
             try {
                 switch (chartType) {

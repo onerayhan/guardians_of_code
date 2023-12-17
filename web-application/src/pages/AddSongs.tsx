@@ -71,19 +71,18 @@ const AddSongs = () => {
             await axios.post(
                 "http://51.20.128.164/api/add_song",
                 {
-                    username: auth()?.username, // Include username
-                    song_id: song.song_id, // Replace 'song' with your song object
+                    username: `${auth()?.username}`, // Include username
                     song_name: song.song_name,
-                    length: song.length,
-                    tempo: song.tempo,
-                    recording_type: song.recording_type,
-                    listens: song.listens,
-                    release_year: song.release_year,
-                    album_name: song.album_name,
-                    performer_name: song.performer_name,
-                    mood: song.mood,
-                    genre: song.genre,
-                    instrument: song.instrument
+                    ...(song.length && { length: song.length }),
+                    ...(song.tempo && { tempo: parseInt(song.tempo, 10) }),
+                    ...(song.recording_type && { recording_type: song.recording_type }),
+                    ...(song.listens && { listens: parseInt(song.listens, 10) }),
+                    ...(song.release_year && { release_year: parseInt(song.release_year, 10) }),
+                    ...(song.album_name && { album_name: song.album_name }),
+                    ...(song.performer_name && { performer_name: song.performer_name }),
+                    ...(song.mood && { mood: song.mood }),
+                    ...(song.genre && { genre: song.genre }),
+                    ...(song.instrument && { instrument: song.instrument }),
                 }
             );
 

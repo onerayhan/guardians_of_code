@@ -144,10 +144,11 @@ const SongsComponent:React.FC = () => {
             [songId]: newRating
         }));
 
-        setRatings(prevRatings => [
-            ...prevRatings,
-            { rating_type: "song_rate", song_id: songId, rating: newRating }
-        ]);
+        // Update the ratings array to include only the latest rating for each song
+        setRatings(prevRatings => {
+            const updatedRatings = prevRatings.filter(rating => rating.song_id !== songId);
+            return [...updatedRatings, { rating_type: "song_rate", song_id: songId, rating: newRating }];
+        });
     };
 
     const RateDisplay = ({ rated }: { rated: RatedArray }) => {
@@ -207,20 +208,30 @@ const SongsComponent:React.FC = () => {
                 const response = await axios.get(apiUrl);
                 const data = response.data;
                 const songObjects = data[`${auth()?.username}_song_ratings`];
+
                 if (Array.isArray(songObjects)) {
-                    setRated(songObjects);
+                    // Create an object to hold the latest rating for each song
+                    const latestRatings = {};
+
+                    songObjects.forEach(rated => {
+                        // If this is the first time seeing this song or the rating is more recent, update the record
+                        if (!latestRatings[rated.song_id] || new Date(latestRatings[rated.song_id].rating_timestamp) < new Date(rated.rating_timestamp)) {
+                            latestRatings[rated.song_id] = rated;
+                        }
+                    });
+
+                    // Set Rated to only the latest ratings
+                    setRated(Object.values(latestRatings));
                 } else {
                     console.log("No song ratings found for the user, or the data is not in the expected format:", songObjects);
-                    // Optionally, set Rated to an empty array if no ratings are found
-                    // setRated([]);
                 }
             } catch (error) {
                 console.error("Error fetching ratings:", error);
             }
         };
 
-        getSongs();
         getRatings();
+        getSongs();
     }, []);
 
     const sendRatings = async () => {
