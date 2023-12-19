@@ -1,12 +1,12 @@
 import uuid
 import secrets
 from app import db
+from config import Config
 from models import *
 from song_models import *
-from config import Config
 from spotify_cred import *
 from spotipy.oauth2 import SpotifyOAuth
-import time
+from datetime import datetime, timezone, timedelta
 
 def generate_public_id():
     return str(uuid.uuid4().hex)
@@ -179,32 +179,44 @@ def username_to_external_service(username):
     else:
         return None
 
-def create_spotify_oauth():
-    app_config = Config()
+def create_spotify_oauth(state=None):    
     return SpotifyOAuth(
-            client_id=app_config['SPOTIFY_CLIEND_ID'],
-            client_secret=app_config['SPOTIFY_CLIENT_SECRET'],
-            redirect_uri=app_config['SPOTIFY_REDIRECT_URI'],
-            scope="user-library-read")
+            client_id=Config.SPOTIFY_CLIENT_ID,
+            client_secret=Config.SPOTIFY_CLIENT_SECRET,
+            redirect_uri=Config.SPOTIFY_REDIRECT_URI,
+            scope=[
+                "user-top-read",
+                "user-library-read",
+                "user-follow-read",
+                "playlist-read-private",
+                "user-read-private"],
+            state=state)
     
 def get_token(username):
     
     token_valid = False    
     external_service = username_to_external_service(username)
-    access_token = external_service.get_access_token()   
+    access_token = external_service.access_token   
     
     if not external_service:
         return None, token_valid
         
-    now = int(time.time())
-    is_token_expired = external_service.expires_at - now < 60
+    is_token_expired = external_service.expires_at < datetime.now()    
     
     if (is_token_expired):
         sp_oauth = create_spotify_oauth()
-        token_info = json.dumps(sp_oauth.refresh_access_token(external_service.refresh_token))
-        external_service.token_info = token_info
-        access_token = external_service.get_access_token()
-
+        token_data = sp_oauth.refresh_access_token(external_service.refresh_token)
+        external_service.access_token = token_data['access_token'] 
+        external_service.refresh_token = token_data['refresh_token'] 
+        
+        expires_at_utc = datetime.utcfromtimestamp(token_data['expires_at']).replace(tzinfo=timezone.utc)                
+        turkey_timezone = timezone(timedelta(hours=3))
+        expires_at_turkey = expires_at_utc.astimezone(turkey_timezone)
+           
+        external_service.expires_at = expires_at_turkey
+        access_token = external_service.access_token
+        db.session.commit()
+    
     token_valid = True
     return access_token, token_valid
 
@@ -297,6 +309,7 @@ def group_album_ratings(group_id):
             val = {'username': member.username,                   
                    'album': album_name,                   
                    'album_rating': rated_album.rating,
+                   'album_id': rated_album.album_id,
                    'rating_timestamp': rated_album.rating_timestamp}
             
             results.append(val)           

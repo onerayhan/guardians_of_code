@@ -129,28 +129,17 @@ class External_Service(db.Model):
     __tablename__ = 'external_service'
     service_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     service_name = db.Column(db.String(255), nullable=False)
-    token_data = db.Column(db.String(1000), nullable=False)   
+    access_token = db.Column(db.String(255), nullable=False)
+    refresh_token = db.Column(db.String(255), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)   
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)
-    
-    def get_access_token(self):
-        if self.token_data:
-            token_data_dict = json.loads(self.token_data)
-            return token_data_dict.get('access_token')
-    
-    def get_expires_at(self):        
-        if self.token_data:
-            token_data_dict = json.loads(self.token_data)
-            return token_data_dict.get('expires_at')
-
-    def get_refresh_token(self):        
-        if self.token_data:
-            token_data_dict = json.loads(self.token_data)
-            return token_data_dict.get('refresh_token')      
+    import_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())          
 
 class Imported_Song(db.Model):
     __tablename__ = 'imported_song'
     import_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'), primary_key=True)         
+    song_id = db.Column(db.Integer, db.ForeignKey('song.song_id', ondelete='CASCADE'))
+    service_id = service_id = db.Column(db.Integer, db.ForeignKey('external_service.service_id', ondelete='CASCADE'))       
     external_song_id = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), nullable=False)    
     import_timestamp = db.Column(db.DateTime, server_default=db.func.current_timestamp())
