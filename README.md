@@ -8,4 +8,4 @@
 
 - Integrated spotify api with the usage of spotipy library.
 
-# Documentation to be updated soon
+# Documentation up to date as of 31.12.2023
