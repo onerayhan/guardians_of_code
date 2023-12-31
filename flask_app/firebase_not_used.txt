@@ -10,14 +10,14 @@ firebase_admin.initialize_app(cred)
 service_acc_json = {    
   "type": "service_account",
   "project_id": "cs308-b4e1d",
-  "private_key_id": "a4f0af140d2874e23c547e3f9f99a4ef3b441a5b",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQDUWBBYhM9lHPze\nveTpevILTgaApvdKakBSu4QA4DXsq2S6RyBXjtTYpxM3imRZFJm6erHfqnHsLRe0\nh5elJ7DpSb2KsrlEl5UU/e6SjXYkY9gctT7W49cbeQ0FWerX9G8apNc3Sy1KUVbp\n3eiq/sJq6DWBgxAgGKfFz5Co09bif5xXXlJOVogMPD4mY893FLDYSzSEAI++pwLc\nGZnEexpeC5ypi4mHxQ0WFKXe/Zzu9Z5vxNnzKwtV2qiYsRX0obgZJl44BDU7FxZ8\nuXliVGocLTd2qilG8QCr/aULFg3na/X5qTScZVgJtViuZ2P1M8O3nu4MfpFq9LC+\ndsHdPCOVAgMBAAECgf9NjdxqeBdHVs8Ei1aP79d3SYgWdOTcyPG1RcdwinMnfXHM\nly24zPHwLxVVs7Xy0xNSiH1us1HocI+3384DA/wZOFWB0sTXyIUqpZP88q2znMPR\nuGC7G3v1DME0syKSvTPXB12TVGG2Qv77a5EO4v0fDrB8HOJG1rpwBN9Qyg4xqr86\n6pbCDbYo+Azu1gM8xRrLFI4gm1ihukAdJdKytpB7Yp6RMrZInoWNTWtA6EfPGGkp\nB5q6pdwt843lBkUnPKe5Fe8IwwfZ4K9FSGSJ8t8Axrs3kyZJZllEAcuT7kK8bVx7\nZp6f1fRRDg1BbaNyuh6u4V4BdEb+U8ITR+HCRWECgYEA+Yy5tRSXaQiZuntr55/w\nAE2QKHGoyziATYRcDeKpS+QxeaJ/4Z75HyoVVfnSZF8IWXJQ9P0Z6HBrtIljNy//\n9U2FjzFqDgjCKckl+WKGPwCLemHkynJS7BXz6HcWnhQkQ+2zA/WOmGYmdE7xiGcH\nqva42S0vmAao151rLf4K10UCgYEA2dUly0snP0j1ciO/7R2OiKsUci1HaYSUjLUc\nLdgjOhdsVy3gc/AafpDByZTf1WcyfGsiZk5cL7CPKz2iS8zTkZ8pRysHfoCdYgcs\nYQA9TXbzPGotx0Ch0Q2I4q1j0JEN7ofSUXAzn7wsr4Be4AAqiqAK6AIFpKh1mQ3F\n4G0l+BECgYABT1PKN4lz66+i4vL2DEjeN4oCLFaOeoVx4rf4+q+YzmHUGZ5COOtl\n1nq2MNGB5V3N2mPCZXG1XqGyGOaEa6QUTYvd7Ix59mHOhlfEr1e1DPOueMUSqvb0\ndkkJd1aPDdwC30SJSMiu1BpvkdqCtMe9hf4CZdJSIfbQ6uqdGzBDYQKBgG3dgShd\niTfz9kdRHJXdGGx5zOAhUik4AyxMlB/TKUE9WxlFPDV9Xf+DxxmCiro5SE9UQY9T\n6k7rP+pRNbABaJvDqLAKVcdJ2xb8AzgRRNnzKo7IBrq+MF8d8nJRfUxOPLaXrk4A\nxyjDYc5Kco+LxekQ+y81Bd+cT2OYfLrKkiHhAoGAIvwlIBTfXliiizLnnfvu4f6B\n/LU+7oSUfJ7bCgLYNFyQVIKlJqjYXi1QNkKAriHIMfwrQerv3mkH5ngCdhnaYehD\n7wsV60trIROvpP4qP++kWMLH1vrRDN+dBGG2Y7bofV/8uNkcjvNJLOIMmVN+paTL\nIG2MWjKUJQPNYgEvjL0=\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-xlyvi@cs308-b4e1d.iam.gserviceaccount.com",
-  "client_id": "102338154871877748199",
+  "private_key_id": private_key_id_here,
+  "private_key": private_key_here,
+  "client_email": clien_email_here,
+  "client_id": client_id_here,
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xlyvi%40cs308-b4e1d.iam.gserviceaccount.com",
+  "client_x509_cert_url": cert_url_here,
   "universe_domain": "googleapis.com"    
 }
 
