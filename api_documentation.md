@@ -754,7 +754,7 @@ Adds multiple songs to the database.
 
 **Parameters**
 
-- `song_name` (integer): The name of the song to be removed.
+- `song_id` (integer): The id of the song to be removed.
 - `username` (string): The username of the user removing the song.
 
 **Description**

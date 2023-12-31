@@ -1,7 +1,7 @@
 #Interfile imports 
 from app import app, db
 from utils import is_duplicate, is_duplicate_imported, username_to_user, song_name_to_album_name, song_name_to_genre_name, song_name_to_instrument_name, song_name_to_mood_name, song_name_to_performer_name
-from utils import followed_finder, get_user_songs, song_name_to_song, get_group_members
+from utils import followed_finder, get_user_songs, song_id_to_song, get_group_members
 from song_models import Song, Album, Performer, Genre, Mood, Instrument
 from models import users
 
@@ -188,12 +188,13 @@ def add_songs_batch():
 def remove_song():
     data = request.get_json() 
     username = data.get('username')   
-    song_name = data.get('songname')        
+    song_id = data.get('song_id')        
     
-    if not song_name:
-        return jsonify({'error': 'A song_name has to be given'}), 400
+    if not song_id:
+        return jsonify({'error': 'A song_id has to be given'}), 400
 
-    song = song_name_to_song(song_name)   
+    song = song_id_to_song(song_id) 
+    song_name = song.song_name
     
     if not song:
         return jsonify({'error': 'Song not found'}), 404

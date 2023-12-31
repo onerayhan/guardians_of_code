@@ -228,14 +228,18 @@ def is_duplicate_imported(external_song_id):
         return False
 
 def is_duplicate(song_data):
-    existing_song = Song.query.filter_by(
-        song_name=song_data.get('song_name'),
-        length=song_data.get('length'),
-        listens=song_data.get('listens'),
-        tempo=song_data.get('tempo')).first()   
+    existing_song = Song.query.filter_by(song_name=song_data.get('song_name')).first() 
+    
+    performer_name = song_data.get('performer_name')
+    if performer_name:
+        existing_song_performer = Performer.query.filter_by(name=performer_name).first()
+      
+    album_name = song_data.get('album_name') 
+    if album_name:
+        existing_song_album = Album.query.filter_by(name=album_name).first()      
     
 
-    if existing_song:
+    if existing_song and existing_song_album and existing_song_performer:
         return existing_song.song_id
     else:
         return False
