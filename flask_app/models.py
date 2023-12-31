@@ -37,8 +37,7 @@ class Group(db.Model):
     
 class GroupUser(db.Model):
     username = db.Column(db.String(100), db.ForeignKey('users.username', ondelete='CASCADE'), primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.group_id', ondelete='CASCADE'), primary_key=True)
-    
+    group_id = db.Column(db.Integer, db.ForeignKey('group.group_id', ondelete='CASCADE'), primary_key=True)    
 
 #class DeviceToken(db.Model):
 #   device_token = db.Column(db.String(255), primary_key=True, nullable=False)

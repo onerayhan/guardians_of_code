@@ -9,8 +9,8 @@ from flask import request, jsonify
 @app.route('/api/form_groups', methods=['POST'])
 def api_form_groups():
     data = request.get_json()
-    user_arr = data.get('user_arr')
-    group_name = data.get('group_name')
+    user_arr = data.get('username_arr')
+    group_name = data.get('group_name')   
     
     if len(user_arr) < 2:
         return "There must be at least 2 people to form a group.", 400

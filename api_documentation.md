@@ -1,11 +1,18 @@
-# API Documentation
+<span style="color:blue"> API Documentation </span>
+Made by Hamza Özdemir
 
-## Spoti Login
+# Spotify-Related Endpoints
+
+### Spotify Login
 
 **Request**
 
-- **URL:** `/spoti_login`
+- **URL:** `/spoti_login/<username>`
 - **Method:** `GET`
+
+**Parameters**
+
+- `username` encoded within url, f_string style.
 
 **Description**
 
@@ -15,7 +22,9 @@ Initiates the Spotify login process and redirects the user to the Spotify authen
 
 - **Redirect:** User is redirected to the Spotify authentication page.
 
-## Callback
+---
+
+### Callback (Handled by Spotify API)
 
 **Request**
 
@@ -36,37 +45,216 @@ Handles the callback from Spotify after successful user authentication. Retrieve
 - **Success:** User information in JSON format.
 - **Failure:** Error message if the token request fails.
 
-## Check Spotify Connection
+---
+
+### Check Spotify Connection
 
 **Request**
 
-- **Url** `/api/check_spoti_connection/<username>`
+- **URL** `/api/check_spoti_connection/<username>`
 - **Method** `GET`
 
 **Parameters**
 
-- `username`: encoded within url, f_string style.
+- `username` encoded within url, f_string style.
 
 **Description**
 
 Checkes whether the given user has established connection with spotify.
 
-## Add Mobile Token
+---
+
+### Get Current User Tracks
 
 **Request**
 
-- **Url** `/api/add_mobile_token/<username>`
+- **URL** `/spoti/get_curr_user_tracks/<username>`
+- **Method** `GET`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+
+**Description**
+
+Retrieve the users currently saved tracks from spotify.
+
+---
+
+### Get User Top Tracks
+
+**Request**
+
+- **URL** `/spoti/get_curr_top_tracks/<username>`
+- **Method** `GET`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+
+**Description**
+
+Retrieve the users top listened to tracks from spotify.
+
+---
+
+### Get Tracks Info
+
+**Request**
+
+- **URL** `/spoti/get_tracks_info/<username>`
+- **Method** `POST`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+- `track_id_arr` (string): An array composed of spotify track ids.
+
+**Description**
+
+Retrieve track info array through the input id array.
+
+---
+
+### Get Albums Info
+
+**Request**
+
+- **URL** `/spoti/get_albums_info/<username>`
+- **Method** `POST`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+- `album_id_arr` (string): An array composed of spotify album ids.
+
+**Description**
+
+Retrieve album info array through the input id array.
+
+---
+
+### Get Artist/Performer Info
+
+**Request**
+
+- **URL** `/spoti/get_artists_info/<username>`
+- **Method** `POST`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+- `artist_id_arr` (string): An array composed of spotify artist ids.
+
+**Description**
+
+Retrieve artist info array through the input id array.
+
+---
+
+### Get Artist/Performer Albums
+
+**Request**
+
+- **URL** `/spoti/get_artists_info/<username>`
+- **Method** `POST`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+- `artist_id` (string): Spotify artist id.
+
+**Description**
+
+Retrieve the given artist's albums.
+
+---
+
+### Get Artist/Performer Top Tracks
+
+**Request**
+
+- **URL** `/spoti/get_artists_info/<username>`
+- **Method** `POST`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+- `artist_id` (string): Spotify artist id.
+
+**Description**
+
+Retrieve the given artist's top tracks.
+
+---
+
+### Get Spotify Recommendations 
+
+**Request**
+
+- **URL** `/spoti/get_artists_info/<username>`
+- **Method** `POST`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+- `seed_tracks`, `seed_albums`, `seed_artists`, `seed_genres`
+- Check the https://developer.spotify.com/documentation/web-api/reference/get-recommendations for seed values.
+
+**Description**
+
+Get spotify recommendations based on the specified.
+
+---
+
+### Spotify Search 
+
+**Request**
+
+- **URL** `/spoti/get_artists_info/<username>`
+- **Method** `POST`
+
+**Paremeters**
+- `username` encoded within url, f_string style.
+- `q`, `type`
+- Check the https://developer.spotify.com/documentation/web-api/reference/search for q and type values.
+
+**Description**
+
+Get Spotify catalog information about albums, artists, playlists, tracks, shows, episodes or audiobooks that match a keyword string.
+
+---
+
+### Check Spotify Connection
+
+**Request**
+
+- **URL** `/api/add_mobile_token/<username>`
 - **Method** `POST`
 
 **Parameters**
 
 - `username`: The username of the user.
-- `token_data`: Self evident.
 
 **Description**
 
-Addition of token data
+Checking whether the user's token data exists within the database.
 
+---
+
+### Add Mobile Token
+
+**Request**
+
+- **URL** `/api/add_mobile_token/<username>`
+- **Method** `POST`
+
+**Parameters**
+
+- `username` The username of the user.
+- `token_data` Spotify token data.
+
+**Description**
+
+Addition of token data by mobile side.
+
+---
+---
+---
+
+# Authorization Endpoints
 
 ## User Registration
 
@@ -92,6 +280,8 @@ Registers a new user.
 - **Success:** User registered successfully, public_id in JSON format.
 - **Failure:** Error message if registration fails.
 
+---
+
 ## User Login
 
 **Request**
@@ -113,6 +303,73 @@ Logs in an existing user and returns an authentication token.
 
 - **Success:** User login successful, authentication token in JSON format.
 - **Failure:** Error message if login fails.
+
+---
+
+## User Logout
+
+**Request**
+
+- **URL:** `/api/login`
+- **Method:** `GET`
+
+**Description**
+
+Logs out the user from existing flask session.
+
+---
+
+## Change Password
+
+**Request**
+
+- **URL:** `/api/change_password`
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `username` (string): User's username.
+- `old_password` (string): User's old password.
+- `new_password` (string): User's new password.
+
+**Description**
+
+Changes the user's password.
+
+**Response**
+
+- **Success:** Password changed successfully.
+- **Failure:** Error message if password change fails.
+
+---
+---
+---
+
+# User Interaction Endpoints
+
+## Get User Information
+
+**Request**
+
+- **URL:** `/api/user_info`
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `username` (string): User's username.
+
+**Description**
+
+Retrieves information about a user, including follower and following counts.
+
+**Response**
+
+- **Success:** User information in JSON format.
+- **Failure:** Error message if user not found.
+
+---
 
 ## Upload Photo
 
@@ -149,6 +406,7 @@ Uploads a user's profile photo. Ensure that the request includes a valid photo f
   "username": "example_username"
 }
 ```
+---
 
 ## Get Profile Picture
 
@@ -182,6 +440,7 @@ Retrieves the profile picture of a user. Ensure that the request includes a vali
   "username": "example_username"
 }
 ```
+---
 
 ## Delete User
 
@@ -204,11 +463,13 @@ Deletes an existing user.
 - **Success:** User successfully deleted.
 - **Failure:** Error message if deletion fails.
 
-## Get User Information
+---
+
+## User Followings
 
 **Request**
 
-- **URL:** `/api/user_info`
+- **URL:** `/api/user_followings`
 - **Method:** `POST`
 - **Content-Type:** `application/json`
 
@@ -218,35 +479,151 @@ Deletes an existing user.
 
 **Description**
 
-Retrieves information about a user, including follower and following counts.
+Retrieves the list of followers and users followed by a user.
 
 **Response**
 
-- **Success:** User information in JSON format.
+- **Success:** JSON object containing followers and followed users.
 - **Failure:** Error message if user not found.
 
-## Change Password
+---
+
+## Follow User
 
 **Request**
 
-- **URL:** `/api/change_password`
+- **URL:** `/api/follow`
 - **Method:** `POST`
 - **Content-Type:** `application/json`
 
 **Parameters**
 
-- `username` (string): User's username.
-- `old_password` (string): User's old password.
-- `new_password` (string): User's new password.
+- `follower_username` (string): Username of the follower.
+- `followed_username` (string): Username of the user to be followed.
 
 **Description**
 
-Changes the user's password.
+Follows a user.
 
 **Response**
 
-- **Success:** Password changed successfully.
-- **Failure:** Error message if password change fails.
+- **Success:** Relationship added successfully.
+- **Failure:** Error message if relationship already exists.
+
+---
+
+## Unfollow User
+
+**Request**
+
+- **URL:** `/api/unfollow`
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `follower_username` (string): Username of the follower.
+- `followed_username` (string): Username of the user to be unfollowed.
+
+**Description**
+
+Unfollows a user.
+
+**Response**
+
+- **Success:** Relationship removed successfully.
+- **Failure:** Error message if relationship does not exist.
+
+---
+
+## Get All Follows
+
+**Request**
+
+- **URL:** `/api/get_all_follows`
+- **Method:** `GET`
+
+**Description**
+
+Retrieves a list of all user follow relationships.
+
+**Response**
+
+- **Success:** List of all user follow relationships in JSON format.
+
+---
+
+## Get All Users
+
+**Request**
+
+- **URL:** `/api/get_all_users`
+- **Method:** `GET`
+
+**Description**
+
+Retrieves a list of all registered users.
+
+**Response**
+
+- **Success:** List of all users in JSON format.
+
+---
+---
+---
+
+# Group Endpoints
+
+## Form Groups
+
+**Request**
+
+- **URL:** `/api/form_groups`
+- **Method:** `POST`
+
+**Parameters**
+- `username_arr` (string): An array composed of username [<span style="color:red"> Must contain at least two names </span>].
+- `group_name` (string): The name of the to be formed group.
+
+**Description**
+
+Forms a group from the given input username array and with the given group name.
+
+## Add User To Group
+
+**Request**
+
+- **URL:** `/api/add_user_to_group`
+- **Method:** `POST`
+
+**Parameters**
+- `username` (string): Username of the to be added user.
+- `group_id` (int): Group id of the group.
+
+**Description**
+
+Add the user to the specified group.
+
+## Remove User From Group
+
+**Request**
+
+- **URL:** `/api/remove_user_from_group`
+- **Method:** `POST`
+
+**Parameters**
+- `username` (string): Username of the to be added user.
+- `group_id` (int): Group id of the group.
+
+**Description**
+
+Remove the user from the specified group.
+
+---
+---
+---
+
+# Song Endpoints
 
 ## Add Song
 
@@ -297,6 +674,8 @@ Adds a new song to the database.
       "error": "Same song exits in the database"
     }
     ```
+
+---
 
 ## Add Songs Batch
 
@@ -363,6 +742,130 @@ Adds multiple songs to the database.
 - **Failure:** 
   - Not giving a list i.e empty songs[], no username input, + same errors with add_song
 
+---
+
+## Remove Song
+
+### Request
+
+- **URL:** `/api/remove_song`
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `song_name` (integer): The name of the song to be removed.
+- `username` (string): The username of the user removing the song.
+
+**Description**
+
+Removes an existing song from the database.
+
+### Response
+
+- **Success:** 
+  - Status Code: 200 OK
+  - JSON Object:
+    ```json
+    {
+      "message": "{song_name} removed successfully by {username}"
+    }
+    ```
+- **Failure:** 
+  - Status Code: 400 Bad Request
+  - JSON Object:
+    ```json
+    {
+      "error": "A song_name has to be given"
+    }
+    ```
+  - Status Code: 404 Not Found
+  - JSON Object:
+    ```json
+    {
+      "error": "Song not found"
+    }
+    ```
+
+---
+
+## Review User Song Info
+
+**Request**
+
+- **URL:** `/api/user_songs/<username>`
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `username` (string): User's username encoded within url.
+
+**Description**
+
+Retrieves all of the songs a user has added with their info.
+
+**Response**
+
+- **Success:** JSON object containing song info about the songs added by the user.
+- **Failure:** Error message if user not found.
+
+---
+
+## Get Follower Songs
+
+**Request**
+
+- **URL:** `/api/display_followed_songs/<username>`
+- **Method:** `GET`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `username` User's username encoded within url.
+
+**Description**
+
+Retrieves all of the songs of the followers of that user.
+
+---
+
+## Get All Group Songs
+
+**Request**
+
+- **URL:** `/api/get_all_songs_info/<group_id>`
+- **Method:** `GET`
+- **Content-Type:** `application/json`
+
+**Parameters**
+
+- `group_id` Group id encoded within url.
+
+**Description**
+
+Retrieves all of the songs of the group.
+
+---
+
+## Get All Songs
+
+**Request**
+
+- **URL:** `/api/get_all_songs_info`
+- **Method:** `GET`
+- **Content-Type:** `application/json`
+
+**Description**
+
+Retrieves all of the songs.
+
+---
+---
+---
+
+# Rating Related Endpoints
+
 ## Add Rate Batch
 
 ### Endpoint
@@ -419,6 +922,7 @@ This endpoint allows users to submit batches of ratings for songs, albums, or pe
 - **Failure**
   - Not giving a list i.e empty ratings[], no username input, + same errors with user_ratings
 
+---
 
 ## Add User Song Rating
 
@@ -444,6 +948,8 @@ Adds a user rating for a specific song.
 - **400 Bad Request**: Missing required parameters.
   - Body: `{"message": "Username/song_name/rating are required"}`
 
+---
+
 ## Add User Album Rating
 
 ### Endpoint
@@ -467,6 +973,8 @@ Adds a user rating for a specific album.
 
 - **400 Bad Request**: Missing required parameters.
   - Body: `{"message": "Username/album_name/rating are required"}`
+
+---
 
 ## Add User Performer Rating
 
@@ -492,76 +1000,13 @@ Adds a user rating for a specific performer.
 - **400 Bad Request**: Missing required parameters.
   - Body: `{"message": "Username/performer_name/rating are required"}`
 
-
-## Remove Song
-
-### Request
-
-- **URL:** `/api/remove_song`
-- **Method:** `POST`
-- **Content-Type:** `application/json`
-
-**Parameters**
-
-- `song_name` (integer): The name of the song to be removed.
-- `username` (string): The username of the user removing the song.
-
-**Description**
-
-Removes an existing song from the database.
-
-### Response
-
-- **Success:** 
-  - Status Code: 200 OK
-  - JSON Object:
-    ```json
-    {
-      "message": "{song_name} removed successfully by {username}"
-    }
-    ```
-- **Failure:** 
-  - Status Code: 400 Bad Request
-  - JSON Object:
-    ```json
-    {
-      "error": "A song_name has to be given"
-    }
-    ```
-  - Status Code: 404 Not Found
-  - JSON Object:
-    ```json
-    {
-      "error": "Song not found"
-    }
-    ```
-
-## Review User Song Info
-
-**Request**
-
-- **URL:** `/api/user_songs`
-- **Method:** `POST`
-- **Content-Type:** `application/json`
-
-**Parameters**
-
-- `username` (string): User's username.
-
-**Description**
-
-Retrieves all of the songs a user has added with their info.
-
-**Response**
-
-- **Success:** JSON object containing song info about the songs added by the user.
-- **Failure:** Error message if user not found.
+---
 
 ## Get User Song Ratings
 
 ### Endpoint
 
-`POST /api/user_song_ratings`
+`GET /api/user_song_ratings/<username>`
 
 ### Description
 
@@ -569,7 +1014,7 @@ Retrieves all song ratings submitted by a specific user.
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose song ratings are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -578,11 +1023,13 @@ Retrieves all song ratings submitted by a specific user.
 
 - **Error**: Username has to be given.
 
+---
+
 ## Get User Album Ratings
 
 ### Endpoint
 
-`POST /api/user_album_ratings`
+`GET /api/user_album_ratings/<username>`
 
 ### Description
 
@@ -590,7 +1037,7 @@ Retrieves all album ratings submitted by a specific user.
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose album ratings are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -599,11 +1046,13 @@ Retrieves all album ratings submitted by a specific user.
 
 - **Error**: Username has to be given.
 
+---
+
 ## Get User Performer Ratings
 
 ### Endpoint
 
-`POST /api/user_performer_ratings`
+`GET /api/user_performer_ratings/<username>`
 
 ### Description
 
@@ -611,7 +1060,7 @@ Retrieves all performer ratings submitted by a specific user.
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose performer ratings are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -620,11 +1069,149 @@ Retrieves all performer ratings submitted by a specific user.
 
 - **Error**: Username has to be given.
 
+---
+
+## Follower Song Ratings
+
+### Endpoint
+
+`GET /api/follower_song_ratings/<username>`
+
+### Description
+
+Retrieves all song ratings submitted by the followers of the specified user.
+
+### Request Body
+
+- `username` Username encoded within URL.
+
+---
+
+## Follower Album Ratings
+
+### Endpoint
+
+`GET /api/follower_album_ratings/<username>`
+
+### Description
+
+Retrieves all album ratings submitted by the followers of the specified user.
+
+### Request Body
+
+- `username` Username encoded within URL.
+
+---
+
+## Follower Performer Ratings
+
+### Endpoint
+
+`GET /api/follower_performer_ratings/<username>`
+
+### Description
+
+Retrieves all performer ratings submitted by the followers of the specified user.
+
+### Request Body
+
+- `username` Username encoded within URL.
+
+---
+
+## Group Song Ratings
+
+### Endpoint
+
+`GET /api/group_song_ratings/<group_id>`
+
+### Description
+
+Retrieves all song ratings submitted by the followers of the specified group.
+
+### Request Body
+
+- `group_id` Username encoded within URL.
+
+---
+
+## Group Album Ratings
+
+### Endpoint
+
+`GET /api/group_album_ratings/<group_id>`
+
+### Description
+
+Retrieves all album ratings submitted by the followers of the specified group.
+
+### Request Body
+
+- `group_id` Username encoded within URL.
+
+---
+
+## Group Performer Ratings
+
+### Endpoint
+
+`GET /api/group_performer_ratings/<group_id>`
+
+### Description
+
+Retrieves all performer ratings submitted by the followers of the specified group.
+
+### Request Body
+
+- `group_id` Username encoded within URL.
+
+---
+
+## All Song Ratings
+
+### Endpoint
+
+`GET /api/all_song_ratings`
+
+### Description
+
+Retrieves all song ratings.
+
+---
+
+## All Album Ratings
+
+### Endpoint
+
+`GET /api/all_album_ratings`
+
+### Description
+
+Retrieves all album ratings.
+
+---
+
+## All Performer Ratings
+
+### Endpoint
+
+`GET /api/all_performer_ratings`
+
+### Description
+
+Retrieves all performer ratings.
+
+---
+---
+---
+
+# Preference Endpoints
+
 ## User Genre Preferences
 
 ### Endpoint
 
-`POST /api/user_genre_preference`
+`GET /api/user_genre_preference/<username>`
 
 ### Description
 
@@ -632,7 +1219,7 @@ Retrieves genre preferences based on the songs associated with a specific user.
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose performer preferences are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -642,11 +1229,13 @@ Retrieves genre preferences based on the songs associated with a specific user.
 - **400 Bad Request**: Username has to be given.
   - Body: `{"error": "A username has to be given"}`
 
+---
+
 ## User Album Preferences
 
 ### Endpoint
 
-`POST /api/user_album_preference`
+`GET /api/user_album_preference/<username>`
 
 ### Description
 
@@ -654,7 +1243,7 @@ Retrieves performer preferences based on the songs associated with a specific us
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose performer preferences are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -664,11 +1253,13 @@ Retrieves performer preferences based on the songs associated with a specific us
 - **400 Bad Request**: Username has to be given.
   - Body: `{"error": "A username has to be given"}`
 
+---
+
 ## User Performer Preferences
 
 ### Endpoint
 
-`POST /api/user_performer_preference`
+`GET /api/user_performer_preference/<username>`
 
 ### Description
 
@@ -676,7 +1267,7 @@ Retrieves performer preferences based on the songs associated with a specific us
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose performer preferences are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -686,11 +1277,13 @@ Retrieves performer preferences based on the songs associated with a specific us
 - **400 Bad Request**: Username has to be given.
   - Body: `{"error": "A username has to be given"}`
 
+---
+
 ## User Followings Genre Preference
 
 ### Endpoint
 
-`POST /api/user_followings_genre_preference`
+`GET /api/user_followings_genre_preference/<username>`
 
 ### Description
 
@@ -698,7 +1291,7 @@ Retrieves genre preferences based on the songs of users whom the specified user 
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose followings' genre preferences are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -711,11 +1304,13 @@ Retrieves genre preferences based on the songs of users whom the specified user 
 - **400 Bad Request**: Username has to be given.
   - Body: `{"error": "A username has to be given"}`
 
+---
+
 ## User Followings Album Preference
 
 ### Endpoint
 
-`POST /api/user_followings_album_preference`
+`GET /api/user_followings_album_preference/<username>`
 
 ### Description
 
@@ -723,7 +1318,7 @@ Retrieves album preferences based on the songs of users whom the specified user 
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose followings' album preferences are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -736,11 +1331,13 @@ Retrieves album preferences based on the songs of users whom the specified user 
 - **400 Bad Request**: Username has to be given.
   - Body: `{"error": "A username has to be given"}`
 
+---
+
 ## User Followings Performer Preference
 
 ### Endpoint
 
-`POST /api/user_followings_performer_preference`
+`GET /api/user_followings_performer_preference/<username>`
 
 ### Description
 
@@ -748,7 +1345,7 @@ Retrieves performer preferences based on the songs of users whom the specified u
 
 ### Request Body
 
-- `username` (string, required): The username of the user whose followings' performer preferences are being retrieved.
+- `username` Username encoded within URL.
 
 ### Response
 
@@ -761,99 +1358,91 @@ Retrieves performer preferences based on the songs of users whom the specified u
 - **400 Bad Request**: Username has to be given.
   - Body: `{"error": "A username has to be given"}`
 
+---
+
+## Group Genre Preferences
+
+### Endpoint
+
+`GET /api/group_genre_preference/<username>`
+
+### Description
+
+Retrieves genre preferences based on the songs of group members whom is within the same group as the user.
+
+### Request Body
+
+- `username` Username encoded within URL.
+
+---
+
+## Group Album Preferences
+
+### Endpoint
+
+`GET /api/group_album_preference/<username>`
+
+### Description
+
+Retrieves album preferences based on the songs of group members whom is within the same group as the user.
+
+### Request Body
+
+- `username` Username encoded within URL.
+
+---
+
+## Group Performer Preferences
+
+### Endpoint
+
+`GET /api/group_performer_preference/<username>`
+
+### Description
+
+Retrieves performer preferences based on the songs of group members whom is within the same group as the user.
+
+### Request Body
+
+- `username` Username encoded within URL.
+
+---
+
+## Get All Genre Preferences
+
+### Endpoint
+
+`GET /api/get_all_genre_preference`
+
+### Description
+
+Retrieves all genre preferences present throughout the database.
+
+---
+
+## Get All Album Preferences
+
+### Endpoint
+
+`GET /api/get_all_album_preference`
+
+### Description
+
+Retrieves all album preferences present throughout the database.
+
+---
+
+## Get All Performer Preferences
+
+### Endpoint
+
+`GET /api/get_all_performer_preference`
+
+### Description
+
+Retrieves all performer preferences present throughout the database.
 
 
-## User Followings
 
-**Request**
 
-- **URL:** `/api/user_followings`
-- **Method:** `POST`
-- **Content-Type:** `application/json`
 
-**Parameters**
-
-- `username` (string): User's username.
-
-**Description**
-
-Retrieves the list of followers and users followed by a user.
-
-**Response**
-
-- **Success:** JSON object containing followers and followed users.
-- **Failure:** Error message if user not found.
-
-## Follow User
-
-**Request**
-
-- **URL:** `/api/follow`
-- **Method:** `POST`
-- **Content-Type:** `application/json`
-
-**Parameters**
-
-- `follower_username` (string): Username of the follower.
-- `followed_username` (string): Username of the user to be followed.
-
-**Description**
-
-Follows a user.
-
-**Response**
-
-- **Success:** Relationship added successfully.
-- **Failure:** Error message if relationship already exists.
-
-## Unfollow User
-
-**Request**
-
-- **URL:** `/api/unfollow`
-- **Method:** `POST`
-- **Content-Type:** `application/json`
-
-**Parameters**
-
-- `follower_username` (string): Username of the follower.
-- `followed_username` (string): Username of the user to be unfollowed.
-
-**Description**
-
-Unfollows a user.
-
-**Response**
-
-- **Success:** Relationship removed successfully.
-- **Failure:** Error message if relationship does not exist.
-
-## Get All Follows
-
-**Request**
-
-- **URL:** `/api/get_all_follows`
-- **Method:** `GET`
-
-**Description**
-
-Retrieves a list of all user follow relationships.
-
-**Response**
-
-- **Success:** List of all user follow relationships in JSON format.
-
-## Get All Users
-
-**Request**
-
-- **URL:** `/api/get_all_users`
-- **Method:** `GET`
-
-**Description**
-
-Retrieves a list of all registered users.
-
-**Response**
-
-- **Success:** List of all users in JSON format.

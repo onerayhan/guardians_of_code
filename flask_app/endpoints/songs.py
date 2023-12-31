@@ -1,7 +1,7 @@
 #Interfile imports 
 from app import app, db
 from utils import is_duplicate, is_duplicate_imported, username_to_user, song_name_to_album_name, song_name_to_genre_name, song_name_to_instrument_name, song_name_to_mood_name, song_name_to_performer_name
-from utils import follower_finder, get_user_songs, song_name_to_song, get_group_members
+from utils import followed_finder, get_user_songs, song_name_to_song, get_group_members
 from song_models import Song, Album, Performer, Genre, Mood, Instrument
 from models import users
 
@@ -204,7 +204,7 @@ def remove_song():
     return jsonify({'message': f'{song_name} removed successfully by {username}'}), 200
 
 # Displaying a given user's songs
-@app.route('/api/user_songs/<username>', methods=['POST'])
+@app.route('/api/user_songs/<username>')
 def user_songs(username):   
     user_songs = Song.query.filter_by(username=username)
     
@@ -235,13 +235,13 @@ def user_songs(username):
 @app.route('/api/display_followed_songs/<username>')
 def display_followed_songs(username):
     user = username_to_user(username)
-    followers = follower_finder(user)
+    followings = followed_finder(user)
     results = []
-    if not followers:
-        followers = []
+    if not followings:
+        followings = []
     
-    for follower in followers:
-        f_user = username_to_user(follower) 
+    for followed in followings:
+        f_user = username_to_user(followed) 
         val = {'username':f_user.username, 'songs': get_user_songs(f_user), }
         results.append(val)
         

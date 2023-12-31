@@ -214,19 +214,26 @@ def check_spoti_connection(username):
 @app.route('/api/add_mobile_token/<username>', methods=['POST'])
 def add_mobile_token(username):
     data = request.get_json()
-    token_data = json.dumps(data.get('token_data'))
+    token_data = json.dumps(data.get('token_data'))  
+    
     
     if not token_data:
-        return "No token data given", 404
+        return jsonify({'error':"No token data given"}), 404
     
     external_service = External_Service.query.filter_by(username=username).first()
-    if external_service:
-        external_service.token_data = token_data
-        return "User connection already in database, taken data refreshed"
+    if external_service:        
+        return jsonify({'message':"User already has a connection in database"}), 200
             
     else:
+        expires_at_utc = datetime.utcfromtimestamp(token_data['expires_at']).replace(tzinfo=timezone.utc)                
+        turkey_timezone = timezone(timedelta(hours=3))
+        expires_at_turkey = expires_at_utc.astimezone(turkey_timezone)
+                
+                
         db.session.add(External_Service(username=username,
-                                        service_name='Spotify',                                        
-                                        token_data=token_data))
+                                        service_name='Spotify',                                                
+                                        access_token=token_data['access_token'],
+                                        refresh_token=token_data['refresh_token'],
+                                        expires_at=expires_at_turkey))
         db.session.commit()
-        return "User connection added to the database."
+        return jsonify({'message':"User already has a connection in database"}), 200

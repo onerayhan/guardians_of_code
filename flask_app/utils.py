@@ -241,8 +241,7 @@ def is_duplicate(song_data):
         return False
              
     
-def form_group(group_name, username_arr):
-    
+def form_group(group_name, username_arr):    
     group = Group(group_name=group_name)
     db.session.add(group)
     db.session.commit()
@@ -257,9 +256,24 @@ def group_id_to_group(group_id):
     group = Group.query.filter_by(group_id=group_id).first()
     return group
 
+def get_user_groups(username):
+    groups = GroupUser.query.filter_by(username=username).all()
+    results = []
+    
+    if not groups:
+        return results
+    
+    for group in groups:
+        results.append(group_id_to_group(group.group_id).group_name)
+        
+    return results
+
 def get_group_members(group_id):
     members = GroupUser.query.filter_by(group_id=group_id).all()
     results = []
+    
+    if not members:
+        return results
     
     for member in members:
         results.append(member.username)
