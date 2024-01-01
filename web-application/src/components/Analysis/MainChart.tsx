@@ -141,6 +141,7 @@ const MainChart: React.FC = () => {
                         </Select>
                     )}
                 </Flex>
+                <div className="py-3"></div>
             </VStack>
 
             <Plot

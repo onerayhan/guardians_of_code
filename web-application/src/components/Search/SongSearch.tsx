@@ -14,6 +14,7 @@ interface Song {
     song_name: string;
     artist_name: string;
     album_name: string;
+    genre: string | null;
     length: number | null
     tempo: number | null
     recording_type: string | null;
@@ -64,9 +65,10 @@ const SongSearch: React.FC<SongSearchProps> = ({songInfo }) => {
                 ...(songInfo.tempo !== null && { tempo: songInfo.tempo }),
                 ...(songInfo.recording_type && { recording_type: songInfo.recording_type }),
                 ...(songInfo.listens !== null && { listens: songInfo.listens }),
+                ...(songInfo.genre !== null && { genre: songInfo.genre }),
                 ...(songInfo.release_year !== null && { release_year: songInfo.release_year }),
                 ...(songInfo.album_name && { album_name: songInfo.album_name }),
-                performer_name: songInfo.artist_name, // Always include artist name
+                performer_name: songInfo.artist_name,
             };
 
             await axios.post("http://51.20.128.164/api/add_song", payload);
@@ -86,35 +88,38 @@ const SongSearch: React.FC<SongSearchProps> = ({songInfo }) => {
     }
 
     return (
-        <Card className="w-[900px]" overflow='hidden' variant='outline'>
-            <div className="flex items-center">
-                <Avatar img={songInfo.song_photo} size="xl" />
-                <CardBody>
-                    <Text fontSize="xl" fontWeight="bold">{songInfo.song_name}</Text>
-                    <Button onClick={() => navigateArtist(songInfo.artist_name)}>{songInfo.artist_name}</Button>
-                    {songInfo.album_name && <Button onClick={() => navigateAlbum(songInfo.album_name)}>{songInfo.album_name}</Button>}
-                    <HStack spacing={4}>
-                        <Text py='2'>Length: {formatDuration(songInfo.length)}</Text>
-                    </HStack>
-                    <HStack spacing={4}>
-                        <Text py='2'>Listens: {songInfo.listens || 'N/A'}</Text>
-                        <Text py='2'>Year: {songInfo.release_year || 'N/A'}</Text>
-                    </HStack>
-                </CardBody>
-                <CardFooter>
-                    <Button
-                        variant='solid'
-                        colorScheme="orange"
-                        onClick={addToDatabase}
-                    >
-                        <FaDatabase />
-                        <div className="px-1"></div>
-                        Add Song to Database
-                    </Button>
-                    <div className="px-2"></div>
-                </CardFooter>
-            </div>
-        </Card>
+        <div>
+            <Card className="w-[900px]" overflow='hidden' variant='outline'>
+                <div className="flex items-center">
+                    <Avatar img={songInfo.song_photo} size="xl" />
+                    <CardBody>
+                        <Text fontSize="xl" fontWeight="bold">{songInfo.song_name}</Text>
+                        <Button onClick={() => navigateArtist(songInfo.artist_name)}>{songInfo.artist_name}</Button>
+                        {songInfo.album_name && <Button onClick={() => navigateAlbum(songInfo.album_name)}>{songInfo.album_name}</Button>}
+                        <HStack spacing={4}>
+                            <Text py='2'>Length: {formatDuration(songInfo.length)}</Text>
+                        </HStack>
+                        <HStack spacing={4}>
+                            <Text py='2'>Year: {songInfo.release_year || 'N/A'}</Text>
+                            <Text py='2'>Genre: {songInfo.genre || 'N/A'}</Text>
+                        </HStack>
+                    </CardBody>
+                    <CardFooter>
+                        <Button
+                            variant='solid'
+                            colorScheme="orange"
+                            onClick={addToDatabase}
+                        >
+                            <FaDatabase />
+                            <div className="px-1"></div>
+                            Add Song to Database
+                        </Button>
+                        <div className="px-2"></div>
+                    </CardFooter>
+                </div>
+            </Card>
+            <div className="py-2" ></div>
+        </div>
     );
 };
 

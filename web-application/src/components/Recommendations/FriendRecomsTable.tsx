@@ -1,4 +1,4 @@
-import {TableContainer, Table, Thead, Tr, Th, Tbody, Td} from '@chakra-ui/react'
+import {TableContainer, Table, Thead, Tr, Th, Tbody, Td, Heading} from '@chakra-ui/react'
 import React, {useEffect, useState} from "react";
 import {useAuthUser} from "react-auth-kit";
 import axios from "axios";
@@ -50,7 +50,9 @@ function FriendRecomsTable() {
 
     return (
         <div className="relative w-full flex flex-col items-center top-20 pb-8">
-            <h1 className="text-4xl font-semibold text-white">Friend-Originated Recommendations</h1>
+            <Heading as="h1" size="xl" color="white" align="center">
+                Recommendations based on your Armonify Friends
+            </Heading>
             <div className="pt-5"></div>
             <div className="rounded-xl bg-white">
                 <TableContainer maxH="500px">

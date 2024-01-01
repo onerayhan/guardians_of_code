@@ -148,6 +148,9 @@ function RecommendationsTable() {
 
   return (
       <Box>
+          <Heading as="h1" size="xl" color="white" align="center">
+            Song Recommendations by Armonify
+          </Heading>
         <Flex align="center" justify="center">
           {recomType === '2' ? (
               <Flex align="center" justify="center">

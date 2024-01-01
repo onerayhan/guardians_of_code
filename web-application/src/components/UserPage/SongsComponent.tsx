@@ -50,17 +50,17 @@ interface RatedArray {
 const SongsComponent:React.FC = () => {
 
   const navigate = useNavigate();
-
   const toast = useToast();
   const deleteSong = async (song_id: string) => {
-    const apiUrl = "http://51.20.128.164/api/delete_song";
+    const apiUrl = `http://51.20.128.164/api/remove_song`;
+    let idNum = Number(song_id);
     try {
-        console.log(song_id);
-      await axios.post(apiUrl, { username: `${auth()?.username}`, song_id: song_id });
+      await axios.post(apiUrl, { username: `${auth()?.username}`, song_id: idNum });
       toast({
         title: `Song successfully deleted!`,
         status: "success",
       })
+      window.location.reload();
 
     } catch (error) {
       console.error("Error deleting song:", error);
@@ -192,9 +192,9 @@ const SongsComponent:React.FC = () => {
 
     useEffect(() => {
       const getSongs = async () => {
-        const apiUrl = "http://51.20.128.164/api/user_songs";
+        const apiUrl = `http://51.20.128.164/api/user_songs/${auth()?.username}`;
         try {
-          const response = await axios.post(apiUrl, { username: `${auth()?.username}` });
+          const response = await axios.get(apiUrl);
           const data = response.data;
           setPosted(data);
         } catch (error) {

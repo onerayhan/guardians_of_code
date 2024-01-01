@@ -115,6 +115,7 @@ const Analysis = () => {
         <Header />
         <MainTable ratedArray={data} />
         <hr className="w-1/2 mx-auto border-t border-white"/>
+        <div className="py-5"></div>
         <div className="relative flex flex-col items-center">
             <MainChart/>
         </div>

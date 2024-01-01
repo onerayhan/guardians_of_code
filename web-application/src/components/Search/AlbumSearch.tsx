@@ -23,17 +23,21 @@ const AlbumSearch: React.FC<AlbumSearchProps> = ({albumInfo }) => {
     };
 
     return (
-        <Card className="w-[700px]" overflow="hidden" variant="outline">
-            <div className="flex items-center">
-                <HStack spacing={4} className="flex-grow">
-                    <CardBody>
-                        <Avatar size="xl" img={albumInfo.album_photo}/>
-                        <Button onClick={() => navigateToAlbum(albumInfo.album_name)}>{albumInfo.album_name}</Button>
-                        <Text py="2">Artists: {albumInfo.artist_names.join(', ')}</Text>
-                    </CardBody>
-                </HStack>
-            </div>
-        </Card>
+        <div>
+            <Card className="w-[900px]" overflow="hidden" variant="outline">
+                <div className="flex items-center">
+                    <HStack spacing={4} className="flex-grow">
+                        <Avatar size="xl" img={albumInfo.album_photo} />
+                        <CardBody>
+                            <Button onClick={() => navigateToAlbum(albumInfo.album_name)}>{albumInfo.album_name}</Button>
+                            <Text py="2">Artists: {albumInfo.artist_names}</Text>
+                            <Text py="2">Release Year: {albumInfo.release_year || 'N/A'}</Text>
+                        </CardBody>
+                    </HStack>
+                </div>
+            </Card>
+            <div className="py-2" ></div>
+        </div>
     );
 };
 

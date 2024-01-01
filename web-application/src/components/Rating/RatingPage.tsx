@@ -99,9 +99,9 @@ function RatingPage() {
 
     useEffect(() => {
         const getSongs = async () => {
-            const apiUrl = "http://51.20.128.164/api/user_songs";
+            const apiUrl = `http://51.20.128.164/api/user_songs/${auth()?.username}`;
             try {
-                const response = await axios.post(apiUrl, { username: `${auth()?.username}` });
+                const response = await axios.get(apiUrl);
                 const data = response.data;
                 setRatingSongsOwn(data);
             } catch (error) {
@@ -118,7 +118,6 @@ function RatingPage() {
             [songId]: newRating
         }));
 
-        // Update the ratings array to include only the latest rating for each song
         setRatings(prevRatings => {
             const updatedRatings = prevRatings.filter(rating => rating.song_id !== songId);
             return [...updatedRatings, { rating_type: "song_rate", song_id: songId, rating: newRating }];
@@ -352,112 +351,118 @@ function RatingPage() {
                 <div className="relative w-full flex flex-col items-center top-12 py-8">
                     <h1 className="text-6xl font-lalezar text-white">Rate Songs to Get Recommendations.</h1>
                     <h1 className="text-2xl font-lalezar text-white">These are also recommendations by Armonify™! </h1>
+                    <div className="py-2"></div>
+                    <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
+                        <Box bg="white" maxW='sm' borderWidth='1px' borderRadius='lg' p={1} overflow='hidden'>
+                            <div className="px-1"></div>
+                            <RadioGroup onChange={setRateType} value={rateType}>
+                                <Stack direction='row' w={60}>
+                                    <Radio value='1' className="text-white">Armonify</Radio>
+                                    <div className="px-1"></div>
+                                    <Radio value='2' className="text-white">My Songs</Radio>
+                                </Stack>
+                            </RadioGroup>
+                        </Box>
+                    </Stack>
                 </div>
+
                 <div>
-                    <div className="py-8"></div>
+                    <div className="py-2"></div>
                     <Flex align="center" justify="center">
-
-                        {/* Genre Section */}
-                        <Box className="flex flex-col">
-                            <Flex>
-                                <Input
-                                    placeholder="Type Genre..."
-                                    value={genre}
-                                    onChange={handleGenreChange}
-                                    size="sm"
-                                    mr={2}
-                                    className="text-white"
-                                />
-                                <Button onClick={addGenre} size="sm">Add Genre</Button>
-                            </Flex>
-                            <Stack spacing={4} direction="row" align="center" wrap="wrap">
-                                {selectedGenres.map((tag, index) => (
-                                    <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                        <TagLabel>{tag}</TagLabel>
-                                        <TagCloseButton onClick={() => removeGenre(tag)}/>
-                                    </Tag>
-                                ))}
-                            </Stack>
-                        </Box>
-                        <div className="px-5"></div>
-                        {/* Artist Section */}
-                        <Box className="flex flex-col">
-                            <Flex>
-                                <Input
-                                    placeholder="Type Artist..."
-                                    value={artist}
-                                    onChange={handleArtistChange}
-                                    size="sm"
-                                    mr={2}
-                                    className="text-white"
-                                />
-                                <Button onClick={addArtist} size="sm">Add Artist</Button>
-                            </Flex>
-                            <Stack spacing={4} direction="row" align="center" wrap="wrap">
-                                {selectedArtists.map((tag, index) => (
-                                    <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                        <TagLabel>{tag}</TagLabel>
-                                        <TagCloseButton onClick={() => removeArtist(tag)}/>
-                                    </Tag>
-                                ))}
-                            </Stack>
-                        </Box>
-                        <div className="px-5"></div>
-                        {/* Album Section */}
-                        <Box className="flex flex-col">
-                            <Flex>
-                                <Input
-                                    placeholder="Type Album..."
-                                    value={album}
-                                    onChange={handleAlbumChange}
-                                    size="sm"
-                                    mr={2}
-                                    className="text-white"
-                                />
-                                <Button onClick={addAlbum} size="sm">Add Album</Button>
-                            </Flex>
-                            <Stack spacing={4} direction="row" align="center" wrap="wrap">
-                                {selectedAlbums.map((tag, index) => (
-                                    <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                        <TagLabel>{tag}</TagLabel>
-                                        <TagCloseButton onClick={() => removeAlbum(tag)}/>
-                                    </Tag>
-                                ))}
-                            </Stack>
-                        </Box>
-                        <div className="px-5"></div>
-
-                        <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                            <Box bg="white" maxW='sm' borderWidth='1px' borderRadius='lg' p={1} overflow='hidden'>
-                                <div className="px-1"></div>
-                                <RadioGroup onChange={setRateType} value={rateType}>
-                                    <Stack direction='row'>
-                                        <Radio value='1' className="text-white">Armonify</Radio>
-                                        <Radio value='2' className="text-white">My Songs</Radio>
+                        {
+                            rateType === '1' && (
+                                <>
+                                {/* Genre Section */}
+                                <Box className="flex flex-col">
+                                    <Flex>
+                                        <Input
+                                            placeholder="Type Genre..."
+                                            value={genre}
+                                            onChange={handleGenreChange}
+                                            size="sm"
+                                            mr={2}
+                                            className="text-white"
+                                        />
+                                        <Button onClick={addGenre} size="sm">Add Genre</Button>
+                                    </Flex>
+                                    <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                        {selectedGenres.map((tag, index) => (
+                                            <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
+                                                <TagLabel>{tag}</TagLabel>
+                                                <TagCloseButton onClick={() => removeGenre(tag)}/>
+                                            </Tag>
+                                        ))}
                                     </Stack>
-                                </RadioGroup>
-                            </Box>
-                        </Stack>
-                        
-                        <div className="px-5"></div>
-
-                        {rateType === '1' ? (
-                            <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
-                                <Button colorScheme="facebook" onClick={fetch_recom_songs}>
-                                    Get Songs to Rate
-                                </Button>
-                            </Stack>
-                        ) : (
-                            <></>
-                        )}
-
+                                </Box>
+                                <div className="px-5"></div>
+                                {/* Artist Section */}
+                                <Box className="flex flex-col">
+                                    <Flex>
+                                        <Input
+                                            placeholder="Type Artist..."
+                                            value={artist}
+                                            onChange={handleArtistChange}
+                                            size="sm"
+                                            mr={2}
+                                            className="text-white"
+                                        />
+                                        <Button onClick={addArtist} size="sm">Add Artist</Button>
+                                    </Flex>
+                                    <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                        {selectedArtists.map((tag, index) => (
+                                            <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
+                                                <TagLabel>{tag}</TagLabel>
+                                                <TagCloseButton onClick={() => removeArtist(tag)}/>
+                                            </Tag>
+                                        ))}
+                                    </Stack>
+                                </Box>
+                                <div className="px-5"></div>
+                                {/* Album Section */}
+                                <Box className="flex flex-col">
+                                    <Flex>
+                                        <Input
+                                            placeholder="Type Album..."
+                                            value={album}
+                                            onChange={handleAlbumChange}
+                                            size="sm"
+                                            mr={2}
+                                            className="text-white"
+                                        />
+                                        <Button onClick={addAlbum} size="sm">Add Album</Button>
+                                    </Flex>
+                                    <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                        {selectedAlbums.map((tag, index) => (
+                                            <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
+                                                <TagLabel>{tag}</TagLabel>
+                                                <TagCloseButton onClick={() => removeAlbum(tag)}/>
+                                            </Tag>
+                                        ))}
+                                    </Stack>
+                                </Box>
+                                <div className="px-5"></div>
+                                    {rateType === '1' ? (
+                                        <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
+                                            <Button colorScheme="facebook" onClick={fetch_recom_songs}>
+                                                Get Songs to Rate
+                                            </Button>
+                                        </Stack>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </>
+                            )
+                        }
                     </Flex>
+
+                    <div className="px-5"></div>
+
                     <SimpleGrid
                         paddingTop="50px"
                         paddingLeft="50px"
                         paddingRight="50px"
                         spacing={4}
-                        templateColumns='repeat(5, 1fr)'
+                        templateColumns='repeat(4, 1fr)'
                     >
                         {rateType === '1' ? (
                             RatingSongsRecom.slice(0, 15).map((song, index) => (
