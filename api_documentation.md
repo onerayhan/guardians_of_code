@@ -937,7 +937,7 @@ Adds a user rating for a specific song.
 ### Request Body
 
 - `username` (string, required): The username of the user submitting the rating.
-- `song_id` (integer, required): The id of the song for which the user is submitting the rating.
+- `song_id` (id, required): The id of the song for which the user is submitting the rating.
 - `rating` (integer, required): Self evident.
 
 ### Response
@@ -946,7 +946,7 @@ Adds a user rating for a specific song.
   - Body: `{"message": "Song rating added successfully by {username}"}`
 
 - **400 Bad Request**: Missing required parameters.
-  - Body: `{"message": "Username/song_id/rating are required"}`
+  - Body: `{"message": "Username/song_name/rating are required"}`
 
 ---
 
@@ -963,7 +963,7 @@ Adds a user rating for a specific album.
 ### Request Body
 
 - `username` (string, required): The username of the user submitting the rating.
-- `album_id` (integer, required): The id of the album for which the user is submitting the rating.
+- `album_name` (string, required): The name of the album for which the user is submitting the rating.
 - `rating` (integer, required): Self evident.
 
 ### Response
@@ -972,7 +972,7 @@ Adds a user rating for a specific album.
   - Body: `{"message": "Album rating added successfully by {username}"}`
 
 - **400 Bad Request**: Missing required parameters.
-  - Body: `{"message": "Username/album_id/rating are required"}`
+  - Body: `{"message": "Username/album_name/rating are required"}`
 
 ---
 
@@ -989,7 +989,7 @@ Adds a user rating for a specific performer.
 ### Request Body
 
 - `username` (string, required): The username of the user submitting the rating.
-- `performer_id` (integer, required): The id of the performer for which the user is submitting the rating.
+- `performer_name` (integer, required): The name of the performer for which the user is submitting the rating.
 - `rating` (integer, required): Self evident.
 
 ### Response
@@ -998,7 +998,7 @@ Adds a user rating for a specific performer.
   - Body: `{"message": "Performer rating added successfully by {username}"}`
 
 - **400 Bad Request**: Missing required parameters.
-  - Body: `{"message": "Username/performer_id/rating are required"}`
+  - Body: `{"message": "Username/performer_name/rating are required"}`
 
 ---
 

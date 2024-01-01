@@ -1,6 +1,6 @@
 #Interfile imports 
 from app import app, db
-from utils import username_to_user, song_name_to_genre_name, song_name_to_album_name, song_name_to_performer_name, song_id_to_song_name
+from utils import username_to_user, song_name_to_genre_name, song_name_to_album_name, song_name_to_performer_name, song_id_to_song_name, album_name_to_album, performer_name_to_performer
 from utils import album_id_to_album, performer_id_to_performer, group_song_ratings, group_album_ratings, group_performer_ratings, song_id_to_imported_song, follower_finder
 from song_models import User_Song_Rating, User_Album_Rating, User_Performer_Rating
 
@@ -108,15 +108,15 @@ def add_user_album_rating():
     data = request.get_json()
 
     username = data.get('username')
-    album_id = data.get('album_id')
+    album_name = data.get('album_name')
     rating = data.get('rating')
 
-    if not username or not album_id or not rating:
+    if not username or not album_name or not rating:
         return jsonify({"error": "Username/album_id/rating are required"}), 400
 
     new_rating = User_Album_Rating(
         username=username,
-        album_id=album_id,
+        album_id=album_name_to_album(album_name).album_id,
         rating=rating
     )
 
@@ -131,15 +131,15 @@ def add_user_performer_rating():
     data = request.get_json()
 
     username = data.get('username')
-    performer_id = data.get('performer_id')
+    performer_name = data.get('performer_name')
     rating = data.get('rating')
 
-    if not username or not performer_id or not rating:
+    if not username or not performer_name or not rating:
         return jsonify({"error": "Username/performer_id/rating are required"}), 400
 
     new_rating = User_Performer_Rating(
         username=username,
-        performer_id=performer_id,
+        performer_id=performer_name_to_performer(performer_name).performer_id,
         rating=rating
     )
 
