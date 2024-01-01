@@ -31,7 +31,7 @@ const AlbumPage = () => {
     useEffect(() => {
         const fetchAlbumData = async () => {
             try {
-                const response = await axios.get(`http://51.20.128.164/spoti/get_albums_info/${username}/${albumId}`);
+                const response = await axios.get(username);
                 setAlbumData(response.data[0]);
             } catch (error) {
                 console.error("Error fetching album data:", error);

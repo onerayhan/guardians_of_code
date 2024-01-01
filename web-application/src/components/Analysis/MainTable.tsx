@@ -55,13 +55,27 @@ const MainTable: React.FC<RatedTableProps> = ({ ratedArray = [] }) => {
         return 'Song Ratings and Details';
     };
 
-    const getRatingColumnHeader = () => {
+    const getTableHeaders = () => {
         switch (rateType) {
-            case 'artist': return 'Performer Rating Average';
-            case 'album': return 'Album Rating Average';
-            case 'track': return 'Song Rating Average';
-            default: return 'Song Rating Average';
+            case 'artist':
+                return (<><Th>Artist</Th><Th isNumeric>Rating Average</Th></>);
+            case 'album':
+                return (<><Th>Album</Th><Th isNumeric>Rating Average</Th></>);
+            case 'track':
+            default:
+                return (<><Th>Song</Th><Th isNumeric>Rating Average</Th></>);
         }
+    };
+
+    const renderTableRows = () => {
+        return ratedArray.map((item, index) => (
+            <Tr key={index}>
+                {rateType === 'artist' && <Td>{item.artist}</Td>}
+                {rateType === 'album' && <Td>{item.album}</Td>}
+                {(rateType === 'track' || rateType === '') && <Td>{item.song}</Td>}
+                <Td isNumeric>{item.song_rating}</Td>
+            </Tr>
+        ));
     };
 
     const handleMainSelectionChange = (e) => {
@@ -82,20 +96,19 @@ const MainTable: React.FC<RatedTableProps> = ({ ratedArray = [] }) => {
     };
 
     return (
-        <div className="relative flex flex-col items-center">
+        <>
             <VStack>
-                <div className="py-5"></div>
-                <h1 className="text-5xl font-lalezar">Your Data In Tables</h1>
-                <h1 className="text-2xl font-lalezar">Please select the data that you want to analyze.</h1>
+                <h1 className="text-5xl font-lalezar text-[#35517e]">Your Tables</h1>
+                <h1 className="text-2xl font-lalezar text-[#35517e]">Please select the data that you want to analyze.</h1>
                 <Flex direction="row" align="center" justify="center">
-                    <Select onChange={handleMainSelectionChange} placeholder="Select Option" mr={2}>
+                    <Select onChange={handleMainSelectionChange} placeholder="Select Option" mr={2} className="text-[#35517e]">
                         <option value="era">Best Songs By Era</option>
                         <option value="rating">Best Avg. Ratings</option>
                         {/* Add other main options here */}
                     </Select>
 
                     {mainSelection === 'era' && (
-                        <Select onChange={handleDecadeChange} placeholder="Select Decade">
+                        <Select onChange={handleDecadeChange} placeholder="Select Decade" className="text-[#35517e]">
                             <option value="60s">60s</option>
                             <option value="70s">70s</option>
                             <option value="80s">80s</option>
@@ -106,15 +119,15 @@ const MainTable: React.FC<RatedTableProps> = ({ ratedArray = [] }) => {
                     )}
 
                     {mainSelection === 'rating' && (
-                        <Select onChange={handleTypeChange} placeholder="Select Option">
+                        <Select onChange={handleTypeChange} placeholder="Select Option" className="text-[#35517e]">
                             <option value="artist">Artist Ratings</option>
                             <option value="track">Song Ratings</option>
                             <option value="album">Album Ratings</option>
                         </Select>
                     )}
 
-                    {mainSelection === 'rating' &&  (
-                        <Select onChange={handleTimeChange} placeholder="Select Span">
+                    {mainSelection === 'rating' && (
+                        <Select onChange={handleTimeChange} placeholder="Select Span" className="text-[#35517e]">
                             <option value="1m">1 Month</option>
                             <option value="6m">6 Months</option>
                             <option value="1y">1 Year</option>
@@ -123,34 +136,25 @@ const MainTable: React.FC<RatedTableProps> = ({ ratedArray = [] }) => {
                 </Flex>
                 <div className="py-5"></div>
             </VStack>
-            <Box bg='white' w='60%' p={4} color='black' rounded="xl">
+            <Box bg='white' w='900px' p={4} color='black' rounded="xl">
                 <TableContainer>
                     <Table variant='simple'>
                         <TableCaption>{getTableCaption()}</TableCaption>
                         <Thead>
                             <Tr>
-                                <Th>Artist</Th>
-                                <Th>Album</Th>
-                                <Th>Song</Th>
-                                <Th isNumeric>{getRatingColumnHeader()}</Th>
+                                {getTableHeaders()}
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {ratedArray.map((item, index) => (
-                                <Tr key={index}>
-                                    <Td>{item.artist}</Td>
-                                    <Td>{item.album}</Td>
-                                    <Td>{item.song}</Td>
-                                    <Td isNumeric>{item.song_rating}</Td>
-                                </Tr>
-                            ))}
+                            {renderTableRows()}
                         </Tbody>
                     </Table>
                 </TableContainer>
             </Box>
             <div className="py-5"></div>
-        </div>
+        </>
     );
+
 };
 
 export default MainTable;

@@ -90,7 +90,12 @@ const RateCSV = () => {
             <SimpleGrid columns={2} spacing={10}>
                 {/* Artist Dropdown and Tags */}
                 <Flex direction="column" align="start" gap={2}>
-                    <Select placeholder="Select Artist" className="text-white" onChange={(e) => handleSelectArtist(e.target.value)}>
+                    <Select
+                        placeholder="Select Artist"
+                        className="text-[#35517e]"
+                        onChange={(e) => handleSelectArtist(e.target.value)}
+                        style={{ width: '400px' }}
+                    >
                         {uniqueArtists.map(artist => (
                             <option key={artist} value={artist}>{artist}</option>
                         ))}
@@ -107,7 +112,12 @@ const RateCSV = () => {
 
                 {/* Album Dropdown and Tags */}
                 <Flex direction="column" align="start" gap={2}>
-                    <Select placeholder="Select Album" className="text-white" onChange={(e) => handleSelectAlbum(e.target.value)}>
+                    <Select
+                        placeholder="Select Album"
+                        className="text-[#35517e]"
+                        onChange={(e) => handleSelectAlbum(e.target.value)}
+                        style={{ width: '400px' }}
+                    >
                         {uniqueAlbums.map(album => (
                             <option key={album} value={album}>{album}</option>
                         ))}
@@ -129,6 +139,7 @@ const RateCSV = () => {
             </Center>
         </Box>
     );
+
 };
 
 export default RateCSV;

@@ -284,12 +284,13 @@ const Header: React.FC = () => {
                     <div className='pr-[8px]'><FiSettings size={15}/></div>
                     Settings</a>
                 </li>
-                <li>
+                {/*                <li>
+
                   <a onClick={navigateToShare}
                      className="flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer dark:hover:text-white">
                     <div className='pr-[8px]'><FaShare size={15}/></div>
                     Share</a>
-                </li>
+                </li> */}
               </ul>
               <div className="py-2">
                 <a onClick={handleSignOut}

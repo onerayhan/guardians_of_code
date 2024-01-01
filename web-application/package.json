@@ -39,6 +39,7 @@
     "react-datepicker": "^4.21.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
+    "react-paginate": "^8.2.0",
     "react-phone-input-2": "^2.15.1",
     "react-phone-number-input": "^3.3.7",
     "react-pivot": "^4.4.0",

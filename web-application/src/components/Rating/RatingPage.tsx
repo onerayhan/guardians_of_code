@@ -16,7 +16,18 @@ import {
     useCheckbox,
     chakra,
     Icon,
-    UseCheckboxProps, useCheckboxGroup, HStack, VStack, Radio, RadioGroup, Input
+    UseCheckboxProps,
+    useCheckboxGroup,
+    HStack,
+    VStack,
+    Radio,
+    RadioGroup,
+    Input,
+    Tabs,
+    TabList,
+    Tab,
+    TabPanels,
+    TabPanel, TableContainer, Table, Thead, Tr, Th, Tbody
 } from '@chakra-ui/react'
 import React, { useEffect, useState} from 'react';
 import {useAuthUser} from "react-auth-kit";
@@ -28,9 +39,9 @@ import {useNavigate} from "react-router-dom";
 import GenreInput from "./GenreInput.tsx";
 import AlbumInput from "./AlbumInput.tsx";
 import ArtistInput from "./ArtistInput.tsx";
-import {FaMusic, FaCalendarAlt, FaClock, FaStar, FaDatabase} from 'react-icons/fa';
+import {FaMusic, FaCalendarAlt, FaClock, FaStar, FaDatabase, FaCompactDisc, FaMicrophone} from 'react-icons/fa';
 import { MdAlbum } from 'react-icons/md';
-import { IoMdMicrophone } from "react-icons/io";
+import {IoIosRefreshCircle, IoMdMicrophone} from "react-icons/io";
 import {IoRefreshCircleSharp} from "react-icons/io5";
 import RefreshButton from "./RefreshButton.tsx";
 import {BsFillSendFill} from "react-icons/bs";
@@ -38,7 +49,8 @@ import { Text } from '@chakra-ui/react'
 import { IoMdOptions } from "react-icons/io";
 import StarRating from "./SongStar.tsx";
 import Ratings from "react-star-ratings";
-import {Avatar} from "flowbite-react";
+import {Avatar, Modal} from "flowbite-react";
+import ReactPaginate from 'react-paginate';
 
 interface Song {
     song_id: string;
@@ -64,7 +76,10 @@ interface RatingStarsProps {
     onRatingChange: (songId: number, newRating: number) => void;
 }
 
-
+interface ModalState {
+    type: 'artist' | 'album' | null;
+    data: string | null;
+}
 
 function RatingPage() {
     const [RatingSongsRecom, setRatingSongsRecom] = useState<Song[]>([]);
@@ -81,6 +96,143 @@ function RatingPage() {
     const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
     const [ratings, setRatings] = useState<Array<{ rating_type: string, song_id: number, rating: number }>>([]);
     const [rateType, setRateType] = React.useState('2');
+    const [showArtistRateModal, setArtistRateModal] = React.useState(false);
+    const [showAlbumRateModal, setAlbumRateModal] = React.useState(false);
+    const [currentModal, setCurrentModal] = useState<ModalState>({ type: null, data: null });
+
+    const openArtistModal = (artistName: string) => {
+        setCurrentModal({ type: 'artist', data: artistName });
+    };
+
+    const openAlbumModal = (albumName: string) => {
+        setCurrentModal({ type: 'album', data: albumName });
+    };
+
+    const closeModal = () => {
+        setCurrentModal({ type: null, data: null });
+    };
+
+    const isArtistModalOpen = currentModal.type === 'artist';
+    const isAlbumModalOpen = currentModal.type === 'album';
+
+    useEffect(() => {
+        setSongRatings({});
+    }, [rateType]);
+
+    const ArtistRate = ({ artist_name }: { artist_name: string | null}) => {
+        const [artistRatings, setArtistRatings] = useState<{ [artistName: string]: number }>({});
+
+        const updateRating = (artist_name: string, newRating: number) => {
+            setArtistRatings(prevRatings => ({
+                ...prevRatings,
+                [artist_name]: newRating
+            }));
+        };
+
+        let currentRating = 0;
+        artist_name ? currentRating = artistRatings[artist_name] || 0 : currentRating = 0;
+
+        const changeRating = (newRating: number) => {
+            artist_name ? updateRating(artist_name, newRating) : updateRating("", 0);
+        };
+
+        const handleSendRate = async () => {
+            const apiUrl = "http://51.20.128.164/api/add_user_performer_ratings"
+            try {
+                await axios.post(apiUrl, {username: `${auth()?.username}`, performer_name: artist_name, rating: artistRatings[artist_name]});
+                toast({
+                    title: `${artist_name} was rated ${artistRatings[artist_name]}!`,
+                    status: "success",
+                });
+                closeModal();
+            }
+            catch (error) {
+                console.error("Error in sending rating:", error);
+            }
+        }
+        return(
+            <Box className="rounded-xl bg-gray-100">
+                <VStack>
+                    <div className="px-2"></div>
+                    <Ratings
+                        rating={currentRating}
+                        numberOfStars={5}
+                        changeRating={changeRating}
+                        starRatedColor="gold"
+                        starEmptyColor="grey"
+                        starHoverColor="lightblue"
+                        starDimension="20px"
+                        starSpacing="5px"
+                        name="rating"
+                    />
+                    <div className="px-2"></div>
+                    <Button onClick={handleSendRate} colorScheme="green">Send Rating</Button>
+                    <div className="px-2"></div>
+                </VStack>
+            </Box>
+        );
+    }
+
+    const AlbumRate = ({ album_name }: { album_name: string | null}) => {
+        const [albumRatings, setAlbumRatings] = useState<{ [albumName: string]: number }>({});
+        const auth = useAuthUser();
+        const toast = useToast();
+
+        const updateRating = (album_name: string, newRating: number) => {
+            setAlbumRatings(prevRatings => ({
+                ...prevRatings,
+                [album_name]: newRating
+            }));
+        };
+
+        let currentRating = 0;
+        if (album_name) {
+            currentRating = albumRatings[album_name] || 0;
+        }
+
+        const changeRating = (newRating: number) => {
+            if (album_name) {
+                updateRating(album_name, newRating);
+            }
+        };
+
+        const handleSendRate = async () => {
+            const apiUrl = "http://51.20.128.164/api/add_user_album_ratings" // Update the API URL
+            try {
+                await axios.post(apiUrl, {username: `${auth()?.username}`, album_name: album_name, rating: albumRatings[album_name]});
+                toast({
+                    title: `${album_name} was rated ${albumRatings[album_name]}!`,
+                    status: "success",
+                });
+                closeModal();
+            }
+            catch (error) {
+                console.error("Error in sending rating:", error);
+            }
+        }
+
+        return (
+            <Box className="rounded-xl bg-gray-100">
+                <VStack>
+                    <div className="px-2"></div>
+                    <Ratings
+                        rating={currentRating}
+                        numberOfStars={5}
+                        changeRating={changeRating}
+                        starRatedColor="gold"
+                        starEmptyColor="grey"
+                        starHoverColor="lightblue"
+                        starDimension="20px"
+                        starSpacing="5px"
+                        name="rating"
+                    />
+                    <div className="px-2"></div>
+                    <Button onClick={handleSendRate} colorScheme="green">Send Rating</Button>
+                    <div className="px-2"></div>
+                </VStack>
+            </Box>
+        );
+    }
 
     const fetch_recom_songs = async () => {
         const apiUrl = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`;
@@ -156,6 +308,47 @@ function RatingPage() {
         );
     };
 
+    function SongDisplayComponent({ rateType, RatingSongsRecom, RatingSongsOwn }) {
+        const [currentPage, setCurrentPage] = useState(0);
+        const songsPerPage = 4;
+
+        const displayedSongs = (rateType === '1' ? RatingSongsRecom : RatingSongsOwn)
+            .slice(currentPage * songsPerPage, (currentPage + 1) * songsPerPage);
+
+        const pageCount = Math.ceil((rateType === '1' ? RatingSongsRecom.length : RatingSongsOwn.length) / songsPerPage);
+
+        const handlePageClick = (selectedItem) => {
+            setCurrentPage(selectedItem.selected);
+        };
+
+        return (
+            <>
+                <div className="flex flex-col items-center pt-12 px-12">
+                    <div className="flex space-x-4">
+                        <div className="py-5"></div>
+                        {displayedSongs.map((song, index) => (
+                            <RateDisplaySong key={song.song_name} song={song}/>
+                        ))}
+                        <div className="py-5"></div>
+                    </div>
+                    <ReactPaginate
+                        previousLabel={<button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">← Previous</button>}
+                        nextLabel={<button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Next →</button>}
+                        pageCount={pageCount}
+                        onPageChange={handlePageClick}
+                        containerClassName="pagination flex justify-center mt-4"
+                        pageClassName="page-item inline-block"
+                        pageLinkClassName="page-link inline-block border border-gray-300 text-gray rounded py-2 px-3 bg-gray-100 hover:bg-gray-200"
+                        activeClassName="text-blue rounded"
+                        activeLinkClassName="active-link"
+                        previousClassName="mr-2"
+                        nextClassName="ml-2"
+                    />
+                </div>
+            </>
+        );
+    }
+
     const handleGenreChange = (event) => {
         setGenre(event.target.value);
     };
@@ -221,7 +414,6 @@ function RatingPage() {
             <Card maxW='500px'>
                 <CardBody>
                     <Stack spacing={3}>
-                        <Avatar size="xl" className="pl-5" img={song.song_photo}/>
                         <div className="px-2"></div>
                         <Flex alignItems="center">
                             <Icon as={FaMusic} w={5} h={5} mr={2}/>
@@ -232,13 +424,28 @@ function RatingPage() {
                         <Flex alignItems="center">
                             <Icon as={IoMdMicrophone} w={5} h={5} mr={2}/>
                             <Button variant='ghost'
-                                    onClick={() => handleArtistNavigate(song.performer_name)}>{song.performer_name}</Button>
+                                    onClick={() => openArtistModal(song.performer_name)}>{song.performer_name}</Button>
                         </Flex>
                         <Flex alignItems="center">
                             <Icon as={MdAlbum} w={5} h={5} mr={2}/>
                             <Button variant='ghost'
-                                    onClick={() => handleAlbumNavigate(song.album_name)}>{song.album_name}</Button>
+                                    onClick={() => openAlbumModal(song.album_name)}>{song.album_name}</Button>
                         </Flex>
+
+                        <Modal show={isArtistModalOpen} size="sm" onClose={closeModal}>
+                            <Modal.Header>Rate Artist: {currentModal.data}</Modal.Header>
+                            <Modal.Body>
+                                <ArtistRate artist_name={currentModal.data}/>
+                            </Modal.Body>
+                        </Modal>
+
+                        <Modal show={isAlbumModalOpen} size="sm" onClose={closeModal}>
+                            <Modal.Header>Rate Album: {currentModal.data}</Modal.Header>
+                            <Modal.Body>
+                                <AlbumRate album_name={currentModal.data}/>
+                            </Modal.Body>
+                        </Modal>
+
                         <div className="px-2"></div>
                         <Flex alignItems="center">
                             <Icon as={IoMdOptions} w={5} h={5} mr={2}/>
@@ -280,71 +487,6 @@ function RatingPage() {
         );
     };
 
-    const RateDisplaySongSpoti = ({ song }: { song: Song }) => {
-
-        const addSongToDB = async () => {
-            const apiUrl = "http://51.20.128.164/api/add_song";
-            try {
-                const response = await axios.post(apiUrl, { song_name: `${song.song_name}`, artist_name: `${song.artist_name}`, album_name: `${song.album_name}`, genre: `${song.genre}`, duration: `${song.duration}`, year: `${song.year}` });
-                const data = response.data;
-                console.log(data);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        
-        return (
-            <Card maxW='500px'>
-                <CardBody>
-                    <Stack spacing={3}>
-                        <Avatar size="xl" className="pl-5" img={song.song_photo}/>
-                        <div className="px-2"></div>
-                        <Flex alignItems="center">
-                            <Icon as={FaMusic} w={5} h={5} mr={2}/>
-                            <div className="px-2"></div>
-                            <Text className="font-semibold">{song.song_name}</Text>
-                        </Flex>
-                        <div className="px-2"></div>
-                        <Flex alignItems="center">
-                            <Icon as={IoMdMicrophone} w={5} h={5} mr={2}/>
-                            <Button variant='ghost'
-                                    onClick={() => handleArtistNavigate(song.performer_name)}>{song.performer_name}</Button>
-                        </Flex>
-                        <Flex alignItems="center">
-                            <Icon as={MdAlbum} w={5} h={5} mr={2}/>
-                            <Button variant='ghost'
-                                    onClick={() => handleAlbumNavigate(song.album_name)}>{song.album_name}</Button>
-                        </Flex>
-                        <div className="px-2"></div>
-                        <Flex alignItems="center">
-                            <Icon as={IoMdOptions} w={5} h={5} mr={2}/>
-                            <div className="px-2"></div>
-                            <Text className="font-semibold">{song.genre}</Text>
-                        </Flex>
-                        <div className="px-2"></div>
-                        <Flex alignItems="center">
-                            <Icon as={FaClock} w={5} h={5} mr={2}/>
-                            <div className="px-2"></div>
-                            <Text className="font-semibold">{song.length}</Text>
-                        </Flex>
-                        <div className="px-2"></div>
-                        <Flex alignItems="center">
-                            <Icon as={FaCalendarAlt} w={5} h={5} mr={2}/>
-                            <div className="px-2"></div>
-                            <Text className="font-semibold">{song.release_year}</Text>
-                        </Flex>
-                    </Stack>
-                </CardBody>
-                <Divider />
-                <CardFooter>
-                    <VStack className="flex align-center">
-                        <Button leftIcon={FaDatabase} colorScheme="yellow" onClick={addSongToDB}>Add to Database</Button>
-                    </VStack>
-                </CardFooter>
-            </Card>
-        );
-    };
-
     return (
         <div>
             <div className="overflow-y-auto">
@@ -372,75 +514,78 @@ function RatingPage() {
                         {
                             rateType === '1' && (
                                 <>
-                                {/* Genre Section */}
-                                <Box className="flex flex-col">
-                                    <Flex>
-                                        <Input
-                                            placeholder="Type Genre..."
-                                            value={genre}
-                                            onChange={handleGenreChange}
-                                            size="sm"
-                                            mr={2}
-                                            className="text-white"
-                                        />
-                                        <Button onClick={addGenre} size="sm">Add Genre</Button>
-                                    </Flex>
-                                    <Stack spacing={4} direction="row" align="center" wrap="wrap">
-                                        {selectedGenres.map((tag, index) => (
-                                            <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                                <TagLabel>{tag}</TagLabel>
-                                                <TagCloseButton onClick={() => removeGenre(tag)}/>
-                                            </Tag>
-                                        ))}
-                                    </Stack>
-                                </Box>
-                                <div className="px-5"></div>
-                                {/* Artist Section */}
-                                <Box className="flex flex-col">
-                                    <Flex>
-                                        <Input
-                                            placeholder="Type Artist..."
-                                            value={artist}
-                                            onChange={handleArtistChange}
-                                            size="sm"
-                                            mr={2}
-                                            className="text-white"
-                                        />
-                                        <Button onClick={addArtist} size="sm">Add Artist</Button>
-                                    </Flex>
-                                    <Stack spacing={4} direction="row" align="center" wrap="wrap">
-                                        {selectedArtists.map((tag, index) => (
-                                            <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                                <TagLabel>{tag}</TagLabel>
-                                                <TagCloseButton onClick={() => removeArtist(tag)}/>
-                                            </Tag>
-                                        ))}
-                                    </Stack>
-                                </Box>
-                                <div className="px-5"></div>
-                                {/* Album Section */}
-                                <Box className="flex flex-col">
-                                    <Flex>
-                                        <Input
-                                            placeholder="Type Album..."
-                                            value={album}
-                                            onChange={handleAlbumChange}
-                                            size="sm"
-                                            mr={2}
-                                            className="text-white"
-                                        />
-                                        <Button onClick={addAlbum} size="sm">Add Album</Button>
-                                    </Flex>
-                                    <Stack spacing={4} direction="row" align="center" wrap="wrap">
-                                        {selectedAlbums.map((tag, index) => (
-                                            <Tag size="md" key={index} borderRadius="full" variant="solid" colorScheme="blue">
-                                                <TagLabel>{tag}</TagLabel>
-                                                <TagCloseButton onClick={() => removeAlbum(tag)}/>
-                                            </Tag>
-                                        ))}
-                                    </Stack>
-                                </Box>
-                                <div className="px-5"></div>
+                                    {/* Genre Section */}
+                                    <Box className="flex flex-col">
+                                        <Flex>
+                                            <Input
+                                                placeholder="Type Genre..."
+                                                value={genre}
+                                                onChange={handleGenreChange}
+                                                size="sm"
+                                                mr={2}
+                                                className="text-white"
+                                            />
+                                            <Button onClick={addGenre} size="sm">Add Genre</Button>
+                                        </Flex>
+                                        <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                            {selectedGenres.map((tag, index) => (
+                                                <Tag size="md" key={index} borderRadius="full" variant="solid"
+                                                     colorScheme="blue">
+                                                    <TagLabel>{tag}</TagLabel>
+                                                    <TagCloseButton onClick={() => removeGenre(tag)}/>
+                                                </Tag>
+                                            ))}
+                                        </Stack>
+                                    </Box>
+                                    <div className="px-5"></div>
+                                    {/* Artist Section */}
+                                    <Box className="flex flex-col">
+                                        <Flex>
+                                            <Input
+                                                placeholder="Type Artist..."
+                                                value={artist}
+                                                onChange={handleArtistChange}
+                                                size="sm"
+                                                mr={2}
+                                                className="text-white"
+                                            />
+                                            <Button onClick={addArtist} size="sm">Add Artist</Button>
+                                        </Flex>
+                                        <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                            {selectedArtists.map((tag, index) => (
+                                                <Tag size="md" key={index} borderRadius="full" variant="solid"
+                                                     colorScheme="blue">
+                                                    <TagLabel>{tag}</TagLabel>
+                                                    <TagCloseButton onClick={() => removeArtist(tag)}/>
+                                                </Tag>
+                                            ))}
+                                        </Stack>
+                                    </Box>
+                                    <div className="px-5"></div>
+                                    {/* Album Section */}
+                                    <Box className="flex flex-col">
+                                        <Flex>
+                                            <Input
+                                                placeholder="Type Album..."
+                                                value={album}
+                                                onChange={handleAlbumChange}
+                                                size="sm"
+                                                mr={2}
+                                                className="text-white"
+                                            />
+                                            <Button onClick={addAlbum} size="sm">Add Album</Button>
+                                        </Flex>
+                                        <Stack spacing={4} direction="row" align="center" wrap="wrap">
+                                            {selectedAlbums.map((tag, index) => (
+                                                <Tag size="md" key={index} borderRadius="full" variant="solid"
+                                                     colorScheme="blue">
+                                                    <TagLabel>{tag}</TagLabel>
+                                                    <TagCloseButton onClick={() => removeAlbum(tag)}/>
+                                                </Tag>
+                                            ))}
+                                        </Stack>
+                                    </Box>
+                                    <div className="px-5"></div>
                                     {rateType === '1' ? (
                                         <Stack spacing={4} direction="row" align="center" wrap="wrap" mb={4}>
                                             <Button colorScheme="facebook" onClick={fetch_recom_songs}>
@@ -457,30 +602,27 @@ function RatingPage() {
 
                     <div className="px-5"></div>
 
-                    <SimpleGrid
-                        paddingTop="50px"
-                        paddingLeft="50px"
-                        paddingRight="50px"
-                        spacing={4}
-                        templateColumns='repeat(4, 1fr)'
-                    >
-                        {rateType === '1' ? (
-                            RatingSongsRecom.slice(0, 15).map((song, index) => (
-                                    <RateDisplaySong key={song.song_name} song={song}/>
-                                ))
-                        ) : (
-                            RatingSongsOwn.slice(0, 15).map((song, index) => (
-                                    <RateDisplaySong key={song.song_name} song={song}/>
-                                ))
-                        )}
-                    </SimpleGrid>
                 </div>
+                {rateType === '3' ? (
+                    <></>
+                ) : (
+                    <div className="bg-[#081730]">
+                        <div>
+                            <SongDisplayComponent rateType={rateType} RatingSongsRecom={RatingSongsRecom}
+                                                  RatingSongsOwn={RatingSongsOwn}/>
+                        </div>
+                    </div>
+                )}
             </div>
-            <div className="flex items-center justify-center bg-[#081730]">
-                <div className="w-1/2 text-center flex flex-col items-center justify-center pr-32">
-                    <RefreshButton/>
+            {rateType !== '3' ? (
+                <div className="bg-[#081730]">
+                    <div>
+                        <RefreshButton/>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <></>
+            )}
         </div>
     );
 };

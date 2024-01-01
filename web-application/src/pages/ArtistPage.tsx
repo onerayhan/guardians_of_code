@@ -19,38 +19,23 @@ interface Artist {
     release_year: number | null;
 }
 
-
 const ArtistPage = () => {
-    const {artistId} = useParams();
     const location = useLocation();
     const artist = location.state?.groupMembers;
-    const artistIdNum = Number(artistId);
     const [artistData, setArtistData] = useState<Artist | null>(null);
-    const [artistRatings, setArtistRatings] = useState<{ [artistId: number]: number }>({});
-    const [ratings, setRatings] = useState<Array<{ rating_type: string, artist_id: number, rating: number }>>([]);
+    const [artistRatings, setArtistRatings] = useState<{ [artistName: string]: number }>({});
     const toast = useToast();
     const auth = useAuthUser();
+    let artistIdNum = location.state?.groupMembers.artist_name;
 
     useEffect(() => {
         setArtistData(artist);
     }, []);
 
-    const updateRating = (artistIdNum: number, newRating: number) => {
-        setArtistRatings(prevRatings => ({
-            ...prevRatings,
-            [artistIdNum]: newRating
-        }));
-
-        setRatings(prevRatings => [
-            ...prevRatings,
-            {rating_type: "artist_rate", artist_id: artistIdNum, rating: newRating}
-        ]);
-    };
-
     const handleSendRate = async () => {
-        const apiUrl = "http://51.20.128.164/api/add_rate_batch";
+        const apiUrl = "http://51.20.128.164/api/add_user_performer_ratings";
         try {
-            await axios.post(apiUrl, {username: `${auth()?.username}`, ratings: ratings});
+            await axios.post(apiUrl, {username: `${auth()?.username}`, performer_name: artistIdNum, ratings: rating});
             toast({
                 title: "Artist was successfully rated!",
                 status: "success",
@@ -59,6 +44,13 @@ const ArtistPage = () => {
         } catch (error) {
             console.error("Error in sending rating:", error);
         }
+    };
+
+    const updateRating = (artistName: string, newRating: number) => {
+        setArtistRatings(prevRatings => ({
+            ...prevRatings,
+            [artistName]: newRating,
+        }));
     };
 
     const currentRating = artistRatings[artistIdNum] || 0;

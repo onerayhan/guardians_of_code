@@ -98,7 +98,6 @@ const SongsComponent:React.FC = () => {
         }
     };
 
-  //const [Liked, setLiked] = useState<SongsArray[]>([]);
   const [Posted, setPosted] = useState<SongsArray[]>([]);
   const [Rated, setRated] = useState<RatedArray[]>([]);
   const [ratings, setRatings] = useState<Array<{ rating_type: string, song_id: number, rating: number }>>([]);

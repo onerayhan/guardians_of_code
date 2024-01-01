@@ -114,17 +114,17 @@ const MainChart: React.FC = () => {
     return (
         <>
             <VStack>
-                <h1 className="text-5xl font-lalezar">Your Charts</h1>
-                <h1 className="text-2xl font-lalezar">Please select the data that you want to analyze.</h1>
+                <h1 className="text-5xl font-lalezar text-[#35517e]">Your Charts</h1>
+                <h1 className="text-2xl font-lalezar text-[#35517e]">Please select the data that you want to analyze.</h1>
                 <Flex direction="row" align="center" justify="center">
-                    <Select onChange={handleChartChange} width="auto" mr={2}>
+                    <Select onChange={handleChartChange} width="auto" mr={2} className="text-[#35517e]">
                         <option value="">Select Category</option>
-                        <option value="temporal" className="text-black">Temporal Analysis</option>
+                        <option value="temporal" className="text-[#35517e]">Temporal Analysis</option>
                         {/* Add other options as necessary */}
                     </Select>
 
                     {selectedChart === 'temporal' && (
-                        <Select onChange={handleSubOptionChange} width="auto" mr={2}>
+                        <Select onChange={handleSubOptionChange} width="auto" mr={2} className="text-[#35517e]">
                             <option value="">Select Sub-Category</option>
                             <option value="albums" className="text-black">Your Favorite Albums</option>
                             <option value="performers" className="text-black">Your Favorite Performers</option>
@@ -133,7 +133,7 @@ const MainChart: React.FC = () => {
                     )}
 
                     {selectedSubOption && selectedChart === 'temporal' && (
-                        <Select onChange={handleTimeFrameChange} width="auto">
+                        <Select onChange={handleTimeFrameChange} width="auto" className="text-[#35517e]">
                             <option value="">Select Time Frame</option>
                             <option value="1month" className="text-black">In 1 Month</option>
                             <option value="6months" className="text-black">In 6 Months</option>
