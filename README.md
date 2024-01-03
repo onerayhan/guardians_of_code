@@ -8,4 +8,6 @@
 
 - Integrated spotify api with the usage of spotipy library.
 
+- ML model for song recommendation
+
 # Documentation up to date as of 31.12.2023
