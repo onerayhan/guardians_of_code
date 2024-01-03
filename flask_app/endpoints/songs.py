@@ -1,7 +1,7 @@
 #Interfile imports 
 from app import app, db
 from utils import is_duplicate, is_duplicate_imported, username_to_user, song_name_to_album_name, song_name_to_genre_name, song_name_to_instrument_name, song_name_to_mood_name, song_name_to_performer_name
-from utils import followed_finder, get_user_songs, song_id_to_song, get_group_members
+from utils import followed_finder, get_user_songs, song_id_to_song, get_group_members, get_user_groups
 from song_models import Song, Album, Performer, Genre, Mood, Instrument
 from models import users
 
@@ -265,7 +265,7 @@ def get_all_song_info():
     
 # Getting all the songs of a group     
 @app.route('/api/group_get_all_songs/<group_id>')
-def group_get_all_songs(group_id):
+def group_get_all_songs(group_id):    
     group_members_names = get_group_members(group_id)
     results = []
     if not all_users:
@@ -275,4 +275,22 @@ def group_get_all_songs(group_id):
         val = {'username':member_name, 'songs': get_user_songs(username_to_user(member_name))}
         results.append(val)
         
+    return jsonify(results)
+
+# Getting all the songs of a user is part of
+@app.route('/api/get_user_group_songs/<username>')
+def get_user_group_songs(username):
+    groups = get_user_groups(username)  
+    
+    if not groups:
+        return {'message': 'User does not belong to any group'}, 200 
+    
+    results = []
+    for group in groups:
+        members_names = get_group_members(group.group_id)
+        for member_name in members_names:
+            if member_name != username:
+                val = {'username':member_name, 'songs': get_user_songs(username_to_user(member_name))}
+                results.append(val)  
+
     return jsonify(results)

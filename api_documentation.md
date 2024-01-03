@@ -1442,6 +1442,25 @@ Retrieves all album preferences present throughout the database.
 
 Retrieves all performer preferences present throughout the database.
 
+---
+---
+---
+
+## Get Recommendations
+
+### Endpoint
+
+`POST /api/recommendation/<username>`
+
+### Description 
+
+Gets recommendations based on an ML model and given parameters.
+
+## Parameters
+
+- `username` Username encoded within URL.
+- `target_audience`(string): Choose your target audience -> all (every song in db), followings (people you follow), group (your group members)
+- `criteria_list`(string list): a list of criterias which are genre, album and performer. <span style="color:red"> You have to give at least one criteria. </span> 
 
 
 

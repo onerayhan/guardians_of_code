@@ -214,7 +214,9 @@ def get_all_genre_preference():
     
     genres = []
     for song in all_songs:
-        genres.append(song_name_to_genre_name(song.song_name))  
+        genre = song_name_to_genre_name(song.song_name)
+        if genre:
+            genres.append(genre)            
     
     genre_count = {}
     for genre in genres:
@@ -233,7 +235,9 @@ def get_all_album_preference():
     
     albums = []
     for song in all_songs:
-        albums.append(song_name_to_album_name(song.song_name))  
+        album = song_name_to_album_name(song.song_name)
+        if album:
+            albums.append(album)
     
     album_count = {}
     for album in albums:
@@ -251,8 +255,10 @@ def get_all_performer_preference():
     all_songs = Song.query.all()
     
     performers = []
-    for song in all_songs:
-        performers.append(song_name_to_performer_name(song.song_name))
+    for song in all_songs:        
+        performer = song_name_to_performer_name(song.song_name)
+        if performer:
+            performers.append(performer)
     
     performer_count = {}
     for performer in performers:

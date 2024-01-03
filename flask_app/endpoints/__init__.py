@@ -6,8 +6,8 @@ from .ratings import *
 from .songs import *
 from .spotify import *
 from .user import *
-from .preferences import *
 
 # Out-folder imports
 from utils import *
 from app import app, db
+

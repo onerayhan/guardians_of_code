@@ -268,7 +268,7 @@ def get_user_groups(username):
         return results
     
     for group in groups:
-        results.append(group_id_to_group(group.group_id).group_name)
+        results.append(group_id_to_group(group.group_id))
         
     return results
 
