@@ -239,7 +239,7 @@ def display_followed_songs(username):
     followings = followed_finder(user)
     results = []
     if not followings:
-        followings = []
+        return jsonify([]) 
     
     for followed in followings:
         f_user = username_to_user(followed) 
@@ -253,7 +253,7 @@ def display_followed_songs(username):
 def get_all_song_info():
     all_users = users.query.all()
     if not all_users:
-        all_users = []  
+        return jsonify([])   
     
     results = []
     
@@ -263,13 +263,13 @@ def get_all_song_info():
         
     return jsonify(results)    
     
-# Getting all the songs of a group     
+# Getting all the songs of a group    
 @app.route('/api/group_get_all_songs/<group_id>')
 def group_get_all_songs(group_id):    
     group_members_names = get_group_members(group_id)
     results = []
-    if not all_users:
-        all_users = []
+    if not group_members_names:
+        return jsonify([]) 
     
     for member_name in group_members_names:
         val = {'username':member_name, 'songs': get_user_songs(username_to_user(member_name))}
@@ -283,7 +283,7 @@ def get_user_group_songs(username):
     groups = get_user_groups(username)  
     
     if not groups:
-        return {'message': 'User does not belong to any group'}, 200 
+        return jsonify([]) 
     
     results = []
     for group in groups:

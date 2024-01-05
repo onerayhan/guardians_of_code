@@ -59,7 +59,7 @@ def user_followings_genre_prf(username):
     followed_usernames = followed_finder(user)
     
     if not followed_usernames:
-        return {'message': 'User does not follow anyone'}, 200
+        return jsonify({})
     
     genres = []
     for followed_username in followed_usernames:
@@ -85,7 +85,7 @@ def user_followings_album_prf(username):
     followed_usernames = followed_finder(user)
     
     if not followed_usernames:
-        return {'message': 'User does not follow anyone'}, 200
+        return jsonify({})
     
     albums = []
     for followed_username in followed_usernames:
@@ -111,7 +111,7 @@ def user_followings_performer_prf(username):
     followed_usernames = followed_finder(user)
     
     if not followed_usernames:
-        return {'message': 'User does not follow anyone'}, 200
+        return jsonify({})
     
     performers = []
     for followed_username in followed_usernames:
@@ -135,7 +135,7 @@ def group_genre_prf(username):
     groups = get_user_groups(username)  
     
     if not groups:
-        return {'message': 'User does not belong to any group'}, 200 
+        return jsonify({})  
     
     genres = []
     for group in groups:
@@ -161,7 +161,7 @@ def group_album_prf(username):
     groups = get_user_groups(username)  
     
     if not groups:
-        return {'message': 'User does not belong to any group'}, 200 
+        return jsonify({})   
     
     albums = []
     for group in groups:
@@ -187,7 +187,7 @@ def group_performer_prf(username):
     groups = get_user_groups(username)  
     
     if not groups:
-        return {'message': 'User does not belong to any group'}, 200 
+        return jsonify({})  
     
     performers = []
     for group in groups:
