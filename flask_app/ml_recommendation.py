@@ -11,7 +11,7 @@ from functools import reduce
 from itertools import combinations
 
 pd.options.mode.chained_assignment = None
-keys = ["album", "performer", "genre", "song_id", "songs_name", "username"]
+KEYS = ["album", "performer", "genre", "song_id", "songs_name", "username"]
 MAX_SONG_RETURN = 50
 
 def get_recommendation_weights(user_preferences, target_preferences, criteria):    
@@ -48,13 +48,12 @@ def get_recommendation_weights(user_preferences, target_preferences, criteria):
 
     df_items_weights_content = pd.DataFrame(items_with_weights_content)
 
-    # Collaborative Filtering
-    
+    # Collaborative Filtering    
     if len(common_items) == 0:
         df_user_common = df_user
         df_all_common = df_user
     
-    user_weights = df_user_common['count'].values
+    user_weights = df_user_common['count'].valuess
     target_weights = df_all_common['count'].values    
     
 
@@ -135,7 +134,7 @@ def recommend_songs_on_criteria(weights, x, filtered_list):
     recommended_songs_list = []
     
     for item, songs in selected_songs.items():
-        item_songs_list = songs[keys].to_dict(orient='records')
+        item_songs_list = songs[KEYS].to_dict(orient='records')
         recommended_songs_list.extend(item_songs_list)
             
     return recommended_songs_list
@@ -210,7 +209,7 @@ def return_recommended_songs(username, weights_list, target_audience):
     non_na_songs_lists = [value for value in songs_lists if value == value]
     for song_lists in non_na_songs_lists:    
         for song in song_lists:
-            filtered_data = {key: song_lists[key] for key in keys if key in song_lists}
+            filtered_data = {key: song_lists[key] for key in KEYS if key in song_lists}
             filtered_list.append(filtered_data)
 
     dataframes = []
@@ -240,7 +239,7 @@ def return_recommended_songs(username, weights_list, target_audience):
         # Shuffle to avoid non-deterministic values
         list_shuffle = list(rank_comb_list)  
         random.shuffle(list_shuffle)        
-        intersection = reduce(lambda left, right: pd.merge(left, right, on=keys, how='inner'), list_shuffle)
+        intersection = reduce(lambda left, right: pd.merge(left, right, on=KEYS, how='inner'), list_shuffle)
         if (intersection.shape[0] + final_counter) <= max_count:
             final_recommended_songs.extend(intersection.to_dict(orient='records'))
             final_counter += intersection.shape[0]
