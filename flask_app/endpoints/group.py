@@ -1,6 +1,6 @@
 #Interfile imports 
-from app import app
-from utils import username_to_user, username_to_groups, form_group, group_id_to_group
+from app import app, db
+from utils import username_to_user, username_to_groups, form_group, group_id_to_group, get_group_members
 
 #Library imports
 from flask import request, jsonify
@@ -53,5 +53,10 @@ def remove_user_from_group():
     user = username_to_user(username)
     group = group_id_to_group(group_id)
     
-    user.remove_from_group(group)    
-    return jsonify({'message': f'{username} has been successfully removed from the group `{group.group_name}.'})
+    user.remove_from_group(group)   
+    
+    if len(get_group_members(group_id)) < 2:
+        group = group_id_to_group(group)
+        db.session.delete(group)
+     
+    return jsonify({'message': f'{username} has been successfully removed from the {group.group_name}.'})

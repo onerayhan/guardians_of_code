@@ -54,8 +54,7 @@ def get_recommendation_weights(user_preferences, target_preferences, criteria):
         df_all_common = df_user
     
     user_weights = df_user_common['count'].valuess
-    target_weights = df_all_common['count'].values    
-    
+    target_weights = df_all_common['count'].values        
 
     user_weights_normalized = user_weights / sum(user_weights)
     target_weights_normalized = target_weights / sum(target_weights)
@@ -103,12 +102,10 @@ def recommend_songs_on_criteria(weights, x, filtered_list):
                 
     df_common_songs = pd.DataFrame(common_songs)  
 
-    proportions = weights[[x, 'normalized_combined_weight']]   
-    
+    proportions = weights[[x, 'normalized_combined_weight']]       
 
     max_song_count = min(len(common_songs), MAX_SONG_RETURN) 
-    proportions['song_count'] = (proportions['normalized_combined_weight'] * max_song_count)
-    
+    proportions['song_count'] = (proportions['normalized_combined_weight'] * max_song_count)    
        
     max_song_count = min(len(common_songs), MAX_SONG_RETURN) 
     initial_total = (proportions['normalized_combined_weight'] * max_song_count).astype(int).sum()     
@@ -154,10 +151,7 @@ def recommendation_parameters_to_weights(username , target_audience , criteria_l
     if target_audience == 'group':
         target_preferences_genre = group_genre_prf(username).get_json()
         target_preferences_album = group_album_prf(username).get_json()
-        target_preferences_performer = group_performer_prf(username).get_json()
-        
-    #else:
-        #return jsonify({'error': 'target_audience can only be all/followings/group !'})
+        target_preferences_performer = group_performer_prf(username).get_json()    
 
     user_genre_preferences = user_genre_prf(username).get_json()
     user_album_preferences = user_album_prf(username).get_json()

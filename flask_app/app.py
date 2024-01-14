@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from flask_cors import CORS
+from flask_compress import Compress
 from config import Config
 import time
 from flask_sqlalchemy import SQLAlchemy
@@ -8,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 CORS(app)
+compress = Compress(app)
 app.config.from_object(Config)
 db = SQLAlchemy()
 db.init_app(app)
