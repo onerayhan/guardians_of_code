@@ -60,10 +60,10 @@ const MainTable: React.FC<RatedTableProps> = ({ ratedArray = [] }) => {
             case 'artist':
                 return (<><Th>Artist</Th><Th isNumeric>Rating Average</Th></>);
             case 'album':
-                return (<><Th>Album</Th><Th isNumeric>Rating Average</Th></>);
+                return (<><Th>Album</Th><Th>Artist</Th><Th isNumeric>Rating Average</Th></>);
             case 'track':
             default:
-                return (<><Th>Song</Th><Th isNumeric>Rating Average</Th></>);
+                return (<><Th>Song</Th><Th>Album</Th><Th>Artist</Th><Th isNumeric>Rating Average</Th></>);
         }
     };
 
@@ -136,7 +136,7 @@ const MainTable: React.FC<RatedTableProps> = ({ ratedArray = [] }) => {
                 </Flex>
                 <div className="py-5"></div>
             </VStack>
-            <Box bg='white' w='900px' p={4} color='black' rounded="xl">
+            <Box bg='white' w='700px' p={4} color='black' rounded="xl">
                 <TableContainer>
                     <Table variant='simple'>
                         <TableCaption>{getTableCaption()}</TableCaption>

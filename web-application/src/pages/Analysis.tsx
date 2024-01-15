@@ -5,9 +5,9 @@ import MainChart from "../components/Analysis/MainChart";
 import MainTable from "../components/Analysis/MainTable";
 import axios from "axios";
 import { useAuthUser } from "react-auth-kit";
-import TweetButton from "../APIClasses/TweetButton.tsx";
 import ExportCSV from "../components/Share/ExportCSV.tsx";
 import {FaChartLine, FaFileExport, FaShareAlt, FaTable} from "react-icons/fa";
+import TweetButton from "../APIClasses/TweetButton.tsx";
 
 interface GroupProps {
     groupName: string;
@@ -82,17 +82,13 @@ const Analysis = () => {
             }
         };
 
-        if (selected === "all-db") {
             fetchSongs(`${baseURL}/all_song_ratings`, setAllSongs);
-        } else if (selected === "friends") {
             fetchSongs(`${baseURL}/follower_song_ratings/${auth()?.username}`, setFriendsSongs);
-        } else if (selected === "user") {
             fetchSongs(`${baseURL}/user_song_ratings/${auth()?.username}`, setUserSongs);
-        } else if (selected === "friend_groups" && selectedGroup) {
             fetchSongs(`${baseURL}/group_song_ratings/${auth()?.username}/${selectedGroup}`, setFriendGroupsSongs);
-        }
 
-    }, [selected, selectedGroup, auth]);
+
+    }, []);
 
     useEffect(() => {
         switch (selected) {
@@ -142,17 +138,17 @@ const Analysis = () => {
                             <div className="flex justify-center items-center">
                                 {/* Left Column */}
                                 <div className="flex flex-col items-center justify-center pl-5">
-                                    <h2 className="text-2xl text-white font-lalezar text-[#35517e]">Share your Top 5 Albums</h2>
+                                    <h2 className="text-2xl font-lalezar text-[#35517e]">Share your Top 5 Albums</h2>
                                     <TweetButton shareType="albums"/>
                                 </div>
                                 {/* Middle Column */}
                                 <div className="flex flex-col items-center justify-center h-full pl-5">
-                                    <h2 className="text-2xl text-white font-lalezar text-[#35517e]">Share your Top 5 Performers</h2>
+                                    <h2 className="text-2xl font-lalezar text-[#35517e]">Share your Top 5 Performers</h2>
                                     <TweetButton shareType="performers"/>
                                 </div>
                                 {/* Right Column */}
                                 <div className="flex flex-col items-center justify-center h-full pl-5">
-                                    <h2 className="text-2xl text-white font-lalezar text-[#35517e]">Share your Top 5 Songs</h2>
+                                    <h2 className="text-2xl font-lalezar text-[#35517e]">Share your Top 5 Songs</h2>
                                     <TweetButton shareType="songs"/>
                                 </div>
                             </div>
@@ -161,7 +157,7 @@ const Analysis = () => {
                     <TabPanel>
                         <VStack>
                             <h1 className="text-2xl font-lalezar text-[#35517e]">Export your Rating Data</h1>
-                            <ExportCSV/>
+                            <ExportCSV />
                         </VStack>
                     </TabPanel>
                 </TabPanels>

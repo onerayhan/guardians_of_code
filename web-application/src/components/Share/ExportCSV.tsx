@@ -1,49 +1,56 @@
-import { useEffect, useState } from 'react';
-import {Box, Button, Select, Tag, TagLabel, TagCloseButton, SimpleGrid, Flex, Center} from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import {Box, Button, Select, Tag, TagLabel, TagCloseButton, SimpleGrid, Flex, Center, useToast} from '@chakra-ui/react';
 import { useAuthUser } from "react-auth-kit";
 import useMemoizedFetch from "../../contexts/useMemoizedFetch";
 import { TbFileTypeCsv } from "react-icons/tb";
+import axios from "axios";
 
-interface Song {
-    song_photo: string | undefined;
-    song_id: number;
-    song_name: string;
-    artist_name: string;
-    album_name: string;
-    genre: string;
-    duration: string;
-    year: number;
+interface RatedArray {
+    artist: string;
+    album: string;
+    song: string;
+    song_rating: number;
+    rating_timestamp: string;
 }
 
-const RateCSV = () => {
-    const [songs, setSongs] = useState<Song[]>([]);
+const ExportCSV = () => {
+    const [ratedArray, setRatedArray] = useState<RatedArray[]>([]);
     const [uniqueArtists, setUniqueArtists] = useState<string[]>([]);
     const [uniqueAlbums, setUniqueAlbums] = useState<string[]>([]);
     const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
     const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
     const auth = useAuthUser();
+    const toast = useToast();
+    const baseURL = "http://51.20.128.164/api"
 
     useEffect(() => {
-        const fetchSongs = async () => {
-            // const response = await axios.get('YOUR_API_ENDPOINT');
-            // const fetchedSongs = response.data;
-            const data = useMemoizedFetch("");
-            // @ts-ignore
-            const userSongs = data.filter(song => song.username === auth()?.username);
-            setSongs(userSongs);
+        const fetch = async () => {
+            try {
+                const response = await axios.get(`${baseURL}/user_song_ratings/${auth()?.username}`);
+                const username = auth()?.username;
+                const property = `${username}_song_ratings`;
+                setRatedArray(response.data[property]);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                toast({
+                    title: "Error",
+                    description: `${error}`,
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        }
 
-            // @ts-ignore
-            const artists = new Set(fetchedSongs.map(song => song.artist_name));
-            // @ts-ignore
-            const albums = new Set(fetchedSongs.map(song => song.album_name));
-            // @ts-ignore
-            setUniqueArtists(Array.from(artists));
-            // @ts-ignore
-            setUniqueAlbums(Array.from(albums));
-        };
+        fetch();
+    }, []);
 
-        fetchSongs();
-    }, [auth]);
+    useEffect(() => {
+        const artists = new Set(ratedArray.map(song => song.artist));
+        const albums = new Set(ratedArray.map(song => song.album));
+        setUniqueArtists(Array.from(artists));
+        setUniqueAlbums(Array.from(albums));
+    }, [ratedArray]);
 
     const handleSelectArtist = (artist: string) => {
         if (!selectedArtists.includes(artist)) {
@@ -66,14 +73,14 @@ const RateCSV = () => {
     };
 
     const exportCSV = () => {
-        const filteredSongs = songs.filter(song =>
-            (selectedArtists.length === 0 || selectedArtists.includes(song.artist_name)) &&
-            (selectedAlbums.length === 0 || selectedAlbums.includes(song.album_name))
+        const filteredSongs = ratedArray.filter(song =>
+            (selectedArtists.length === 0 || selectedArtists.includes(song.artist)) &&
+            (selectedAlbums.length === 0 || selectedAlbums.includes(song.album))
         );
 
-        const headers = 'Song ID,Song Name,Artist Name,Album Name,Genre,Duration,Year\n';
+        const headers = 'Song Name,Album Name,Performer Name, Timestamp\n';
         const rows = filteredSongs.map(song =>
-            `${song.song_id},${song.song_name},${song.artist_name},${song.album_name},${song.genre},${song.duration},${song.year}`
+            `${song.song},${song.album},${song.artist},${song.song_rating},${song.rating_timestamp}`
         ).join('\n');
 
         const csvContent = `data:text/csv;charset=utf-8,${headers}${rows}`;
@@ -142,4 +149,4 @@ const RateCSV = () => {
 
 };
 
-export default RateCSV;
+export default ExportCSV;
