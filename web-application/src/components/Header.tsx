@@ -230,7 +230,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <div className={`sticky ${ scrollDirection === "down" ? "-top-24" : "top-0"} bg-[#081730] flex rounded-b-3xl border-b-[5px] border-[#020917] items-center justify-between px-[5rem] text-[0.8rem] h-24 transition-all duration-500 z-50`}>  
+    <div className={`sticky ${ scrollDirection === "down" ? "-top-24" : "top-0"} bg-[#081730] flex rounded-b-3xl border-b-[5px] border-[#020917] items-center justify-between px-[5rem] text-[0.8rem] h-24 transition-all duration-500 z-50`}>
       {/* LOGO */}
       <img 
           src={"/header_logo.png"}
@@ -263,7 +263,7 @@ const Header: React.FC = () => {
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
               </svg>
             </button>
-            <div id="dropdownDivider" ref={dropdownRef} style={{ width: dropdownToggleRef.current?.offsetWidth }} className={`absolute z-10 ${dropdownOpen && scrollDirection !== "down" ? '' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg mt-[260px] shadow dark:bg-gray-700 dark:divide-gray-600`}>
+            <div id="dropdownDivider" ref={dropdownRef} style={{ width: dropdownToggleRef.current?.offsetWidth }} className={`absolute z-10 ${dropdownOpen && scrollDirection !== "down" ? '' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg mt-[220px] shadow dark:bg-gray-700 dark:divide-gray-600`}>
               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDividerButton">
                 <li>
                   <a onClick={navigateToUserPage}

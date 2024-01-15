@@ -20,6 +20,7 @@ import { IoIosRemoveCircle } from "react-icons/io";
 import Ratings from "react-star-ratings";
 import { IoIosRefreshCircle } from "react-icons/io";
 import {useNavigate} from "react-router-dom";
+import { Skeleton, SkeletonCircle, SkeletonText } from '@chakra-ui/react'
 
 interface SongsArray {
     song_id: string;
@@ -256,10 +257,11 @@ const SongsComponent:React.FC = () => {
                           <Tab><FaStar size={20}/>Rated Songs</Tab>
                           <Tab><FaDatabase size={20}/>Added Songs</Tab>
                       </TabList>
-                      <div className="px-80"></div>
+                        <Spacer />
                       {tabIndex === 0 && (
                           <Button colorScheme="green" onClick={sendRatings}><IoIosRefreshCircle size={20}/>Complete re-rating</Button>
                       )}
+                      <div className="w-4"></div>
                   </Flex>
               <TabPanels>
                   <TabPanel>
@@ -304,9 +306,9 @@ const SongsComponent:React.FC = () => {
                                               <Th></Th>
                                           </Tr>
                                       </Thead>
-                                      <Tbody>
-                                          {Posted.map(song => <SongDisplay key={song.song_id} song={song}/>)}
-                                      </Tbody>
+                                  <Tbody>
+                                      {Posted.map(song => <SongDisplay key={song.song_id} song={song}/>)}
+                                  </Tbody>
                                   </Table>
                               </TableContainer>
                           </div>

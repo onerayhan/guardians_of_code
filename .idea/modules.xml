@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/guardians_of_code.iml" filepath="$PROJECT_DIR$/.idea/guardians_of_code.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/CS308.iml" filepath="$PROJECT_DIR$/.idea/CS308.iml" />
     </modules>
   </component>
 </project>

@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {Button, TableContainer} from '@chakra-ui/react';
+import {
+    Button,
+    Card,
+    CardBody,
+    CardFooter,
+    HStack,
+    Icon,
+    Skeleton, SkeletonCircle,
+    TableContainer,
+    Text,
+    VStack
+} from '@chakra-ui/react';
 import { useAuthUser } from 'react-auth-kit';
 import AlbumSearch from './AlbumSearch';
 import ArtistSearch from './ArtistSearch';
 import SongSearch from './SongSearch';
-import { FaSearch } from "react-icons/fa";
+import {FaSearch, FaStar} from "react-icons/fa";
 import {useSpotify} from "../../contexts/SpotifyContext.tsx";
+import {Avatar} from "flowbite-react";
+import Ratings from "react-star-ratings";
 
 interface Song {
     song_photo: string | undefined;
@@ -48,6 +61,7 @@ const SpotifySearch = () => {
     const [searchResults, setSearchResults] = useState<Song[] | Album[] | Artist[]>([]);
     const auth = useAuthUser();
     const [spoti_auth, setSpotiAuth] = useState(false);
+
 
     useEffect(() => {
         const fetch_spoti_status = async () => {
@@ -105,6 +119,42 @@ const SpotifySearch = () => {
         return Promise.all(promises);
     }
 
+    const SpotiSkeleton = () => {
+        return (
+            <div>
+                <Card className="w-[900px]" overflow="hidden" variant="outline">
+                    <div className="flex items-center">
+                        <CardBody>
+                            <HStack spacing={4} className="flex-grow">
+                                <SkeletonCircle size="20" />
+                                <CardBody>
+                                    <Skeleton height='20px' width="200px"/>
+                                    <div className="px-2"></div>
+                                    <Skeleton height='20px' width="200px"/>
+                                    <div className="px-2"></div>
+                                    <Skeleton height='20px' width="200px"/>
+                                    <div className="px-2"></div>
+                                    <Skeleton height='20px' width="200px"/>
+                                </CardBody>
+                            </HStack>
+                        </CardBody>
+                        <CardFooter>
+                            <VStack>
+                                <div className="px-2"></div>
+                                <Skeleton height='20px' width="200px"/>
+                                <div className="px-2"></div>
+                                <Skeleton height='20px' width="200px"/>
+                            </VStack>
+                            <div className="px-2"></div>
+                            <Skeleton height='20px' width="200px"/>
+                        </CardFooter>
+                    </div>
+                </Card>
+                <div className="py-2"></div>
+            </div>
+        );
+    }
+
     const responseParser = (data) => {
         if (searchType === 'track' && data.tracks) {
             processSongs(data).then(songs => setSearchResults(songs));
@@ -140,7 +190,8 @@ const SpotifySearch = () => {
 
     return (
         <div className="relative w-full flex flex-col items-center top-12">
-            <h1 className="text-3xl font-lalezar text-white">Search Stuff to Add Them to the Database, Rate Them etc...</h1>
+            <h1 className="text-3xl font-lalezar text-white">Search Stuff to Add Them to the Database, Rate Them
+                etc...</h1>
             <div className="flex items-center w-[900px] relative py-5">
                 <select
                     name="searchType"
@@ -148,7 +199,7 @@ const SpotifySearch = () => {
                     onChange={handleSearchTypeChange}
                     value={searchType}
                 >
-                    <option value="track">Song</option>
+                <option value="track">Song</option>
                     <option value="album">Album</option>
                     <option value="artist">Artist</option>
                 </select>
@@ -180,17 +231,24 @@ const SpotifySearch = () => {
             </div>
 
             <TableContainer>
-                {searchResults.map((item, index) => {
-                    if (searchType === 'track') {
-                        return <SongSearch key={index} songInfo={item} />;
-                    } else if (searchType === 'artist') {
-                        return <ArtistSearch key={index} artistInfo={item} />;
-                    } else if (searchType === 'album') {
-                        return <AlbumSearch key={index} albumInfo={item} />;
-                    }
-                    return null;
-                })}
+                {fetching_results ? (
+                    Array.from({ length: 10 }).map((_, index) => (
+                        <SpotiSkeleton key={index} />
+                    ))
+                ) : (
+                    searchResults.map((item, index) => {
+                        if (searchType === 'track') {
+                            return <SongSearch key={index} songInfo={item} />;
+                        } else if (searchType === 'artist') {
+                            return <ArtistSearch key={index} artistInfo={item} />;
+                        } else if (searchType === 'album') {
+                            return <AlbumSearch key={index} albumInfo={item} />;
+                        }
+                        return null;
+                    })
+                )}
             </TableContainer>
+
         </div>
     );
 };
