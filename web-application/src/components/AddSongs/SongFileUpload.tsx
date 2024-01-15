@@ -8,7 +8,7 @@ import {
     ModalCloseButton,
     ModalContent, ModalFooter,
     ModalHeader,
-    ModalOverlay,
+    ModalOverlay, useToast,
 } from "@chakra-ui/react";
 import {useAuthUser} from "react-auth-kit";
 import axios from "axios";
@@ -44,6 +44,7 @@ const SongFileUpload: React.FC<SongFileUploadProps> = ({ isOpen, onClose }) => {
     const [files, setFiles] = useState<FileWithPreview[]>([]);
     const [uploadStatus, setUploadStatus] = useState<string>('');
     const auth = useAuthUser();
+    const toast = useToast();
 
     const onFileAccepted = (acceptedFiles: FileWithPreview[]) => {
         setFiles(acceptedFiles);
@@ -51,21 +52,56 @@ const SongFileUpload: React.FC<SongFileUploadProps> = ({ isOpen, onClose }) => {
 
     const handleUpload = async () => {
         const username = auth()?.username;
-        const formData = new FormData();
-        formData.append('username', `${username}`)
-        files.forEach(file => formData.append('file', file));
+        if (!username) {
+            console.error("No username found");
+            return;
+        }
+
+        let filePromises = files.map(file => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result;
+                    if (typeof result === 'string') {
+                        try {
+                            const fileAsJson = JSON.parse(result);
+                            resolve(fileAsJson); // This could be an object or an array
+                        } catch (error) {
+                            reject(error);
+                        }
+                    } else {
+                        reject(new Error('File read did not return a string'));
+                    }
+                };
+                reader.onerror = () => reject(reader.error);
+                reader.readAsText(file);
+            });
+        });
 
         try {
-            const response = await axios.post('http://51.20.128.164/api/upload_song', formData, {
+            const filesContents = await Promise.all(filePromises);
+            // Flatten in case some files contain an array of songs
+            const allSongs = filesContents.flat();
 
+            const response = await axios.post('http://51.20.128.164/api/add_songs_batch', { username, songs: allSongs }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
-            setUploadStatus('success');
             console.log('Response:', response.data);
-            // Handle response data
+            setUploadStatus('success');
         } catch (error) {
             setUploadStatus('error');
-            console.error('Error uploading file:', error);
-            // Handle error
+            console.log('Error uploading file:', error);
+            toast(
+                {
+                    title: "Error",
+                    description: `${error}`,
+                    status: "error",
+                    duration: 9000,
+                    isClosable: true,
+                }
+            )
         }
     };
 
@@ -84,7 +120,7 @@ const SongFileUpload: React.FC<SongFileUploadProps> = ({ isOpen, onClose }) => {
                         <MyDropzone onFileAccepted={onFileAccepted} />
                         {files.map(file => (
                             <Box key={file.name} p={2}>
-                                <Image src={file.preview} alt={file.name} />
+                                <Image alt={file.name} />
                             </Box>
                         ))}
                         {uploadStatus === 'success' && <Alert status="success"><AlertIcon />Upload successful!</Alert>}
