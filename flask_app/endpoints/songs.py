@@ -111,7 +111,7 @@ def add_songs_batch():
             return jsonify({'error': f'A song name has to be given at the song number: {index}'}), 400            
 
         if is_duplicate(song) != False:
-            return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!', 'song_id of original': is_duplicate(song).song_id}), 403                        
+            return jsonify({'error': f'Song {song_name} already exists at the song number: {index}!', 'song_id of original': is_duplicate(song)}), 403                        
 
         new_song = Song(
             song_name=song.get('song_name'),

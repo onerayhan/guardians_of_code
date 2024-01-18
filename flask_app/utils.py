@@ -299,7 +299,7 @@ def group_song_ratings(group_id):
     results = []
     
     for member in members:
-        user_rated_songs = User_Song_Rating(username=member.username).all()
+        user_rated_songs = User_Song_Rating.query.filter_by(username=member.username).all()
         for rated_song in user_rated_songs:
             song_name = song_id_to_song(rated_song.song_id).song_name
             val = {'username': member.username,
@@ -321,7 +321,7 @@ def group_album_ratings(group_id):
     results = []
     
     for member in members:
-        user_rated_albums = User_Album_Rating(username=member.username).all()
+        user_rated_albums = User_Album_Rating.query.filter_by(username=member.username).all()
         for rated_album in user_rated_albums:
             album_name = album_id_to_album(rated_album.album_id).name
             val = {'username': member.username,                   
@@ -339,7 +339,7 @@ def group_performer_ratings(group_id):
     results = []
     
     for member in members:
-        user_rated_performers = User_Performer_Rating(username=member.username).all()
+        user_rated_performers = User_Performer_Rating.query.filter_by(username=member.username).all()
         for rated_performer in user_rated_performers:
             performer_name = performer_id_to_performer(rated_performer.performer_id).name
             val = {'username': member.username,                   

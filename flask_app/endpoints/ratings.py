@@ -201,6 +201,9 @@ def all_performer_ratings():
 def get_follower_song_ratings(username):
     user = username_to_user(username)
     follower_usernames = follower_finder(user)
+    if not follower_usernames:
+        return jsonify([])
+    
     user_ratings = []
     for follower_username in follower_usernames:
         ratings = User_Performer_Rating.query.filter_by(username=follower_username).all()
@@ -226,6 +229,9 @@ def get_follower_song_ratings(username):
 def get_follower_album_ratings(username):
     user = username_to_user(username)
     follower_usernames = follower_finder(user)
+    if not follower_usernames:
+        return jsonify([])
+    
     user_ratings = []
     for follower_username in follower_usernames:
         ratings = User_Performer_Rating.query.filter_by(username=follower_username).all()
@@ -244,6 +250,9 @@ def get_follower_album_ratings(username):
 def get_follower_performer_ratings(username):
     user = username_to_user(username)
     follower_usernames = follower_finder(user)
+    if not follower_usernames:
+        return jsonify([])
+    
     user_ratings = []
     for follower_username in follower_usernames:
         ratings = User_Performer_Rating.query.filter_by(username=follower_username).all()
@@ -303,18 +312,18 @@ def get_user_song_ratings(username):
     
    
     
-    return jsonify({f"{username}_song_ratings": ratings_data})
+    return jsonify({"user_song_ratings": ratings_data})
 
 #Retreive all of the given user's album ratings
 @app.route('/api/user_album_ratings/<username>')
 def get_user_album_ratings(username):
     user_ratings = User_Album_Rating.query.filter_by(username=username).all()
-    ratings_data = [{"album_id": rating.album_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
+    ratings_data = [{"album": album_id_to_album(rating.album_id).name,"album_id": rating.album_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
     return jsonify({"user_album_ratings": ratings_data})
 
 #Retreive all of the given user's performer ratings
 @app.route('/api/user_performer_ratings/<username>')
 def get_user_performer_ratings(username):
-    user_ratings = User_Performer_Rating.query.filter_by(username=username).all()
-    ratings_data = [{"performer_id": rating.performer_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
+    user_ratings = User_Performer_Rating.query.filter_by(username=username).all()    
+    ratings_data = [{"performer": performer_id_to_performer(rating.performer_id).name,"performer_id": rating.performer_id, "rating": rating.rating, "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
     return jsonify({"user_performer_ratings": ratings_data})
