@@ -296,7 +296,7 @@ def get_external_songs(username):
 
 def group_song_ratings(group_id):
     members = GroupUser.query.filter_by(group_id=group_id).all()
-    results = []
+    results = []    
     
     for member in members:
         user_rated_songs = User_Song_Rating.query.filter_by(username=member.username).all()
@@ -313,7 +313,7 @@ def group_song_ratings(group_id):
                    'external_service_id' : song_id_to_imported_song(rated_song.rating_id)}
             
             results.append(val)           
-        
+      
     return results  
 
 def group_album_ratings(group_id):

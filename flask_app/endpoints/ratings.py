@@ -206,7 +206,7 @@ def get_follower_song_ratings(username):
     
     user_ratings = []
     for follower_username in follower_usernames:
-        ratings = User_Performer_Rating.query.filter_by(username=follower_username).all()
+        ratings = User_Song_Rating.query.filter_by(username=follower_username).all()
         for rating in ratings:
             user_ratings.append(rating)
     
@@ -234,12 +234,12 @@ def get_follower_album_ratings(username):
     
     user_ratings = []
     for follower_username in follower_usernames:
-        ratings = User_Performer_Rating.query.filter_by(username=follower_username).all()
+        ratings = User_Album_Rating.query.filter_by(username=follower_username).all()
         for rating in ratings:
             user_ratings.append(rating)
     
     ratings_data = [{"username": rating.username,                     
-                     "album": album_id_to_album(user_ratings.album_id).name,                     
+                     "album": album_id_to_album(rating.album_id).name,                     
                      "album_rating": rating.rating,
                      "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
     
@@ -260,7 +260,7 @@ def get_follower_performer_ratings(username):
             user_ratings.append(rating)
     
     ratings_data = [{"username": rating.username,                     
-                     "performer": performer_id_to_performer(user_ratings.performer_id).name,                     
+                     "performer": performer_id_to_performer(rating.performer_id).name,                     
                      "performer_rating": rating.rating,
                      "rating_timestamp": rating.rating_timestamp} for rating in user_ratings]
     
@@ -271,8 +271,7 @@ def get_follower_performer_ratings(username):
 def get_group_song_ratings(group_id):     
     results = group_song_ratings(group_id)
     if not results:
-        results = []       
-    
+        results = []   
     
     return jsonify(results)
 
