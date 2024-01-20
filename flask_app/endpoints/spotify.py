@@ -171,7 +171,10 @@ def get_recommendations(username):
     data = request.get_json()
     seed_tracks = data.get('seed_tracks')
     seed_artists = data.get('seed_artists')    
-    seed_genres = data.get('seed_genres') or sp.recommendation_genre_seeds()    
+    seed_genres = data.get('seed_genres') or sp.recommendation_genre_seeds()
+    
+    if not seed_tracks or not seed_artists or not seed_genres:
+        return jsonify({"error": "seed_tracks, seed_artists and see_genres must be given!"})    
     
     if isinstance(seed_genres, str):
         seed_genres = [seed_genres]
@@ -192,8 +195,11 @@ def spoti_search(username):
     sp = spotipy.Spotify(auth=access_token)
     
     data = request.get_json()
-    q = data.get('query')
-    type = data.get('type')    
+    q = data.get('query')       
+    type = data.get('type') 
+    
+    if not q or not type:
+        return jsonify({"error": "query and type must be given!"})    
     
     results = sp.search(q=q, type=type)  
     

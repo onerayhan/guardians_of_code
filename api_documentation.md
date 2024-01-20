@@ -208,7 +208,7 @@ Get spotify recommendations based on the specified.
 
 **Paremeters**
 - `username` encoded within url, f_string style.
-- `q`, `type`
+- `query`, `type`
 - Check the https://developer.spotify.com/documentation/web-api/reference/search for q and type values.
 
 **Description**
@@ -1450,7 +1450,7 @@ Retrieves all performer preferences present throughout the database.
 
 ### Endpoint
 
-`POST /api/recommendation/<username>`
+`POST /api/recommendations/<username>`
 
 ### Description 
 
