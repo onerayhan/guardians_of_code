@@ -1,6 +1,6 @@
 #Interfile imports 
 from app import app, db
-from utils import username_to_user, song_name_to_genre_name, song_name_to_album_name, song_name_to_performer_name, song_id_to_song_name, album_name_to_album, performer_name_to_performer
+from utils import username_to_user, song_name_to_genre_name, song_name_to_album_name, song_name_to_performer_name, song_id_to_song, song_id_to_song_name, album_name_to_album, performer_name_to_performer
 from utils import album_id_to_album, performer_id_to_performer, group_song_ratings, group_album_ratings, group_performer_ratings, song_id_to_imported_song, follower_finder
 from song_models import User_Song_Rating, User_Album_Rating, User_Performer_Rating
 
@@ -163,6 +163,7 @@ def all_song_ratings():
                      "song": song_id_to_song_name(rating.song_id),
                      "song_rating": rating.rating,
                      "rating_timestamp": rating.rating_timestamp,
+                     "release_year": song_id_to_song(rating.song_id).release_year,
                      "external_service_id" : song_id_to_imported_song(rating.song_id)} for rating in every_song_ratings]   
 
     
@@ -219,6 +220,7 @@ def get_follower_song_ratings(username):
                      "song": song_id_to_song_name(rating.song_id),
                      "song_rating": rating.rating,
                      "rating_timestamp": rating.rating_timestamp,
+                     "release_year": song_id_to_song(rating.song_id).release_year,
                      "external_service_id" : song_id_to_imported_song(rating.song_id)} for rating in user_ratings]   
     
     
@@ -307,9 +309,8 @@ def get_user_song_ratings(username):
                      "song": song_id_to_song_name(rating.song_id),
                      "song_rating": rating.rating,                     
                      "rating_timestamp": rating.rating_timestamp,
-                     "external_service_id" : song_id_to_imported_song(rating.song_id)} for rating in user_ratings]
-    
-   
+                     "release_year": song_id_to_song(rating.song_id).release_year,
+                     "external_service_id" : song_id_to_imported_song(rating.song_id)} for rating in user_ratings]  
     
     return jsonify({"user_song_ratings": ratings_data})
 

@@ -310,6 +310,7 @@ def group_song_ratings(group_id):
                    'song': song_name,
                    'song_rating': rated_song.rating,
                    'rating_timestamp': rated_song.rating_timestamp,
+                   'release_year': song_id_to_song(rated_song.song_id).release_year,
                    'external_service_id' : song_id_to_imported_song(rated_song.rating_id)}
             
             results.append(val)           

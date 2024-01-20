@@ -170,16 +170,14 @@ def get_recommendations(username):
     
     data = request.get_json()
     seed_tracks = data.get('seed_tracks')
-    seed_artists = data.get('seed_artists')
-    seed_albums = data.get('seed_albums')
-    if data.get('seed_genres'):
-        seed_genres = sp.recommendation_genre_seeds()
-    else:
-        seed_genres = None   
+    seed_artists = data.get('seed_artists')    
+    seed_genres = data.get('seed_genres') or sp.recommendation_genre_seeds()    
+    
+    if isinstance(seed_genres, str):
+        seed_genres = [seed_genres]
     
     recommendation_tracks = sp.recommendations(seed_tracks=seed_tracks,
-                                               seed_artists=seed_artists,
-                                               seed_albums=seed_albums,
+                                               seed_artists=seed_artists,                                               
                                                seed_genres=seed_genres)['tracks']   
         
     return jsonify(recommendation_tracks)    
