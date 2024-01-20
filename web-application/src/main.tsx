@@ -6,6 +6,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { AuthProvider } from "react-auth-kit"
 import './index.css'
 import {SpotifyProvider} from "./contexts/SpotifyContext.tsx";
+import 'globalthis/auto';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>

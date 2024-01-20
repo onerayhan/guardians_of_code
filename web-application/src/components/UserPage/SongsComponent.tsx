@@ -207,7 +207,7 @@ const SongsComponent:React.FC = () => {
             try {
                 const response = await axios.get(apiUrl);
                 const data = response.data;
-                const songObjects = data[`${auth()?.username}_song_ratings`];
+                const songObjects = data[`user_song_ratings`];
 
                 if (Array.isArray(songObjects)) {
                     // Create an object to hold the latest rating for each song

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuthUser } from 'react-auth-kit';
 import { AwesomeButtonSocial } from "react-awesome-button";
-import AwesomeButtonStyles from 'react-awesome-button/src/styles/styles.scss'
+import AwesomeButtonStyles from "react-awesome-button/src/styles/styles.scss"
 
 interface RatedArray {
     artist: string;
@@ -31,7 +31,7 @@ const TweetButton: React.FC<TweetButtonProps> = ({ shareType }) => {
                 if (!username) throw new Error("Username is undefined");
 
                 const response = await axios.get(`http://51.20.128.164/api/user_song_ratings/${username}`);
-                const ratedArray: RatedArray[] = response.data[`${username}_song_ratings`];
+                const ratedArray: RatedArray[] = response.data[`user_song_ratings`];
 
                 let items: { [key: string]: { totalRating: number; count: number } } = {};
                 ratedArray.forEach((item) => {

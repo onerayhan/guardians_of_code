@@ -27,8 +27,7 @@ const ExportCSV = () => {
         const fetch = async () => {
             try {
                 const response = await axios.get(`${baseURL}/user_song_ratings/${auth()?.username}`);
-                const username = auth()?.username;
-                const property = `${username}_song_ratings`;
+                const property = `user_song_ratings`;
                 setRatedArray(response.data[property]);
             } catch (error) {
                 console.error("Error fetching data:", error);

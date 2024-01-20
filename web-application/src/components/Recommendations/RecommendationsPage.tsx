@@ -43,6 +43,11 @@ interface Song {
     release_year: number | null;
 }
 
+interface SongRatings {
+    song: string;
+    song_rating: number;
+}
+
 interface SongRecom {
     album: string;
     genre: string;
@@ -50,6 +55,21 @@ interface SongRecom {
     song_id: number;
     songs_name: string;
     username: string;
+}
+
+interface genrePref {
+    genre: string;
+    count: string;
+}
+
+interface artistPref {
+    performer: string;
+    count: string;
+}
+
+interface albumPref {
+    album: string;
+    count: string;
 }
 
 function RecommendationsPage() {
@@ -64,7 +84,185 @@ function RecommendationsPage() {
     const [activeButtons, setActiveButtons] = useState<string[]>([]);
     const [selection, setSelection] = useState('all');
     const [fetching_results, setFetchingResults] = useState(false);
+
+    const [top_album, setTopAlbum] = useState("");
+    const [top_genre, setTopGenre] = useState("");
+    const [top_artist, setTopArtist] = useState("");
+    const [top_song, setTopSong] = useState("");
+
+    const [SpotiSongsAlbum, setSpotiSongsAlbum] = useState<Song[]>([]);
+    const [SpotiSongsGenre, setSpotiSongsGenre] = useState<Song[]>([]);
+    const [SpotiSongsArtist, setSpotiSongsArtist] = useState<Song[]>([]);
+    const [SpotiSongsSong, setSpotiSongsSong] = useState<Song[]>([]);
+
+    const [spotiRecomType, setSpotiRecomType] = React.useState('Genre-based');
+
+    const [activeSpotiRecoms, setActiveSpotiRecoms] = useState<Song[]>([]);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        switch (spotiRecomType)
+        {
+            case "Genre-based":
+                setActiveSpotiRecoms(SpotiSongsGenre);
+                break;
+            case "Artist-based":
+                setActiveSpotiRecoms(SpotiSongsArtist);
+                break;
+            case "Song-based":
+                setActiveSpotiRecoms(SpotiSongsSong);
+                break;
+            case "Album-based":
+                setActiveSpotiRecoms(SpotiSongsAlbum);
+                break;
+        }
+    }, [spotiRecomType]);
+
+    useEffect(() => {
+        const get_top_genres = async () => {
+            console.log("Fetching top genres");
+
+            try {
+                const apiUrl = `http://51.20.128.164/api/user_genre_preference/${auth()?.username}`;
+                const response = await axios.get(apiUrl);
+                const genreCounts = response.data.genres || [];
+
+                if (genreCounts.length > 0) {
+                    genreCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
+                    console.log("Top genre:", genreCounts[0].genre);
+                    setTopGenre(genreCounts[0].genre);
+                } else {
+                    console.log("No genres found");
+                }
+            } catch (error) {
+                console.log("Error fetching top genres:", error);
+            }
+        };
+
+        const get_top_artists = async () => {
+            console.log("Fetching top artists");
+            const apiUrl = `http://51.20.128.164/api/user_performer_preference/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const artistCounts = response.data.performers || [];
+
+                if (artistCounts.length > 0) {
+                    artistCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
+                    console.log("Top artist: " + artistCounts[0].performer);
+                    setTopArtist(artistCounts[0].performer);
+                } else {
+                    console.log("No artists found");
+                }
+            } catch (error) {
+                console.log("Error fetching top artists:", error);
+            }
+        };
+
+        const get_top_albums = async () => {
+            console.log("Fetching top albums");
+            const apiUrl = `http://51.20.128.164/api/user_album_preference/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const albumCounts = response.data.albums || [];
+
+                if (albumCounts.length > 0) {
+                    albumCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
+                    console.log("Top album: " + albumCounts[0].album);
+                    setTopAlbum(albumCounts[0].album);
+                } else {
+                    console.log("No albums found");
+                }
+            } catch (error) {
+                console.log("Error fetching top albums:", error);
+            }
+        };
+
+        const get_top_songs = async () => {
+            console.log("Fetching top songs");
+            const apiUrl = `http://51.20.128.164/api/user_song_ratings/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const songs = response.data.user_song_ratings || [];
+
+                if (songs.length > 0) {
+                    songs.sort((a, b) => parseFloat(b.song_rating) - parseFloat(a.song_rating));
+                    console.log("Top song: " + songs[0].song);
+                    setTopSong(songs[0].song);
+                } else {
+                    console.log("No songs found");
+                }
+            } catch (error) {
+                console.log("Error fetching top songs:", error);
+            }
+        };
+
+
+        const fetch_spotify_recommendations = async () => {
+
+            const set_spoti_recoms_genre = async () => {
+                const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
+
+                try {
+                    const top_genre_lower: string = top_genre.toLowerCase();
+                    const recomResponse = await axios.post(recomURL, {seed_genres: [top_genre_lower]});
+                    const recomData = recomResponse.data;
+                    console.log("RECOM DATA GENRE: " + recomData)
+                    await processSongsSpoti(recomData).then(songs => setSpotiSongsGenre(songs));
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+
+            const set_spoti_recoms_artist = async () => {
+                const apiURL = `http://51.20.128.164/spoti/search/${auth()?.username}`
+                const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
+
+                try {
+                    const response = await axios.post(apiURL, {type: "artist", query: top_artist});
+                    const data = response.data.artists.items[0].id;
+                    console.log("RECOM DATA ID ARTIST: " + data);
+                    const recomResponse = await axios.post(recomURL, {seed_artists: [data]});
+                    const recomData = recomResponse.data;
+                    console.log("RECOM DATA ARTIST:", JSON.stringify(recomData, null, 2));
+
+                    await processSongsSpoti(recomData).then(songs => setSpotiSongsArtist(songs));
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+
+            const set_spoti_recoms_song = async () => {
+                const apiURL = `http://51.20.128.164/spoti/search/${auth()?.username}`
+                const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
+
+                try {
+                    const response = await axios.post(apiURL, {type: "track", query: top_song});
+                    const data = response.data.tracks.items[0].id;
+                    console.log("RECOM DATA ID SONG: " + data);
+                    const recomResponse = await axios.post(recomURL, {seed_tracks: [data]});
+                    const recomData = recomResponse.data;
+                    console.log("RECOM DATA SONG:", JSON.stringify(recomData, null, 2));
+
+                    await processSongsSpoti(recomData).then(songs => setSpotiSongsSong(songs));
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+
+            await set_spoti_recoms_genre();
+            await set_spoti_recoms_artist();
+            await set_spoti_recoms_song();
+        }
+
+        get_top_artists();
+        get_top_songs();
+        get_top_genres();
+
+        fetch_spotify_recommendations();
+    }, []);
 
     function RadioCard(props) {
         const { getInputProps, getRadioProps } = useRadio(props);
@@ -101,6 +299,41 @@ function RecommendationsPage() {
         );
     }
 
+    function RadioCardSpoti(props) {
+        const { getInputProps, getRadioProps } = useRadio(props);
+        const input = getInputProps();
+        const radio = getRadioProps();
+
+        // Define the background color for the active state
+        const activeBgColor = '#215cff'; // Or any color you prefer
+
+        return (
+            <Box as='label'>
+                <input {...input} />
+                <Box
+                    {...radio}
+                    cursor='pointer'
+                    borderWidth='1px'
+                    borderRadius='md'
+                    boxShadow='md'
+                    bg={props.children === spotiRecomType ? activeBgColor : 'transparent'}
+                    textStyle={"lalezar"}
+                    textColor={props.children === spotiRecomType ? 'white' : 'black'}
+                    _checked={{
+                        borderColor: 'green.600', // Or any border color you prefer
+                    }}
+                    _hover={{
+                        borderColor: 'black',
+                    }}
+                    px={5}
+                    py={3}
+                >
+                    {props.children}
+                </Box>
+            </Box>
+        );
+    }
+
     function SelectionRadio() {
         const options = ['Armonify', 'Spotify'];
 
@@ -126,6 +359,30 @@ function RecommendationsPage() {
         );
     }
 
+    function SelectionRadioSpotiRecoms() {
+        const options = ['Genre-based', 'Artist-based', 'Song-based'];
+
+        const { getRootProps, getRadioProps } = useRadioGroup({
+            name: 'framework',
+            defaultValue: 'react',
+            onChange: setSpotiRecomType,
+        });
+
+        const group = getRootProps();
+
+        return (
+            <HStack {...group}>
+                {options.map((value) => {
+                    const radio = getRadioProps({ value });
+                    return (
+                        <RadioCardSpoti key={value} {...radio} value={value}>
+                            {value}
+                        </RadioCardSpoti>
+                    );
+                })}
+            </HStack>
+        );
+    }
 
     const auth = useAuthUser();
     const toast = useToast();
@@ -201,25 +458,6 @@ function RecommendationsPage() {
     const handleSelectChange = (event) => {
         setSelection(event.target.value);
     };
-
-    const { definePartsStyle, defineMultiStyleConfig } =
-        createMultiStyleConfigHelpers(selectAnatomy.keys)
-
-    const brandPrimary = definePartsStyle({
-        field: {
-            border: "1px dashed",
-            borderColor: "purple.200",
-            borderRadius: "full",
-            textColor: "black.100"
-        },
-        icon: {
-            color: "purple.400"
-        }
-    })
-
-    const selectTheme = defineMultiStyleConfig({
-        variants: { brandPrimary },
-    })
 
     useEffect(() => {
         const fetch_spoti_status = async () => {
@@ -301,6 +539,37 @@ function RecommendationsPage() {
             throw new Error('Invalid data type specified');
         }
     }
+
+    async function processSongsSpoti(tracks) {
+        const processTrack = async (track) => {
+            if (!track || !track.artists) {
+                console.error("Invalid track data:", track);
+                return null;
+            }
+
+            try {
+                // Assuming get_genre_of_song function takes the artist's name and returns the genre
+                const genre = await get_genre_of_song(track.artists[0].name);
+                return {
+                    song_photo: track.album.images[0]?.url,
+                    song_id: track.id,
+                    song_name: track.name,
+                    artist_name: track.artists.map(artist => artist.name).join(', '),
+                    genre: genre,
+                    album_name: track.album.name,
+                    length: track.duration_ms,
+                    release_year: track.album.release_date ? parseInt(track.album.release_date.split('-')[0], 10) : null,
+                };
+            } catch (error) {
+                console.error(`Error processing track ${track.name}:`, error);
+                return null;
+            }
+        };
+
+        // Process each track in the array
+        return Promise.all(tracks.map(track => processTrack(track)));
+    }
+
 
     async function get_genre_of_song(song_name : string) {
         try {
@@ -425,7 +694,6 @@ function RecommendationsPage() {
                                                           onClick={() => toggleButtonActive(buttonId)}
                                                           colorScheme={activeButtons.includes(buttonId) ? 'blue' : 'gray'}
                                                           m={2}
-                                                          className="aws-btn 4px 2px"
                                                       >
                                                           {buttonId}
                                                       </Button>
@@ -485,6 +753,7 @@ function RecommendationsPage() {
                                               <Tab><BsGraphUpArrow size={20}/>Your Top Spotify Songs</Tab>
                                               <Tab><TbPlayerTrackNextFilled size={20}/> Your Current Spotify
                                                   Tracks</Tab>
+                                              <Tab><FaSpotify size={20} /> Spotify Recommendations</Tab>
                                           </TabList>
                                           <div className="px-80"></div>
                                       </Flex>
@@ -564,6 +833,69 @@ function RecommendationsPage() {
                                                               </Thead>
                                                               <Tbody>
                                                                   {AddSongsSpoti.map((song, index) => (
+                                                                      <Tr key={index}>
+                                                                          <Td><Avatar img={song.song_photo} size="xl" /></Td>
+                                                                          <Td className="text-black">{song.song_name}</Td>
+                                                                          <Td className="text-black">{song.genre}</Td>
+                                                                          <Td>
+                                                                              {
+                                                                                  song.artist_name.split(",").map((artist, index) => (
+                                                                                      <Button
+                                                                                          key={index}
+                                                                                          onClick={() => navigateArtist(artist)}
+                                                                                      >
+                                                                                          {artist}
+                                                                                      </Button>
+                                                                                  ))
+                                                                              }
+                                                                          </Td>
+                                                                          <Td><Button onClick={() => navigateAlbum(song.album_name)}>{song.album_name}</Button></Td>
+                                                                          <Td className="text-black">{formatDuration(song.length)}</Td>
+                                                                          <Td className="text-black">{song.release_year}</Td>
+                                                                          <Td>
+                                                                              <Button
+                                                                                  variant='solid'
+                                                                                  colorScheme='yellow'
+                                                                                  leftIcon={FaDatabase}
+                                                                                  onClick={() => addSongToDB(song)}
+                                                                              >
+                                                                                  Add to Database
+                                                                              </Button>
+                                                                          </Td>
+                                                                      </Tr>
+                                                                  ))}
+                                                              </Tbody>
+                                                          </Table>
+                                                      </TableContainer>
+                                                  </div>
+                                              </div>
+                                          </TabPanel>
+                                          <TabPanel>
+                                              <div className="relative w-full flex flex-col items-center top-10 pb-8">
+                                                  <div className="rounded-xl bg-white">
+                                                      <TableContainer>
+                                                          <div>
+                                                                <div className="py-3"></div>
+                                                                <div className="px-5">
+                                                                    <SelectionRadioSpotiRecoms />
+                                                                </div>
+                                                                <div className="py-3"></div>
+                                                          </div>
+                                                          <Table variant="simple" colorScheme='purple' size="lg">
+                                                              <Thead>
+                                                                  <Tr>
+                                                                      <Th>Song Photos</Th>
+                                                                      <Th>Song Name</Th>
+                                                                      <Th>Genre</Th>
+                                                                      <Th>Artists</Th>
+                                                                      <Th>Album</Th>
+                                                                      <Th>Length</Th>
+                                                                      <Th>Release Year</Th>
+                                                                      <Th></Th>
+                                                                  </Tr>
+                                                              </Thead>
+                                                              <Tbody>
+                                                                  {activeSpotiRecoms.map((song, index) => (
                                                                       <Tr key={index}>
                                                                           <Td><Avatar img={song.song_photo} size="xl" /></Td>
                                                                           <Td className="text-black">{song.song_name}</Td>

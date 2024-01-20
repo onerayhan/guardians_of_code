@@ -62,8 +62,9 @@ import Ratings from "react-star-ratings";
 import {Avatar, Modal} from "flowbite-react";
 import ReactPaginate from 'react-paginate';
 import {selectAnatomy} from '@chakra-ui/anatomy'
-import AwesomeButton from "react-native-really-awesome-button";
+import AwesomeButtonSocial from "react-native-really-awesome-button";
 import {useDisclosure} from "@chakra-ui/hooks";
+import AwesomeButtonStyles from "react-awesome-button/src/styles/styles.scss"
 
 interface Song {
     song_id: string;
@@ -723,7 +724,6 @@ function RatingPage() {
                                                 onClick={() => toggleButtonActive(buttonId)}
                                                 colorScheme={activeButtons.includes(buttonId) ? 'blue' : 'gray'}
                                                 m={2}
-                                                className="aws-btn 4px 2px"
                                             >
                                                 {buttonId}
                                             </Button>

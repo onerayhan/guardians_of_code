@@ -39,76 +39,6 @@ const Analysis = () => {
     const [selectedSubOption, setSelectedSubOption] = useState('');
     const [selectedTimeFrame, setSelectedTimeFrame] = useState('');
 
-    const handleChartChange = (e) => {
-        setSelectedChart(e.target.value);
-        setSelectedSubOption('');
-        setSelectedTimeFrame('');
-    };
-
-    const handleSubOptionChange = (e) => {
-        setSelectedSubOption(e.target.value);
-        setSelectedTimeFrame('');
-    };
-
-    const handleTimeFrameChange = (e) => {
-        setSelectedTimeFrame(e.target.value);
-    };
-
-    const handleGroupChange = (e) => {
-        setSelectedGroup(Number(e.target.value));
-    };
-
-    useEffect(() => {
-        if (selected === "friend_groups") {
-            const apiUrl = `${baseURL}/display_user_group/${auth()?.username}`;
-            axios.get(apiUrl).then(response => {
-                const fetchedGroups = response.data.map((group: any) => ({
-                    groupName: group.group_name,
-                    groupMembers: group.group_members,
-                    groupID: group.group_id
-                }));
-                setGroups(fetchedGroups);
-            }).catch(error => console.log(error));
-        }
-    }, [selected, auth]);
-
-    useEffect(() => {
-        const fetchSongs = async (url: string, setter: React.Dispatch<React.SetStateAction<RatedArray[]>>) => {
-            try {
-                const response = await axios.get(url);
-                setter(response.data.ratings_data);
-            } catch (error) {
-                console.error('Error fetching data', error);
-            }
-        };
-
-            fetchSongs(`${baseURL}/all_song_ratings`, setAllSongs);
-            fetchSongs(`${baseURL}/follower_song_ratings/${auth()?.username}`, setFriendsSongs);
-            fetchSongs(`${baseURL}/user_song_ratings/${auth()?.username}`, setUserSongs);
-            fetchSongs(`${baseURL}/group_song_ratings/${auth()?.username}/${selectedGroup}`, setFriendGroupsSongs);
-
-
-    }, []);
-
-    useEffect(() => {
-        switch (selected) {
-            case "all-db":
-                setData(allSongs);
-                break;
-            case "friends":
-                setData(friendsSongs);
-                break;
-            case "user":
-                setData(userSongs);
-                break;
-            case "friend_groups":
-                setData(friendGroupsSongs);
-                break;
-            default:
-                break;
-        }
-    }, [allSongs, friendsSongs, userSongs, friendGroupsSongs, selected]);
-
     return (
         <body className="bg-[#081730] overflow-y-auto text-white">
         <Header/>
@@ -127,7 +57,7 @@ const Analysis = () => {
                 </TabList>
                 <TabPanels>
                 <TabPanel>
-                        <MainTable ratedArray={data}/>
+                        <MainTable />
                     </TabPanel>
                     <TabPanel>
                         <MainChart/>

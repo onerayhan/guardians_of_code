@@ -54,6 +54,12 @@ interface RatedArray {
     rating_timestamp: string;
 }
 
+interface groupProps {
+    groupName: string;
+    group_members: string[];
+    groupID: number;
+}
+
 const UserProfile = () => {
     const { userId } = useParams();
     const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
@@ -67,7 +73,7 @@ const UserProfile = () => {
     const [Posted, setPosted] = useState<SongsArray[]>([]);
     const [Rated, setRated] = useState<RatedArray[]>([]);
     const [tabIndex, setTabIndex] = useState(0);
-    const [groups, setGroups] = useState<string[]>([]);
+    const [groups, setGroups] = useState<groupProps[]>([]);
     const navigate = useNavigate();
     const toast = useToast();
     const auth = useAuthUser();
@@ -137,7 +143,7 @@ const UserProfile = () => {
             try {
                 const response = await axios.get(apiUrl);
                 const data = response.data;
-                const songObjects = data[`${auth()?.username}_song_ratings`];
+                const songObjects = data[`user_song_ratings`];
 
                 if (Array.isArray(songObjects)) {
                     // Create an object to hold the latest rating for each song
@@ -217,13 +223,18 @@ const UserProfile = () => {
         };
 
         const fetchGroups = async () => {
-            const apiUrl = "http://51.20.128.164/api/user_groups";
+            const apiUrl = `http://51.20.128.164/api/display_user_group/${auth()?.username}`;
             try {
-                const response = await axios.post(apiUrl, {username: `${userId}`});
+                const response = await axios.get(apiUrl);
                 const data = response.data;
-                const groupNames = data[`Groups of ${userId}`] || [];
 
-                setGroups(groupNames);
+                const groups: groupProps[] = data.map((group: any) => ({
+                    groupName: group.group_name,
+                    groupMembers: group.group_members,
+                    groupID: group.group_id
+                }));
+
+                setGroups(groups);
             } catch (error) {
                 console.log(error);
             }
