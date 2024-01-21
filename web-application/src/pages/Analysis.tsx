@@ -1,44 +1,12 @@
-import React, { useEffect, useState } from "react";
-import {Flex, Heading, Select, Tab, TabList, TabPanel, TabPanels, Tabs, VStack} from "@chakra-ui/react";
+import {Flex, Tab, TabList, TabPanel, TabPanels, Tabs, VStack} from "@chakra-ui/react";
 import Header from "../components/Header";
 import MainChart from "../components/Analysis/MainChart";
 import MainTable from "../components/Analysis/MainTable";
-import axios from "axios";
-import { useAuthUser } from "react-auth-kit";
 import ExportCSV from "../components/Share/ExportCSV.tsx";
 import {FaChartLine, FaFileExport, FaShareAlt, FaTable} from "react-icons/fa";
 import TweetButton from "../APIClasses/TweetButton.tsx";
 
-interface GroupProps {
-    groupName: string;
-    groupMembers: string[];
-    groupID: number;
-}
-
-interface RatedArray {
-    artist: string;
-    album: string;
-    song: string;
-    song_rating: number;
-    rating_timestamp: string;
-}
-
 const Analysis = () => {
-    const [selected, setSelected] = useState<string>("all-db");
-    const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
-    const [groups, setGroups] = useState<GroupProps[]>([]);
-    const auth = useAuthUser();
-    const baseURL = "http://51.20.128.164/api"; // Replace with your actual base URL
-    const [data, setData] = useState<RatedArray[]>([]);
-    const [userSongs, setUserSongs] = useState<RatedArray[]>([]);
-    const [friendsSongs, setFriendsSongs] = useState<RatedArray[]>([]);
-    const [allSongs, setAllSongs] = useState<RatedArray[]>([]);
-    const [friendGroupsSongs, setFriendGroupsSongs] = useState<RatedArray[]>([]);
-
-    const [selectedChart, setSelectedChart] = useState('');
-    const [selectedSubOption, setSelectedSubOption] = useState('');
-    const [selectedTimeFrame, setSelectedTimeFrame] = useState('');
-
     return (
         <body className="bg-[#081730] overflow-y-auto text-white">
         <Header/>

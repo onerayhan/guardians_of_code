@@ -10,8 +10,6 @@ import { AiOutlineUsergroupDelete } from "react-icons/ai";
 import axios from "axios";
 import { IoPersonRemove } from "react-icons/io5";
 import { MdOutlineBlock } from "react-icons/md";
-import {useSpotify} from "../../contexts/SpotifyContext.tsx";
-import TweetButton from "../../APIClasses/TweetButton.tsx";
 
 interface groupProps {
     groupName: string;
@@ -31,7 +29,6 @@ function Profile() {
     const auth = useAuthUser();
     const username = auth()?.username;
     const navigate = useNavigate();
-    const { isAuthenticated, updateAccessToken } = useSpotify();
 
     useEffect(() => {
         const fetch_photo = async () => {

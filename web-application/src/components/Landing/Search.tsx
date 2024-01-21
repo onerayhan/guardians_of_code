@@ -5,28 +5,12 @@ import VisibilitySensor from "react-visibility-sensor";
 
 const Search = () => {
   const [elementIsVisible, setElementIsVisible] = useState(false);
-  const bg = {
-    true: {
-      left: "-44rem",
-    },
-    false: {
-      left: "-50rem",
-    },
-  };
   const redimg = {
     true: {
       left: "18rem",
     },
     false: {
       left: "16rem",
-    },
-  };
-  const musicimg = {
-    true: {
-      left: "2rem",
-    },
-    false: {
-      left: "6rem",
     },
   };
   return (

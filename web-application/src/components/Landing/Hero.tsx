@@ -5,14 +5,6 @@ import { motion } from "framer-motion";
 
 const Hero: React.FC = () => {
   const [elementIsVisible, setElementIsVisible] = useState(false);
-  const bg = {
-    true: {
-      left: "7rem",
-    },
-    false: {
-      left: "19rem",
-    },
-  };
   const musicPlayer = {
     true: {
       left: "295px",

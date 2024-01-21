@@ -1,40 +1,16 @@
 import {
     Box,
-    SimpleGrid,
     Card,
     CardBody,
-    Heading,
     CardFooter,
     Stack,
     useToast,
     Button,
     Select,
     Flex,
-    Tag,
-    TagLabel,
-    TagCloseButton,
-    useCheckbox,
-    chakra,
     Icon,
-    UseCheckboxProps,
-    useCheckboxGroup,
     HStack,
     VStack,
-    Radio,
-    RadioGroup,
-    Input,
-    Tabs,
-    TabList,
-    Tab,
-    TabPanels,
-    TabPanel,
-    TableContainer,
-    Table,
-    Thead,
-    Tr,
-    Th,
-    Tbody,
-    createMultiStyleConfigHelpers,
     useRadio,
     useRadioGroup,
     Skeleton
@@ -42,29 +18,16 @@ import {
 import React, {useEffect, useState} from 'react';
 import {useAuthUser} from "react-auth-kit";
 import axios from "axios";
-import {StarIcon} from "@chakra-ui/icons";
-import {Checkbox, Divider} from "antd";
-import {AiTwotoneLike} from "react-icons/ai";
-import {useNavigate} from "react-router-dom";
-import GenreInput from "./GenreInput.tsx";
-import AlbumInput from "./AlbumInput.tsx";
-import ArtistInput from "./ArtistInput.tsx";
-import {FaMusic, FaCalendarAlt, FaClock, FaStar, FaDatabase, FaCompactDisc, FaMicrophone} from 'react-icons/fa';
+import {Divider} from "antd";
+import {FaMusic, FaCalendarAlt, FaClock, FaStar} from 'react-icons/fa';
 import {MdAlbum} from 'react-icons/md';
-import {IoIosRefreshCircle, IoMdMicrophone} from "react-icons/io";
-import {IoRefreshCircleSharp} from "react-icons/io5";
-import RefreshButton from "./RefreshButton.tsx";
+import {IoMdMicrophone} from "react-icons/io";
 import {BsFillSendFill} from "react-icons/bs";
 import {Text} from '@chakra-ui/react'
 import {IoMdOptions} from "react-icons/io";
-import StarRating from "./SongStar.tsx";
 import Ratings from "react-star-ratings";
-import {Avatar, Modal} from "flowbite-react";
+import {Modal} from "flowbite-react";
 import ReactPaginate from 'react-paginate';
-import {selectAnatomy} from '@chakra-ui/anatomy'
-import AwesomeButtonSocial from "react-native-really-awesome-button";
-import {useDisclosure} from "@chakra-ui/hooks";
-import AwesomeButtonStyles from "react-awesome-button/src/styles/styles.scss"
 
 interface Song {
     song_id: string;
@@ -93,12 +56,6 @@ interface SongRecom {
     username: string;
 }
 
-interface RatingStarsProps {
-    song: Song;
-    rating: number;
-    onRatingChange: (songId: number, newRating: number) => void;
-}
-
 interface ModalState {
     type: 'artist' | 'album' | null;
     data: string | null;
@@ -109,18 +66,9 @@ function RatingPage() {
     const [RatingSongsOwn, setRatingSongsOwn] = useState<Song[]>([]);
     const auth = useAuthUser();
     const toast = useToast();
-    const navigate = useNavigate();
-    const [genre, setGenre] = useState<string>('');
-    const [artist, setArtist] = useState<string>('');
-    const [album, setAlbum] = useState<string>('');
-    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-    const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
-    const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
     const [songRatings, setSongRatings] = useState<{ [songId: number]: number }>({});
     const [ratings, setRatings] = useState<Array<{ rating_type: string, song_id: number, rating: number }>>([]);
     const [rateType, setRateType] = React.useState('Added Songs');
-    const [showArtistRateModal, setArtistRateModal] = React.useState(false);
-    const [showAlbumRateModal, setAlbumRateModal] = React.useState(false);
     const [currentModal, setCurrentModal] = useState<ModalState>({type: null, data: null});
     const [activeButtons, setActiveButtons] = useState<string[]>([]);
     const [selection, setSelection] = useState('all');
@@ -137,26 +85,6 @@ function RatingPage() {
                 : [...prevActiveButtons, buttonId]
         );
     };
-
-    const {definePartsStyle, defineMultiStyleConfig} =
-        createMultiStyleConfigHelpers(selectAnatomy.keys)
-
-    const brandPrimary = definePartsStyle({
-        field: {
-            border: "1px dashed",
-            borderColor: "purple.200",
-            borderRadius: "full",
-            textColor: "black.100"
-        },
-        icon: {
-            color: "purple.400"
-        }
-    })
-
-    const selectTheme = defineMultiStyleConfig({
-        variants: {brandPrimary},
-    })
-
 
     const openArtistModal = (artistName: string) => {
         setCurrentModal({type: 'artist', data: artistName});
@@ -195,22 +123,44 @@ function RatingPage() {
         };
 
         const handleSendRate = async () => {
-            const apiUrl = "http://51.20.128.164/api/add_user_performer_ratings"
+            const apiUrl = "http://51.20.128.164/api/add_user_performer_ratings";
+
+            // Check if auth() returns a non-null value and has a username
+            const user = auth();
+            if (!user || typeof user.username !== 'string') {
+                console.error("Authentication error: User is not logged in or username is not available.");
+                return; // Or handle this case appropriately
+            }
+
+            // Check if artist_name is valid
+            if (!artist_name) {
+                console.error("Error: Artist name is not provided.");
+                return; // Or handle this case appropriately
+            }
+
+            // Check if artistRatings has a valid rating for the artist
+            const rating = artistRatings[artist_name];
+            if (rating === undefined || rating === null) {
+                console.error(`Error: No rating found for ${artist_name}.`);
+                return; // Or handle this case appropriately
+            }
+
             try {
                 await axios.post(apiUrl, {
-                    username: `${auth()?.username}`,
+                    username: user.username,
                     performer_name: artist_name,
-                    rating: artistRatings[artist_name]
+                    rating: rating
                 });
                 toast({
-                    title: `${artist_name} was rated ${artistRatings[artist_name]}!`,
+                    title: `${artist_name} was rated ${rating}!`,
                     status: "success",
                 });
                 closeModal();
             } catch (error) {
                 console.error("Error in sending rating:", error);
             }
-        }
+        };
+
         return (
             <Box className="rounded-xl bg-gray-100">
                 <VStack>
@@ -258,22 +208,44 @@ function RatingPage() {
         };
 
         const handleSendRate = async () => {
-            const apiUrl = "http://51.20.128.164/api/add_user_album_ratings" // Update the API URL
+            const apiUrl = "http://51.20.128.164/api/add_user_album_ratings";
+
+            // Check if auth() returns a non-null value and has a username
+            const user = auth();
+            if (!user || typeof user.username !== 'string') {
+                console.error("Authentication error: User is not logged in or username is not available.");
+                return; // Or handle this case appropriately
+            }
+
+            // Check if album_name is valid
+            if (!album_name) {
+                console.error("Error: Album name is not provided.");
+                return; // Or handle this case appropriately
+            }
+
+            // Check if albumRatings has a valid rating for the album
+            const rating = albumRatings[album_name];
+            if (rating === undefined || rating === null) {
+                console.error(`Error: No rating found for ${album_name}.`);
+                return; // Or handle this case appropriately
+            }
+
             try {
                 await axios.post(apiUrl, {
-                    username: `${auth()?.username}`,
+                    username: user.username,
                     album_name: album_name,
-                    rating: albumRatings[album_name]
+                    rating: rating
                 });
                 toast({
-                    title: `${album_name} was rated ${albumRatings[album_name]}!`,
+                    title: `${album_name} was rated ${rating}!`,
                     status: "success",
                 });
                 closeModal();
             } catch (error) {
                 console.error("Error in sending rating:", error);
             }
-        }
+        };
+
 
         return (
             <Box className="rounded-xl bg-gray-100">
@@ -460,11 +432,11 @@ function RatingPage() {
                     <div className="flex space-x-4">
                         <div className="py-5"></div>
                         {rateType === 'Added Songs' ? (
-                            displayedSongs.map((song, index) => (
+                            displayedSongs.map((song) => (
                                 <RateDisplaySong key={song.song_name} song={song}/>
                             ))
                         ) : (
-                            displayedSongs.map((song, index) => (
+                            displayedSongs.map((song) => (
                                 <RateDisplayRecomSong key={song.song_id} song={song}/>
                             ))
                         )}

@@ -3,7 +3,6 @@ import Plot from 'react-plotly.js';
 import { VStack, Flex, Select } from '@chakra-ui/react';
 import { useAuthUser } from 'react-auth-kit';
 import axios from 'axios';
-import ThreeDPlot from "./3DPlot.tsx";
 import { format } from 'date-fns'; // or use moment.js or similar
 
 interface groupProps {

@@ -1,7 +1,7 @@
 import React, { useState} from 'react';
 import { Formik, Form, Field, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import {Card, CardBody, Heading, Text, CardFooter, Button, HStack} from '@chakra-ui/react';
+import {Card, CardBody, Text, CardFooter, Button, HStack} from '@chakra-ui/react';
 import axios, { AxiosError } from "axios";
 import { RiUserFollowFill } from "react-icons/ri";
 import {Avatar} from "flowbite-react";
@@ -96,8 +96,10 @@ const UsernameSubmit: React.FC = () => {
             setFollowed(followedUsers.includes(user));
 
         } catch (err) {
-            if (err && err instanceof AxiosError)
+            if (err && err instanceof AxiosError) {
                 setError(err.response?.data.message || "An error occurred");
+                console.log("Error: ", error);
+            }
             else if (err instanceof Error) setError(err.message);
             console.log("Error: ", err);
         }

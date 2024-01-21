@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {Tabs, TabList, TabPanels, Tab, TabPanel, Thead, Th, Td, Flex, Spacer} from '@chakra-ui/react'
-import {GoThumbsup} from "react-icons/go";
-import {MdOutlineDataset} from "react-icons/md";
 import { useAuthUser } from "react-auth-kit";
 import { Button } from "@chakra-ui/react";
 import { TbMusicX } from "react-icons/tb";
@@ -20,7 +18,6 @@ import { IoIosRemoveCircle } from "react-icons/io";
 import Ratings from "react-star-ratings";
 import { IoIosRefreshCircle } from "react-icons/io";
 import {useNavigate} from "react-router-dom";
-import { Skeleton, SkeletonCircle, SkeletonText } from '@chakra-ui/react'
 
 interface SongsArray {
     song_id: string;
@@ -131,7 +128,7 @@ const SongsComponent:React.FC = () => {
           <Td>{song.release_year}</Td>
           <Td><Timestamp date={song.added_timestamp} /></Td>
           <Td>
-            <Button onClick={() => deleteSong(song.song_id)} colorScheme="red">
+            <Button onClick={() => deleteSong(song.song_id)} colorScheme="red" data-testid={`delete-rating-${song.song_id}`}>
               <TbMusicX size={15}/> Delete Song
             </Button>
           </Td>
@@ -282,7 +279,7 @@ const SongsComponent:React.FC = () => {
                                           </Tr>
                                       </Thead>
                                       <Tbody>
-                                          {Rated.map(rated => <RateDisplay key={rated.song_id} rated={rated}/>)}
+                                          {Rated.map(rated => <RateDisplay key={rated.song_id} rated={rated} data-testid={`rating-${rated.song_id}`}/>)}
                                       </Tbody>
                                   </Table>
                               </TableContainer>

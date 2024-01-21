@@ -1,11 +1,9 @@
 import React, {useState} from 'react';
-import {Card, CardBody, Button, Text, CardFooter, HStack, Box, useToast} from '@chakra-ui/react';
+import {Card, CardBody, Button, Text, CardFooter, HStack, useToast} from '@chakra-ui/react';
 import { useNavigate } from "react-router-dom";
 import { FaDatabase } from "react-icons/fa";
 import axios, {AxiosError} from "axios";
 import {useAuthUser} from "react-auth-kit";
-import {StarIcon} from "@chakra-ui/icons";
-import {AiTwotoneLike} from "react-icons/ai";
 import {Avatar} from "flowbite-react";
 
 interface Song {
@@ -80,9 +78,11 @@ const SongSearch: React.FC<SongSearchProps> = ({songInfo }) => {
             });
         } catch (err) {
             if (err && err instanceof AxiosError)
+            {
                 setError(err.response?.data.message);
+                console.log("Error: ", error)
+            }
             else if (err && err instanceof Error) setError(err.message);
-
             console.log("Error: ", err);
         }
     }

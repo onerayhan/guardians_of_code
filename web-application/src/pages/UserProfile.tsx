@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {
     Box,
-    Button, Flex, Spacer,
+    Button, Flex,
     Stack,
     Tab, Table,
     TableContainer,
@@ -15,18 +15,12 @@ import {
     Td, Th, Thead,
     Tr, useToast,
 } from "@chakra-ui/react";
-import {AiOutlineUsergroupDelete} from "react-icons/ai";
 import {FaUserGroup} from "react-icons/fa6";
 import Header from "../components/Header";
 import {useAuthUser} from "react-auth-kit";
 import Timestamp from "react-timestamp";
-import {GoThumbsup} from "react-icons/go";
-import {MdOutlineDataset} from "react-icons/md";
 import {RiUserFollowFill} from "react-icons/ri";
 import {FaDatabase, FaStar} from "react-icons/fa";
-import {IoIosRefreshCircle, IoIosRemoveCircle} from "react-icons/io";
-import {TbMusicX} from "react-icons/tb";
-import Ratings from "react-star-ratings";
 
 interface SongsArray {
     song_id: string;
@@ -72,7 +66,6 @@ const UserProfile = () => {
     const [following, setFollowing] = useState<string[]>([]);
     const [Posted, setPosted] = useState<SongsArray[]>([]);
     const [Rated, setRated] = useState<RatedArray[]>([]);
-    const [tabIndex, setTabIndex] = useState(0);
     const [groups, setGroups] = useState<groupProps[]>([]);
     const navigate = useNavigate();
     const toast = useToast();
@@ -298,6 +291,14 @@ const UserProfile = () => {
 
     const UserList: React.FC = () => {
 
+        const GroupsDisplay = ({ groupName }: { groupName: string }) => {
+
+            return (
+                <Box p={4} display="flex" alignItems="center" justifyContent="space-between" bg="gray.100" borderRadius="md">
+                    <Button>{groupName}</Button>
+                </Box>
+            );
+        }
         const UserDisplay = ({ user }: { user: string }) => {
             const navigate = useNavigate();
             const [profPhoto, setProfPhoto] = useState<string | undefined>(undefined);
@@ -369,16 +370,6 @@ const UserProfile = () => {
             );
         };
 
-        const GroupsDisplay = ({ group }: { group: string }) => {
-
-            return(
-                <Box p={4} display="flex" alignItems="center" justifyContent="space-between" bg="gray.100" borderRadius="md">
-                    <span>{group}</span>
-                    <Button colorScheme="red" onClick={() => navigate(`/group/${group}`)}><AiOutlineUsergroupDelete />Leave Group</Button>
-                </Box>
-            );
-        }
-
         return (
             <>
                 <Button onClick={() => setShowFollowersModal(true)}>
@@ -434,7 +425,7 @@ const UserProfile = () => {
                     <Modal.Body>
                         <Stack spacing={4}>
                             {groups.map(groups => (
-                                <GroupsDisplay key={groups} group={groups} />
+                                <GroupsDisplay key={groups.groupID} groupName={groups.groupName} />
                             ))}
                         </Stack>
                     </Modal.Body>
@@ -461,7 +452,7 @@ const UserProfile = () => {
         <div className="pl-[150px] pr-[150px] pb-5 overflow-y-auto w-auto">
             <div className="relative flex flex-col items-center bg-[#F3F0F7] rounded-xl mx-20 p-8 overflow-x-auto">
                 <Flex justifyContent="space-between" alignItems="flex-start" w="full">
-                    <Tabs variant='soft-rounded' colorScheme='blue' onChange={(index) => setTabIndex(index)}>
+                    <Tabs variant='soft-rounded' colorScheme='blue'>
                         <Flex alignItems="center" mb={4}>
                             <TabList>
                                 <Tab><FaStar size={20}/>Rated Songs</Tab>

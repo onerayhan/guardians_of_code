@@ -10,7 +10,6 @@ import { useSignOut } from 'react-auth-kit';
 import { useState } from 'react';
 import { Avatar } from 'flowbite-react';
 import axios from "axios";
-import { FaShare } from "react-icons/fa6";
 
 const Header: React.FC = () => {
   const buttonStyle = 
@@ -127,13 +126,6 @@ const Header: React.FC = () => {
     const username = auth()?.username;
     if (username) {
       navigate(`/${username}/settings`);
-    }
-  };
-
-  const navigateToShare = () => {
-    const username = auth()?.username;
-    if (username) {
-      navigate(`/${username}/share`);
     }
   };
 

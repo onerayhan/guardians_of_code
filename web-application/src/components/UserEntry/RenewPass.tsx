@@ -1,4 +1,4 @@
-import React, { useEffect, ChangeEvent } from "react";
+import React, { useEffect } from "react";
 import { useUserEntry } from "../../contexts/UserEntryContext";
 import { Formik, Form, Field, useField, FormikHelpers } from "formik";
 import * as Yup from 'yup';
@@ -103,7 +103,7 @@ const RenewPass = () => {
     } catch(err) {
         if (err && err instanceof AxiosError)
             setError(err.response?.data.message);
-        else if (err && err instanceof Error) setError(err.message);
+        else if (err && err instanceof Error) {setError(err.message); console.log("Error: ", error)}
 
         console.log("Error: ", err);
     }}
@@ -130,7 +130,7 @@ const RenewPass = () => {
           ) => {
             setTimeout(() => {
               alert(JSON.stringify(values, null, 2));
-              //onSubmitRequest(values);
+              onSubmitRequest(values);
               setSubmitting(false);
             }, 500);
           }}

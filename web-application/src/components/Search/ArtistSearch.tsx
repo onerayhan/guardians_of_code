@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import {Card, CardBody, Button, Text, CardFooter, HStack, Box, useToast, Icon, VStack} from '@chakra-ui/react';
+import {Card, CardBody, Button, Text, CardFooter, HStack, useToast, Icon, VStack} from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import {Avatar} from "flowbite-react";
-import {RiUserFollowFill} from "react-icons/ri";
 import {FaStar} from "react-icons/fa";
 import Ratings from "react-star-ratings";
 import {useAuthUser} from "react-auth-kit";

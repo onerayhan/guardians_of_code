@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     Button,
@@ -6,20 +6,15 @@ import {
     CardBody,
     CardFooter,
     HStack,
-    Icon,
     Skeleton, SkeletonCircle,
     TableContainer,
-    Text,
     VStack
 } from '@chakra-ui/react';
 import { useAuthUser } from 'react-auth-kit';
 import AlbumSearch from './AlbumSearch';
 import ArtistSearch from './ArtistSearch';
 import SongSearch from './SongSearch';
-import {FaSearch, FaStar} from "react-icons/fa";
-import {useSpotify} from "../../contexts/SpotifyContext.tsx";
-import {Avatar} from "flowbite-react";
-import Ratings from "react-star-ratings";
+import {FaSearch} from "react-icons/fa";
 
 interface Song {
     song_photo: string | undefined;

@@ -1,11 +1,8 @@
-import RecommendationsTable from './RecommendationsTable';
-import FriendRecomsTable from './FriendRecomsTable';
 import {
     Box,
     Button,
     Flex,
     Heading, HStack,
-    Radio,
     RadioGroup, Select, Spacer,
     Stack,
     Tab, Table, TableContainer,
@@ -17,17 +14,12 @@ import {
 import React, {useEffect, useState} from "react";
 import axios, {AxiosError} from "axios";
 import {useAuthUser} from "react-auth-kit";
-import {FaDatabase, FaSpotify, FaStar} from "react-icons/fa";
-import {IoIosRefreshCircle} from "react-icons/io";
+import {FaDatabase, FaSpotify} from "react-icons/fa";
 import {Avatar} from "flowbite-react";
 import {useNavigate} from "react-router-dom";
 import { BsGraphUpArrow } from "react-icons/bs";
-import {TbMusicX, TbPlayerTrackNextFilled} from "react-icons/tb";
-import { FaRegThumbsUp } from "react-icons/fa";
+import { TbPlayerTrackNextFilled} from "react-icons/tb";
 import { FaUserFriends } from "react-icons/fa";
-import { selectAnatomy } from '@chakra-ui/anatomy'
-import { createMultiStyleConfigHelpers, defineStyle } from '@chakra-ui/react'
-import Timestamp from "react-timestamp";
 
 interface Song {
     song_photo: string | undefined;
@@ -43,11 +35,6 @@ interface Song {
     release_year: number | null;
 }
 
-interface SongRatings {
-    song: string;
-    song_rating: number;
-}
-
 interface SongRecom {
     album: string;
     genre: string;
@@ -57,26 +44,9 @@ interface SongRecom {
     username: string;
 }
 
-interface genrePref {
-    genre: string;
-    count: string;
-}
-
-interface artistPref {
-    performer: string;
-    count: string;
-}
-
-interface albumPref {
-    album: string;
-    count: string;
-}
-
 function RecommendationsPage() {
     const [spoti_auth, setSpotiAuth] = useState(false);
     const [rateType, setRateType] = React.useState('Armonify');
-    const [tabIndex1, setTabIndex1] = useState(0);
-    const [tabIndex, setTabIndex] = useState(0);
     const [RecomSongsSpoti, setRecomSongsSpoti] = useState<Song[]>([]);
     const [AddSongsSpoti, setAddSongsSpoti] = useState<Song[]>([]);
     const [RecomSongs, setRecomSongs] = useState<SongRecom[]>([]);
@@ -85,12 +55,10 @@ function RecommendationsPage() {
     const [selection, setSelection] = useState('all');
     const [fetching_results, setFetchingResults] = useState(false);
 
-    const [top_album, setTopAlbum] = useState("");
     const [top_genre, setTopGenre] = useState("");
     const [top_artist, setTopArtist] = useState("");
     const [top_song, setTopSong] = useState("");
 
-    const [SpotiSongsAlbum, setSpotiSongsAlbum] = useState<Song[]>([]);
     const [SpotiSongsGenre, setSpotiSongsGenre] = useState<Song[]>([]);
     const [SpotiSongsArtist, setSpotiSongsArtist] = useState<Song[]>([]);
     const [SpotiSongsSong, setSpotiSongsSong] = useState<Song[]>([]);
@@ -99,6 +67,18 @@ function RecommendationsPage() {
 
     const [activeSpotiRecoms, setActiveSpotiRecoms] = useState<Song[]>([]);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        console.log("Top genreasd: " + top_genre)
+    }, [top_genre]);
+
+    useEffect(() => {
+        console.log("Top artistasd: " + top_artist)
+    }, [top_artist]);
+
+    useEffect(() => {
+        console.log("Top songasd: " + top_song)
+    }, [top_song]);
 
     useEffect(() => {
         switch (spotiRecomType)
@@ -111,9 +91,6 @@ function RecommendationsPage() {
                 break;
             case "Song-based":
                 setActiveSpotiRecoms(SpotiSongsSong);
-                break;
-            case "Album-based":
-                setActiveSpotiRecoms(SpotiSongsAlbum);
                 break;
         }
     }, [spotiRecomType]);
@@ -129,7 +106,6 @@ function RecommendationsPage() {
 
                 if (genreCounts.length > 0) {
                     genreCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
-                    console.log("Top Genre: " + genreCounts[0].genre);
                     setTopGenre(genreCounts[0].genre);
                 } else {
                     console.log("No genres found");
@@ -148,7 +124,6 @@ function RecommendationsPage() {
 
                 if (artistCounts.length > 0) {
                     artistCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
-                    console.log("Top Artist: " + artistCounts[0].performer);
                     setTopArtist(artistCounts[0].performer);
                 } else {
                     console.log("No artists found");
@@ -167,7 +142,6 @@ function RecommendationsPage() {
 
                 if (songs.length > 0) {
                     songs.sort((a, b) => parseFloat(b.song_rating) - parseFloat(a.song_rating));
-                    console.log("Top Song: " + songs[0].song);
                     setTopSong(songs[0].song);
                 } else {
                     console.log("No songs found");
@@ -177,77 +151,91 @@ function RecommendationsPage() {
             }
         };
 
-
-        const fetch_spotify_recommendations = async () => {
-
-            const set_spoti_recoms_genre = async () => {
-                const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
-
-                try {
-                    const top_genre_lower: string = top_genre.toLowerCase();
-                    console.log("TOP GENRE: " + top_genre_lower);
-                    const recomResponse = await axios.post(recomURL, {seed_genres: [top_genre_lower]});
-                    const recomData = recomResponse.data;
-                    console.log("RECOM DATA GENRE: " + JSON.stringify(recomData, null, 2));
-                    await processSongsSpoti(recomData).then(songs => setSpotiSongsGenre(songs));
-                }
-                catch (error) {
-                    console.log(error);
-                }
-            }
-
-            const set_spoti_recoms_artist = async () => {
-                const apiURL = `http://51.20.128.164/spoti/search/${auth()?.username}`
-                const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
-
-                try {
-                    const response = await axios.post(apiURL, {type: "artist", query: top_artist});
-                    const data = response.data.artists.items[0].id;
-                    console.log("RECOM DATA ID ARTIST: " + data);
-                    const recomResponse = await axios.post(recomURL, {seed_artists: [data]});
-                    const recomData = recomResponse.data;
-                    console.log("RECOM DATA ARTIST:", JSON.stringify(recomData, null, 2));
-
-                    await processSongsSpoti(recomData).then(songs => setSpotiSongsArtist(songs));
-                }
-                catch (error) {
-                    console.log(error);
-                }
-            }
-
-            const set_spoti_recoms_song = async () => {
-                const apiURL = `http://51.20.128.164/spoti/search/${auth()?.username}`
-                const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
-
-                try {
-                    const response = await axios.post(apiURL, {type: "track", query: top_song});
-                    const data = response.data.tracks.items[0].id;
-                    console.log("RECOM DATA ID SONG: " + data);
-                    const recomResponse = await axios.post(recomURL, {seed_tracks: [data]});
-                    const recomData = recomResponse.data;
-                    console.log("RECOM DATA SONG:", JSON.stringify(recomData, null, 2));
-
-                    await processSongsSpoti(recomData).then(songs => setSpotiSongsSong(songs));
-                }
-                catch (error) {
-                    console.log(error);
-                }
-            }
-
-            set_spoti_recoms_artist();
-            set_spoti_recoms_song();
-            set_spoti_recoms_genre();
-        }
-
         const retrieve_params = async () => {
-            await get_top_artists();
-            await get_top_songs();
-            await get_top_genres();
-            await fetch_spotify_recommendations();
+            try {
+                await Promise.all([
+                    get_top_artists(),
+                    get_top_songs(),
+                    get_top_genres()
+                ]);
+            } catch (error) {
+                console.log("Error in retrieving parameters:", error);
+            }
         }
 
         retrieve_params();
+
     }, []);
+
+    const set_spoti_recoms_genre = async () => {
+        const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
+
+        try {
+            const recomResponse = await axios.post(recomURL, {seed_genres: [top_genre.toLowerCase()]});
+            const recomData = recomResponse.data;
+            console.log("RECOM DATA GENRE: " + JSON.stringify(recomData, null, 2));
+            await processSongsSpoti(recomData).then(songs => setSpotiSongsGenre(songs));
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    const set_spoti_recoms_artist = async () => {
+        const apiURL = `http://51.20.128.164/spoti/search/${auth()?.username}`
+        const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
+
+        try {
+            const response = await axios.post(apiURL, {type: ["artist"], query: top_artist});
+            const data = response.data.artists.items[0].id;
+            console.log("RECOM DATA ID ARTIST: " + data);
+            const recomResponse = await axios.post(recomURL, {seed_artists: [data]});
+            const recomData = recomResponse.data;
+            console.log("RECOM DATA ARTIST:", JSON.stringify(recomData, null, 2));
+
+            await processSongsSpoti(recomData).then(songs => setSpotiSongsArtist(songs));
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    const set_spoti_recoms_song = async () => {
+        const apiURL = `http://51.20.128.164/spoti/search/${auth()?.username}`
+        const recomURL = `http://51.20.128.164/spoti/get_recommendations/${auth()?.username}`
+
+        try {
+            const response = await axios.post(apiURL, {type: ["track"], query: top_song});
+            const data = response.data.tracks.items[0].id;
+            console.log("RECOM DATA ID SONG: " + data);
+            const recomResponse = await axios.post(recomURL, {seed_tracks: [data]});
+            const recomData = recomResponse.data;
+            console.log("RECOM DATA SONG:", JSON.stringify(recomData, null, 2));
+
+            await processSongsSpoti(recomData).then(songs => setSpotiSongsSong(songs));
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    const fetch_spotify_recommendations = async () => {
+        try {
+            await Promise.all([
+                set_spoti_recoms_artist(),
+                set_spoti_recoms_song(),
+                set_spoti_recoms_genre()
+            ]);
+        } catch (error) {
+            console.log("Error in fetching Spotify recommendations:", error);
+        }
+    }
+
+    useEffect(() => {
+        if (top_genre && top_artist && top_song) {
+            fetch_spotify_recommendations();
+        }
+    }, [top_genre, top_artist, top_song]); // Dependencies array
 
     function RadioCard(props) {
         const { getInputProps, getRadioProps } = useRadio(props);
@@ -558,8 +546,7 @@ function RecommendationsPage() {
 
     async function get_genre_of_song(song_name : string) {
         try {
-            let type = "artist";
-            const response = await axios.post(`http://51.20.128.164/spoti/search/${auth()?.username}`, { type, query: song_name });
+            const response = await axios.post(`http://51.20.128.164/spoti/search/${auth()?.username}`, { type: ["artist"], query: song_name });
             return response.data.artists.items[0].genres[0];
         } catch (error) {
             console.error('Error fetching search results:', error);
@@ -606,9 +593,11 @@ function RecommendationsPage() {
             });
         } catch (err) {
             if (err && err instanceof AxiosError)
+            {
                 setError(err.response?.data.message);
+                console.log("Error: ", error);
+            }
             else if (err && err instanceof Error) setError(err.message);
-
             console.log("Error: ", err);
         }
     }
@@ -626,10 +615,10 @@ function RecommendationsPage() {
 
             <div className="py-5"></div>
           <div className="relative w-full flex flex-col items-center">
-              <Heading as="h1" size="xl" color="white" align="center">
+              <Heading as="h1" size="xl" color="white" style={{ textAlign: 'center' }}>
                   Select where you want to get your recommendations from.
               </Heading>
-              <Heading as="h1" size="md" color="white" align="center">
+              <Heading as="h1" size="md" color="white" style={{ textAlign: 'center' }}>
                   You can get recommendations from Spotify to add them to your Armonify library and rate them.
               </Heading>
                 <div className="py-5"></div>
@@ -731,8 +720,7 @@ function RecommendationsPage() {
                           <div
                               className="relative flex flex-col max-w-7xl items-center bg-[#F3F0F7] rounded-xl mx-20 p-8 overflow-x-auto">
                               <Flex justifyContent="space-between" alignItems="flex-start" w="full">
-                                  <Tabs variant='soft-rounded' colorScheme='blue'
-                                        onChange={(index) => setTabIndex1(index)}>
+                                  <Tabs variant='soft-rounded' colorScheme='blue'>
                                       <Flex alignItems="center" mb={4}>
                                           <TabList>
                                               <Tab><BsGraphUpArrow size={20}/>Your Top Spotify Songs</Tab>

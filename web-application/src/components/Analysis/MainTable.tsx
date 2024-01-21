@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {
     Table,
     TableContainer,
@@ -64,7 +64,6 @@ const MainTable = () => {
 
     const [decade, setDecade] = useState("60s");
     const [rateType, setRateType] = useState('');
-    const [time, setTime] = useState('');
 
     const auth = useAuthUser();
 
@@ -80,7 +79,7 @@ const MainTable = () => {
     }
 
     // filter songs by decade
-    const filterSongsByDecade = (songs: RatedSongArray[]) => {
+    const filterSongsByDecade = (songs: any[]) => {
         if (decade === '') return songs;
         return songs.filter(song => calculateEra(song) === decade);
     }
@@ -102,7 +101,7 @@ const MainTable = () => {
             album: songDetails[song].album,
             artist: songDetails[song].artist,
             release_year: songDetails[song].release_year,
-            averageRating: songDetails[song].totalRating / songDetails[song].count
+            averageRating: songDetails[song].totalRating / songDetails[song].count,
         }));
     };
 
@@ -269,14 +268,7 @@ const MainTable = () => {
                 case 'album': type = 'Album'; break;
                 default: type = ''; break;
             }
-            let timeSpan = '';
-            switch (time) {
-                case '1m': timeSpan = 'Last 1 Month'; break;
-                case '6m': timeSpan = 'Last 6 Months'; break;
-                case '1y': timeSpan = 'Last 1 Year'; break;
-                default: timeSpan = ''; break;
-            }
-            return `Best Avg. ${type} Ratings ${timeSpan}`;
+            return `Best Avg. ${type} Ratings`;
         } else if (mainSelection === 'genre-prefs') {
             return `Genre Preferences`;
         }
@@ -421,10 +413,6 @@ const MainTable = () => {
 
     const handleTypeChange = (e) => {
         setRateType(e.target.value);
-    };
-
-    const handleTimeChange = (e) => {
-        setTime(e.target.value);
     };
 
     return (

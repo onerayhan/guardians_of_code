@@ -1,15 +1,13 @@
 import Header from "../components/Header";
 import SongFileUpload from "../components/AddSongs/SongFileUpload";
-import {FaFileAudio, FaSpotify} from "react-icons/fa";
+import {FaFileAudio} from "react-icons/fa";
 import {Field, Form, Formik, FormikHelpers} from "formik";
 import { useToast } from '@chakra-ui/react'
-import { useNavigate } from 'react-router-dom';
 import { useAuthUser } from 'react-auth-kit';
 import axios, {AxiosError} from 'axios';
 import { VStack } from '@chakra-ui/react'
 import { Button } from '@chakra-ui/react'
-import {useEffect, useState} from "react";
-import TweetButton from "../APIClasses/TweetButton";
+import {useState} from "react";
 import * as Yup from "yup";
 
 interface Song {
@@ -28,18 +26,6 @@ interface Song {
     instrument: string;
 }
 
-const getCurrentTimestamp = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
-
 const validationSchema = Yup.object({
     song_name: Yup.string().required('This field is required.'),
     release_year: Yup.number()
@@ -53,17 +39,13 @@ const validationSchema = Yup.object({
 const AddSongs = () => {
 
     const [error, setError] = useState("");
-    const navigate = useNavigate();
     const toast = useToast();
-    const [spoti_auth, setSpotiAuth] = useState(false);
     const [isModalOpen, setModalOpen] = useState(false);
     const recordingTypes = ['LIVE', 'STUDIO', 'RADIO'];
     const handleOpenModal = () => setModalOpen(true);
     const handleCloseModal = () => setModalOpen(false);
     const auth = useAuthUser();
-    const handleSpotifyIntegration = () => {
-        navigate(`/${auth()?.username}/settings`);
-    };
+
     const onSubmitRequest = async (song: any) => {
         console.log("Song: ", song);
         setError("");
@@ -94,20 +76,6 @@ const AddSongs = () => {
             console.log("Error: ", err);
         }}
 
-    useEffect(() => {
-        const fetch_spoti_status = async () => {
-            const apiUrl = `http://51.20.128.164/api/check_spoti_connection/${auth()?.username}`;
-            try {
-                const response = await axios.get(apiUrl);
-                const data = response.data.check;
-                setSpotiAuth(data);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-
-        fetch_spoti_status();
-    }, []);
     return (
         <body className="bg-[#081730]">
         <Header/>
