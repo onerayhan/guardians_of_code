@@ -129,7 +129,7 @@ function RecommendationsPage() {
 
                 if (genreCounts.length > 0) {
                     genreCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
-                    console.log("Top genre:", genreCounts[0].genre);
+                    console.log("Top Genre: " + genreCounts[0].genre);
                     setTopGenre(genreCounts[0].genre);
                 } else {
                     console.log("No genres found");
@@ -148,32 +148,13 @@ function RecommendationsPage() {
 
                 if (artistCounts.length > 0) {
                     artistCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
-                    console.log("Top artist: " + artistCounts[0].performer);
+                    console.log("Top Artist: " + artistCounts[0].performer);
                     setTopArtist(artistCounts[0].performer);
                 } else {
                     console.log("No artists found");
                 }
             } catch (error) {
                 console.log("Error fetching top artists:", error);
-            }
-        };
-
-        const get_top_albums = async () => {
-            console.log("Fetching top albums");
-            const apiUrl = `http://51.20.128.164/api/user_album_preference/${auth()?.username}`;
-            try {
-                const response = await axios.get(apiUrl);
-                const albumCounts = response.data.albums || [];
-
-                if (albumCounts.length > 0) {
-                    albumCounts.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
-                    console.log("Top album: " + albumCounts[0].album);
-                    setTopAlbum(albumCounts[0].album);
-                } else {
-                    console.log("No albums found");
-                }
-            } catch (error) {
-                console.log("Error fetching top albums:", error);
             }
         };
 
@@ -186,7 +167,7 @@ function RecommendationsPage() {
 
                 if (songs.length > 0) {
                     songs.sort((a, b) => parseFloat(b.song_rating) - parseFloat(a.song_rating));
-                    console.log("Top song: " + songs[0].song);
+                    console.log("Top Song: " + songs[0].song);
                     setTopSong(songs[0].song);
                 } else {
                     console.log("No songs found");
@@ -204,9 +185,10 @@ function RecommendationsPage() {
 
                 try {
                     const top_genre_lower: string = top_genre.toLowerCase();
+                    console.log("TOP GENRE: " + top_genre_lower);
                     const recomResponse = await axios.post(recomURL, {seed_genres: [top_genre_lower]});
                     const recomData = recomResponse.data;
-                    console.log("RECOM DATA GENRE: " + recomData)
+                    console.log("RECOM DATA GENRE: " + JSON.stringify(recomData, null, 2));
                     await processSongsSpoti(recomData).then(songs => setSpotiSongsGenre(songs));
                 }
                 catch (error) {
@@ -252,16 +234,19 @@ function RecommendationsPage() {
                 }
             }
 
-            await set_spoti_recoms_genre();
-            await set_spoti_recoms_artist();
-            await set_spoti_recoms_song();
+            set_spoti_recoms_artist();
+            set_spoti_recoms_song();
+            set_spoti_recoms_genre();
         }
 
-        get_top_artists();
-        get_top_songs();
-        get_top_genres();
+        const retrieve_params = async () => {
+            await get_top_artists();
+            await get_top_songs();
+            await get_top_genres();
+            await fetch_spotify_recommendations();
+        }
 
-        fetch_spotify_recommendations();
+        retrieve_params();
     }, []);
 
     function RadioCard(props) {

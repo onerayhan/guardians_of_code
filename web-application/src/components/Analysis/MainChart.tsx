@@ -50,6 +50,21 @@ interface artistRatingGroup {
     username: string;
 }
 
+interface genrePref {
+    genre: string;
+    count: number;
+}
+
+interface albumPref {
+    album: string;
+    count: number;
+}
+
+interface artistPref {
+    performer: string;
+    count: number;
+}
+
 interface ProcessedData {
     [key: string]: {
         x: string[];
@@ -70,7 +85,17 @@ const MainChart: React.FC = () => {
     const [artistDataGroup, setArtistDataGroup] = useState<artistRatingGroup[]>([]);
     const [groups, setGroups] = useState<groupProps[]>([]);
     const [selectedGroup, setSelectedGroup] = useState<number>(0);
+
+    const [genrePref, setGenrePref] = useState<genrePref[]>([]);
+    const [albumPref, setAlbumPref] = useState<albumPref[]>([]);
+    const [artistPref, setArtistPref] = useState<artistPref[]>([]);
+
     const auth = useAuthUser();
+
+    const generateColor = (index, total) => {
+        const hue = (index * 360) / total;
+        return `hsl(${hue}, 100%, 50%)`;
+    };
 
     const handleChartChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedChart(e.target.value);
@@ -94,6 +119,65 @@ const MainChart: React.FC = () => {
 
     useEffect(() => {
         console.log("Selected Group:", selectedGroup);
+    }, [selectedGroup]);
+
+    useEffect(() => {
+        const fetchGenrePrefs = async () => {
+            const apiUrl = `http://51.20.128.164/api/group_genre_preference/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const property = "genres";
+
+                if (response.data[property] === undefined) {
+                    setGenrePref([]);
+                    return;
+                }
+
+                const filteredGenrePref = response.data[property].filter((genre) => genre.genre !== null);
+                setGenrePref(filteredGenrePref);
+
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        const fetchAlbumPrefs = async () => {
+            const apiUrl = `http://51.20.128.164/api/group_album_preference/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const property = "albums";
+
+                if (response.data[property] === undefined) {
+                    setAlbumPref([]);
+                    return;
+                }
+
+                setAlbumPref(response.data[property]);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        const fetchPerformerPrefs = async () => {
+            const apiUrl = `http://51.20.128.164/api/group_performer_preference/${auth()?.username}`;
+            try {
+                const response = await axios.get(apiUrl);
+                const property = "performers";
+
+                if (response.data[property] === undefined) {
+                    setArtistPref([]);
+                    return;
+                }
+
+                setArtistPref(response.data[property]);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchGenrePrefs();
+        fetchAlbumPrefs();
+        fetchPerformerPrefs();
     }, [selectedGroup]);
 
     useEffect(() => {
@@ -552,12 +636,24 @@ const MainChart: React.FC = () => {
                     <Select onChange={handleChartChange} width="auto" mr={2} className="text-[#35517e]">
                         <option value="default">Select Category</option>
                         <option value="temporal" className="text-[#35517e]">Temporal Analysis</option>
-                        <option value="group" className="text-[#35517e]">Friend Group Analysis</option>
+                        <option value="group" className="text-[#35517e]">Temporal Group Analysis</option>
+                        <option value="pgroup" className="text-[#35517e]">Pie Chart Group Analysis</option>
                         {/* Add other options as necessary */}
                     </Select>
 
                     {
                         selectedChart === 'group' && (
+                            <Select onChange={handleGroupChange} width="auto" mr={2} className="text-[#35517e]">
+                                <option value="">Select Group</option>
+                                {groups.map(group => (
+                                    <option key={group.groupID} value={group.groupID}>{group.groupName}</option>
+                                ))}
+                            </Select>
+                        )
+                    }
+
+                    {
+                        selectedChart === 'pgroup' && (
                             <Select onChange={handleGroupChange} width="auto" mr={2} className="text-[#35517e]">
                                 <option value="">Select Group</option>
                                 {groups.map(group => (
@@ -573,6 +669,15 @@ const MainChart: React.FC = () => {
                             <option value="albumsg" className="text-black">Group Albums</option>
                             <option value="performersg" className="text-black">Group Performers</option>
                             <option value="songsg" className="text-black">Group Songs</option>
+                        </Select>
+                    )}
+
+                    {selectedGroup && selectedChart === 'pgroup' && (
+                        <Select onChange={handleSubOptionChange} width="auto" mr={2} className="text-[#35517e]">
+                            <option value="">Select Sub-Category</option>
+                            <option value="albumsg2" className="text-black">Album Pref. Dist.</option>
+                            <option value="performersg2" className="text-black">Performer Pref. Dist.</option>
+                            <option value="genresg2" className="text-black">Genre Pref. Dist.</option>
                         </Select>
                     )}
 
@@ -652,7 +757,7 @@ const MainChart: React.FC = () => {
                                 data={processedDataGroup0}
                                 layout={{
                                     width: 800,
-                                    height: 400,
+                                    height: 600,
                                     margin: {
                                         l: 0,
                                         r: 0,
@@ -692,7 +797,7 @@ const MainChart: React.FC = () => {
                                     },
                                     legend: {
                                         title: 'Usernames',
-                                        x: 1.05, // Position the legend to the right of the plot
+                                        x: 1.05,
                                         xanchor: 'left'
                                     }
                                 }}
@@ -718,9 +823,80 @@ const MainChart: React.FC = () => {
                                     },
                                     legend: {
                                         title: 'Usernames',
-                                        x: 1.05, // Position the legend to the right of the plot
+                                        x: 1.05,
                                         xanchor: 'left'
                                     }
+                                }}
+                            />
+                        )}
+                    </>
+                )
+            }
+            {
+                selectedChart === 'pgroup' && selectedSubOption && (
+                    <>
+                        {selectedSubOption === 'albumsg2' && (
+                            <Plot
+                                className="chart-container"
+                                data={[
+                                    {
+                                        type: 'pie',
+                                        labels: albumPref.map(item => item.album),
+                                        values: albumPref.map(item => item.count),
+                                        marker: {
+                                            colors: albumPref.map((_, index) => generateColor(index, albumPref.length)),
+                                        },
+                                    }
+                                ]}
+                                layout={{
+                                    width: 800,
+                                    height: 400,
+                                    showlegend: true,
+                                    title: 'Album Distribution'
+                                }}
+                            />
+                        )}
+
+                        {selectedSubOption === 'performersg2' && (
+                            <Plot
+                                className="chart-container"
+                                data={[
+                                    {
+                                        type: 'pie',
+                                        labels: artistPref.map(item => item.performer),
+                                        values: artistPref.map(item => item.count),
+                                        marker: {
+                                            colors: artistPref.map((_, index) => generateColor(index, artistPref.length)),
+                                        },
+                                    }
+                                ]}
+                                layout={{
+                                    width: 800,
+                                    height: 400,
+                                    showlegend: true,
+                                    title: 'Artist Distribution'
+                                }}
+                            />
+                        )}
+
+                        {selectedSubOption === 'genresg2' && (
+                            <Plot
+                                className="chart-container"
+                                data={[
+                                    {
+                                        type: 'pie',
+                                        labels: genrePref.map(item => item.genre),
+                                        values: genrePref.map(item => item.count),
+                                        marker: {
+                                            colors: genrePref.map((_, index) => generateColor(index, genrePref.length)),
+                                        },
+                                    }
+                                ]}
+                                layout={{
+                                    width: 800,
+                                    height: 400,
+                                    showlegend: true,
+                                    title: 'Genre Distribution'
                                 }}
                             />
                         )}

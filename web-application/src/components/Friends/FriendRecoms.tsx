@@ -52,7 +52,7 @@ const FriendRecoms:React.FC = () => {
             const fetchAndProcessData = async () => {
                 const apiUrl = `http://51.20.128.164/api/recommendations/${auth()?.username}`;
 
-                const selected = ["genre", "album", "performer"];
+                const selected = ["genre"];
                 const selection = "all";
 
                 try {
@@ -77,7 +77,7 @@ const FriendRecoms:React.FC = () => {
                     // Fetch additional details
                     const userDetails: RecomsArray[] = await Promise.all(sortedUsers.map(async user => {
                         // @ts-ignore
-                        const profilePicture: string = await fetchProfilePicture(user.username);
+                        const profilePicture: string | undefined = await fetchProfilePicture(user.username);
                         // @ts-ignore
                         const userFollowData: UserFollowData = await fetchUserFollowData(user.username);
 
@@ -96,21 +96,32 @@ const FriendRecoms:React.FC = () => {
                 }
             };
 
-            fetchAndProcessData();
+            fetchAndProcessData().then(() => {
+                console.log("RecomUsers after fetch:", RecomUsers);
+            });
         }, []);
 
-        const fetchProfilePicture = async (username) => {
-            const apiUrl = "http://51.20.128.164/api/profile_picture";
-                try {
-                    const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
-                    const data = response.data;
-                    const url = URL.createObjectURL(data);
-                    return url;
+    const fetchProfilePicture = async (username) => {
+        const apiUrl = "http://51.20.128.164/api/profile_picture";
+        try {
+            const response = await axios.post(apiUrl, { username: `${username}` }, { responseType: 'blob' });
+            const data = response.data;
+            const url = URL.createObjectURL(data);
+            return url;
+        } catch (error) {
+            // First, check if the error is an instance of an Axios error
+            if (axios.isAxiosError(error)) {
+                // Now it's safe to access error.response
+                if (error.response && error.response.status === 404) {
+                    // If the error code is 404, set the profile picture to undefined
+                    return undefined;
                 }
-                catch (error) {
-                    console.log(error);
-                }
-        };
+            }
+            // Log the error if it's not an Axios error or if the status is not 404
+            console.error('Error fetching profile picture:', error);
+        }
+    };
+
 
         const fetchUserFollowData = async (username) => {
             const apiUrl = "http://51.20.128.164/api/user_followings";
