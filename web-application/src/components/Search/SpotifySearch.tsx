@@ -2,13 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     Button,
-    Card,
-    CardBody,
-    CardFooter,
-    HStack,
-    Skeleton, SkeletonCircle,
     TableContainer,
-    VStack
 } from '@chakra-ui/react';
 import { useAuthUser } from 'react-auth-kit';
 import AlbumSearch from './AlbumSearch';
@@ -77,24 +71,28 @@ const SpotifySearch = () => {
         setSearchResults([]);
     }, [searchType]);
 
-    async function fetchSearchResults(type, term) {
+    const fetchSearchResults = async (type, term) => {
+        setFetchingResults(true);
         try {
-            const response = await axios.post(`http://51.20.128.164/spoti/search/${auth()?.username}`, { type, query: term });
-            responseParser(response.data);
+            const response = await axios.post(`http://51.20.128.164/spoti/search/${auth()?.username}`, { type: [type], query: term });
+            await responseParser(response.data);
         } catch (error) {
             console.error('Error fetching search results:', error);
+            // Update UI or state to show error to user
+        } finally {
+            setFetchingResults(false);
         }
-    }
+    };
 
-    async function get_genre_of_song(song_name : string) {
+    const get_genre_of_song = async (song_name) => {
         try {
-            let type = "artist";
-            const response = await axios.post(`http://51.20.128.164/spoti/search/${auth()?.username}`, { type, query: song_name });
+            const response = await axios.post(`http://51.20.128.164/spoti/search/${auth()?.username}`, { type: ["artist"], query: song_name });
             return response.data.artists.items[0].genres[0];
         } catch (error) {
-            console.error('Error fetching search results:', error);
+            console.error('Error fetching genre:', error);
+            return '';
         }
-    }
+    };
 
     async function processSongs(data) {
         const promises = data.tracks.items.map(async item => {
@@ -112,42 +110,6 @@ const SpotifySearch = () => {
         });
 
         return Promise.all(promises);
-    }
-
-    const SpotiSkeleton = () => {
-        return (
-            <div>
-                <Card className="w-[900px]" overflow="hidden" variant="outline">
-                    <div className="flex items-center">
-                        <CardBody>
-                            <HStack spacing={4} className="flex-grow">
-                                <SkeletonCircle size="20" />
-                                <CardBody>
-                                    <Skeleton height='20px' width="200px"/>
-                                    <div className="px-2"></div>
-                                    <Skeleton height='20px' width="200px"/>
-                                    <div className="px-2"></div>
-                                    <Skeleton height='20px' width="200px"/>
-                                    <div className="px-2"></div>
-                                    <Skeleton height='20px' width="200px"/>
-                                </CardBody>
-                            </HStack>
-                        </CardBody>
-                        <CardFooter>
-                            <VStack>
-                                <div className="px-2"></div>
-                                <Skeleton height='20px' width="200px"/>
-                                <div className="px-2"></div>
-                                <Skeleton height='20px' width="200px"/>
-                            </VStack>
-                            <div className="px-2"></div>
-                            <Skeleton height='20px' width="200px"/>
-                        </CardFooter>
-                    </div>
-                </Card>
-                <div className="py-2"></div>
-            </div>
-        );
     }
 
     const responseParser = (data) => {
@@ -227,9 +189,7 @@ const SpotifySearch = () => {
 
             <TableContainer>
                 {fetching_results ? (
-                    Array.from({ length: 10 }).map((_, index) => (
-                        <SpotiSkeleton key={index} />
-                    ))
+                    <></>
                 ) : (
                     searchResults.map((item, index) => {
                         if (searchType === 'track') {

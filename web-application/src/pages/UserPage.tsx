@@ -10,15 +10,14 @@ interface username {
 const UserPage: FC<username> = () =>
 {
     return (
-      <body className="bg-[#081730] overflow-y-auto">
-        <Header />
-        <Profile/>
-        <SongsComponent />
-        <div className="bg-[#081730] py-10 overflow-y-auto">
-
-        </div>
-      </body>
+        <body className="bg-[#081730]">
+            <div className="bg-[#081730]">
+                <Header/>
+                <Profile/>
+                <SongsComponent/>
+            </div>
+        </body>
     );
 };
-  
+
 export default UserPage;

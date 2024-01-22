@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { FiUser } from 'react-icons/fi'
 import { FiSettings } from 'react-icons/fi'
 import { BiLogOut } from 'react-icons/bi'
@@ -42,6 +42,12 @@ const Header: React.FC = () => {
     }
 
     const fetch_photo = async () => {
+      const cachedPhoto = sessionStorage.getItem('profilePhoto');
+      if (cachedPhoto) {
+        setProfilePhoto(cachedPhoto);
+        return;
+      }
+
       const username = auth()?.username;
       const apiUrl = "http://51.20.128.164/api/profile_picture";
       try {
@@ -49,6 +55,7 @@ const Header: React.FC = () => {
         const data = response.data;
         const url = URL.createObjectURL(data);
         setProfilePhoto(url);
+        sessionStorage.setItem('profilePhoto', url);
       }
       catch (error) {
         console.log(error);
@@ -86,28 +93,31 @@ const Header: React.FC = () => {
   }, [dropdownOpen]);
 
   function useScrollDirection() {
-    const [scrollDirection, setScrollDirection] = React.useState<"up" | "down" | null>(null);
+    const [scrollDirection, setScrollDirection] = useState("");
 
-    React.useEffect(() => {
+    useEffect(() => {
       let lastScrollY = window.scrollY;
-  
+
       const updateScrollDirection = () => {
-        const scrollY = window.scrollY;
-        const direction = scrollY > lastScrollY ? "down" : "up";
-        if (direction !== scrollDirection && (scrollY - lastScrollY > 5 || scrollY - lastScrollY < -5)) {
-          setScrollDirection(direction);
+        const currentScrollY = window.scrollY;
+        if (currentScrollY > lastScrollY) {
+          setScrollDirection("down");
+        } else if (currentScrollY < lastScrollY) {
+          setScrollDirection("up");
         }
-        lastScrollY = scrollY > 0 ? scrollY : 0;
+        lastScrollY = currentScrollY > 0 ? currentScrollY : 0;
       };
-      window.addEventListener("scroll", updateScrollDirection); 
+
+      window.addEventListener("scroll", updateScrollDirection);
+
       return () => {
-        window.removeEventListener("scroll", updateScrollDirection); 
-      }
-    }, [scrollDirection]);
-  
+        window.removeEventListener("scroll", updateScrollDirection);
+      };
+    }, []);
+
     return scrollDirection;
   }
-  
+
   const navigateToUserPage = () => {
     const username = auth()?.username;
     if (username) {
@@ -221,8 +231,18 @@ const Header: React.FC = () => {
     history(path);
   };
 
+  const [hideHeader, setHideHeader] = useState(false);
+
+  useEffect(() => {
+    if (scrollDirection === "down") {
+      setHideHeader(true);
+    } else if (scrollDirection === "up") {
+      setHideHeader(false);
+    }
+  }, [scrollDirection]);
+
   return (
-    <div className={`sticky ${ scrollDirection === "down" ? "-top-24" : "top-0"} bg-[#081730] flex rounded-b-3xl border-b-[5px] border-[#020917] items-center justify-between px-[5rem] text-[0.8rem] h-24 transition-all duration-500 z-50`}>
+    <div className={`sticky ${hideHeader ? "-top-24" : "top-0"} bg-[#081730] flex rounded-b-3xl border-b-[5px] border-[#020917] items-center justify-between px-[5rem] text-[0.8rem] h-24 transition-all duration-500 z-50`}>
       {/* LOGO */}
       <img 
           src={"/header_logo.png"}
@@ -251,7 +271,7 @@ const Header: React.FC = () => {
           <div className="flex items-center">
             <button id="dropdownDividerButton" ref={dropdownToggleRef} data-dropdown-toggle="dropdownDivider" className="text-white relative flex justify-between bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center
              dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" onClick={toggleDropdown}>
-              <Avatar img={profilePhoto} size="xs"/><div className='pl-[10px]'>{auth()?.username}</div><svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+              <Avatar img={profilePhoto} size="sm"/><div className='pl-[10px]'>{auth()?.username}</div><svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
               </svg>
             </button>

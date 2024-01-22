@@ -5,10 +5,12 @@ const Search = () =>
 {
     return (
         <body className="bg-[#081730] overflow-y-auto">
+        <div className="bg-[#081730]">
             <Header />
             <div className="flex flex-col items-center justify-center">
                 <SpotifySearch />
             </div>
+        </div>
         </body>
     );
 };

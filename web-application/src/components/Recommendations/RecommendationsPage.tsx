@@ -68,17 +68,9 @@ function RecommendationsPage() {
     const [activeSpotiRecoms, setActiveSpotiRecoms] = useState<Song[]>([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        console.log("Top genreasd: " + top_genre)
-    }, [top_genre]);
-
-    useEffect(() => {
-        console.log("Top artistasd: " + top_artist)
-    }, [top_artist]);
-
-    useEffect(() => {
-        console.log("Top songasd: " + top_song)
-    }, [top_song]);
+    const saveToSessionStorage = (key, data) => {
+        sessionStorage.setItem(key, JSON.stringify(data));
+    };
 
     useEffect(() => {
         switch (spotiRecomType)
@@ -152,16 +144,26 @@ function RecommendationsPage() {
         };
 
         const retrieve_params = async () => {
-            try {
-                await Promise.all([
-                    get_top_artists(),
-                    get_top_songs(),
-                    get_top_genres()
-                ]);
-            } catch (error) {
-                console.log("Error in retrieving parameters:", error);
+            const cachedGenre = sessionStorage.getItem('SpotiSongsGenre');
+            const cachedArtist = sessionStorage.getItem('SpotiSongsArtist');
+            const cachedSong = sessionStorage.getItem('SpotiSongsSong');
+
+            if (cachedGenre && cachedArtist && cachedSong) {
+                setSpotiSongsGenre(JSON.parse(cachedGenre) as Song[]);
+                setSpotiSongsArtist(JSON.parse(cachedArtist) as Song[]);
+                setSpotiSongsSong(JSON.parse(cachedSong) as Song[]);
+            } else {
+                try {
+                    await Promise.all([
+                        get_top_artists(),
+                        get_top_genres(),
+                        get_top_songs()
+                    ]);
+                } catch (error) {
+                    console.error("Error in fetching Spotify recommendations:", error);
+                }
             }
-        }
+        };
 
         retrieve_params();
 
@@ -174,7 +176,7 @@ function RecommendationsPage() {
             const recomResponse = await axios.post(recomURL, {seed_genres: [top_genre.toLowerCase()]});
             const recomData = recomResponse.data;
             console.log("RECOM DATA GENRE: " + JSON.stringify(recomData, null, 2));
-            await processSongsSpoti(recomData).then(songs => setSpotiSongsGenre(songs));
+            await processSongsSpoti(recomData).then(songs => {setSpotiSongsGenre(songs); saveToSessionStorage('SpotiSongsGenre', songs)});
         }
         catch (error) {
             console.log(error);
@@ -193,7 +195,7 @@ function RecommendationsPage() {
             const recomData = recomResponse.data;
             console.log("RECOM DATA ARTIST:", JSON.stringify(recomData, null, 2));
 
-            await processSongsSpoti(recomData).then(songs => setSpotiSongsArtist(songs));
+            await processSongsSpoti(recomData).then(songs => {setSpotiSongsArtist(songs); saveToSessionStorage('SpotiSongsArtist', songs)});
         }
         catch (error) {
             console.log(error);
@@ -212,7 +214,7 @@ function RecommendationsPage() {
             const recomData = recomResponse.data;
             console.log("RECOM DATA SONG:", JSON.stringify(recomData, null, 2));
 
-            await processSongsSpoti(recomData).then(songs => setSpotiSongsSong(songs));
+            await processSongsSpoti(recomData).then(songs => {setSpotiSongsSong(songs); saveToSessionStorage('SpotiSongsSong', songs)});
         }
         catch (error) {
             console.log(error);
@@ -220,16 +222,26 @@ function RecommendationsPage() {
     }
 
     const fetch_spotify_recommendations = async () => {
-        try {
-            await Promise.all([
-                set_spoti_recoms_artist(),
-                set_spoti_recoms_song(),
-                set_spoti_recoms_genre()
-            ]);
-        } catch (error) {
-            console.log("Error in fetching Spotify recommendations:", error);
+        const cachedGenre = sessionStorage.getItem('SpotiSongsGenre');
+        const cachedArtist = sessionStorage.getItem('SpotiSongsArtist');
+        const cachedSong = sessionStorage.getItem('SpotiSongsSong');
+
+        if (cachedGenre && cachedArtist && cachedSong) {
+            setSpotiSongsGenre(JSON.parse(cachedGenre) as Song[]);
+            setSpotiSongsArtist(JSON.parse(cachedArtist) as Song[]);
+            setSpotiSongsSong(JSON.parse(cachedSong) as Song[]);
+        } else {
+            try {
+                await Promise.all([
+                    set_spoti_recoms_artist(),
+                    set_spoti_recoms_song(),
+                    set_spoti_recoms_genre()
+                ]);
+            } catch (error) {
+                console.error("Error in fetching Spotify recommendations:", error);
+            }
         }
-    }
+    };
 
     useEffect(() => {
         if (top_genre && top_artist && top_song) {
@@ -448,32 +460,47 @@ function RecommendationsPage() {
     }, []);
 
     useEffect(() => {
+
     if (spoti_auth) {
         const fetch_top_spoti = async () => {
             const apiUrl = `http://51.20.128.164/spoti/get_user_top_tracks/${auth()?.username}`;
-            try
+
+            if (sessionStorage.getItem('RecomSongsSpoti') !== null)
             {
-                const response = await axios.get(apiUrl);
-                const data = response.data;
-                processSongs(data, "tracks").then(songs => setRecomSongsSpoti(songs));
+                setRecomSongsSpoti(JSON.parse(sessionStorage.getItem('RecomSongsSpoti') || '{}'));
             }
-            catch (error)
-            {
-                console.log(error);
+            else {
+                try
+                {
+                    const response = await axios.get(apiUrl);
+                    const data = response.data;
+                    processSongs(data, "tracks").then(songs => {setRecomSongsSpoti(songs); saveToSessionStorage('RecomSongsSpoti', songs)});
+                }
+                catch (error)
+                {
+                    console.log(error);
+                }
             }
         }
 
         const fetch_add_spoti = async () => {
             const apiUrl = `http://51.20.128.164/spoti/get_curr_user_tracks/${auth()?.username}`;
-            try
+
+            if (sessionStorage.getItem('AddSongsSpoti') !== null)
             {
-                const response = await axios.get(apiUrl);
-                const data = response.data;
-                processSongs(data, "savedTracks").then(songs => setAddSongsSpoti(songs));
+                setAddSongsSpoti(JSON.parse(sessionStorage.getItem('AddSongsSpoti') || '{}'));
             }
-            catch (error)
-            {
-                console.log(error);
+            else {
+                try
+                {
+                    const response = await axios.get(apiUrl);
+                    const data = response.data;
+                    processSongs(data, "savedTracks").then(songs => {setAddSongsSpoti(songs); saveToSessionStorage('AddSongsSpoti', songs)});
+                }
+                catch (error)
+                {
+                    console.log(error);
+                }
             }
         }
 
