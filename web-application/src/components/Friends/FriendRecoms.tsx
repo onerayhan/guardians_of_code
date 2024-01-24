@@ -119,7 +119,7 @@ const FriendRecoms: React.FC = () => {
         };
 
         fetchAndProcessData();
-    }, [auth]);
+    }, []);
 
     const fetchProfilePicture = async (username: string): Promise<string | undefined> => {
         const apiUrl = "http://51.20.128.164/api/profile_picture";

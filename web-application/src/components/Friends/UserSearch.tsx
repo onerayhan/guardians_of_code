@@ -97,7 +97,6 @@ const UsernameSubmit: React.FC = () => {
 
         } catch (err) {
             if (err && err instanceof AxiosError) {
-                setError(err.response?.data.message || "An error occurred");
                 console.log("Error: ", error);
             }
             else if (err instanceof Error) setError(err.message);

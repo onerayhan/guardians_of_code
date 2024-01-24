@@ -69,7 +69,7 @@ const FormFriendGroups: React.FC<TagInputProps> = () => {
             console.log('Success:', response.data);
 
             toast({
-                description: "User followed successfully.",
+                description: "Friend Group Formed Successfully.",
                 status: "success",
                 duration: 5000,
                 isClosable: true,

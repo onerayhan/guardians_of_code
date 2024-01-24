@@ -35,7 +35,7 @@ const MyDropzone: React.FC<{ onFileAccepted: (files: FileWithPreview[]) => void 
 
     return (
         <div {...getRootProps()} style={{ padding: 20, border: '2px dashed gray', textAlign: 'center' }}>
-            <input {...getInputProps()} />
+            <input {...getInputProps()} data-testid="dropzone"/>
             {isDragActive ? <p>Drop the files here ...</p> : <p>Accepted Formats Are: .json</p>}
         </div>
     );
